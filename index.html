@@ -8,7 +8,7 @@
         /* --- 基礎設定 --- */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
-            background-color: #f5f5f7; /* 更有質感的灰白 */
+            background-color: #f5f5f7;
             color: #1d1d1f;
             margin: 0;
             padding: 60px 20px;
@@ -110,7 +110,7 @@
         }
 
         /* --- 特殊卡片樣式 --- */
-        /* SoulMap 金色邊框 */
+        /* Premium 金色邊框 (給主打工具用) */
         .card.premium {
             border: 1px solid #BF953F;
             background: linear-gradient(to bottom right, #fff, #fffcf5);
@@ -137,7 +137,7 @@
             font-family: inherit;
             outline: none;
             background: #fff;
-            box-sizing: border-box; /* 修正寬度跑版問題 */
+            box-sizing: border-box;
         }
         input[type="number"]:focus {
             border-color: #BF953F;
@@ -175,13 +175,13 @@
 
     <div class="grid-container">
 
-        <a href="soulmap.html" class="card premium">
-            <span class="status">● New Release</span>
+        <a href="aesthetic.html" class="card premium">
+            <span class="status" style="color: #BF953F;">● Featured Tool</span>
             <div>
-                <h2>SoulMap 靈魂導航 🔮</h2>
-                <p>結合人類圖與塔羅的數位神諭。輸入個人資料，即時解析當下能量場與指引。</p>
+                <h2>Aesthetic DNA 美感基因 🧬</h2>
+                <p>找不到適合的風格？輸入生日，透過生命靈數演算法，解析你命定的視覺原型。</p>
             </div>
-            <div class="link-arrow">OPEN APP ↗</div>
+            <div class="link-arrow" style="color: #BF953F;">START ANALYSIS ↗</div>
         </a>
 
         <a href="https://vibe-check-ih3e.vercel.app/" class="card" target="_blank">
@@ -233,7 +233,7 @@
             if (val) {
                 const golden = (val * 1.618).toFixed(2);
                 output.innerText = golden;
-                output.style.color = "#BF953F"; // 有數值時變金色
+                output.style.color = "#BF953F";
             } else {
                 output.innerText = '-';
                 output.style.color = "#333";
