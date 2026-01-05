@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Identity Generator | EDEN LAB</title>
+    <title>Visual Oracle | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
     
@@ -12,10 +12,14 @@
             theme: {
                 extend: {
                     fontFamily: { serif: ['Cinzel', 'serif'], mono: ['Space Mono', 'monospace'] },
-                    colors: { eden: { dark: '#121212', gold: '#BF953F', glass: 'rgba(26, 26, 26, 0.9)' } },
-                    animation: { 'fade-in': 'fadeIn 0.8s ease-out' },
+                    colors: { eden: { dark: '#0a0a0a', gold: '#BF953F', glass: 'rgba(20, 20, 20, 0.9)' } },
+                    animation: { 
+                        'float': 'float 6s ease-in-out infinite',
+                        'fade-in': 'fadeIn 1s ease-out'
+                    },
                     keyframes: {
-                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }
                     }
                 }
             }
@@ -23,250 +27,230 @@
     </script>
 
     <style>
-        body { background-color: #0f172a; color: #e2e8f0; overflow-x: hidden; }
-        .bg-noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.04; pointer-events: none; z-index: 0; filter: contrast(320%); background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E"); }
+        body { background-color: #050505; color: #e2e8f0; overflow-x: hidden; }
+        .bg-noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.03; pointer-events: none; z-index: 0; filter: contrast(300%); background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E"); }
         
-        .glass-panel { background: rgba(18, 18, 18, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        .input-field { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #fff; transition: 0.3s; letter-spacing: 0.05em; }
-        .input-field:focus { border-color: #BF953F; outline: none; background: rgba(255,255,255,0.05); }
+        /* 玻璃質感 */
+        .glass-panel { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .input-field { background: rgba(0,0,0,0.4); border: 1px solid #333; color: #fff; transition: 0.3s; text-align: center; }
+        .input-field:focus { border-color: #BF953F; outline: none; }
         
-        .btn-gold { background: #BF953F; color: #000; font-weight: 700; letter-spacing: 0.1em; transition: 0.3s; }
-        .btn-gold:hover { background: #d4a84e; transform: translateY(-1px); }
+        /* 金色按鈕 */
+        .btn-gold { background: linear-gradient(to bottom, #BF953F, #9e7b30); color: #000; font-weight: 700; letter-spacing: 0.15em; transition: 0.3s; box-shadow: 0 4px 15px rgba(191, 149, 63, 0.2); }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(191, 149, 63, 0.4); }
 
-        .color-swatch { transition: transform 0.2s; cursor: pointer; position: relative; }
-        .color-swatch:hover { transform: scale(1.05); z-index: 10; border: 1px solid #fff; }
-        .color-swatch:active { transform: scale(0.95); }
+        /* 卡牌樣式 */
+        .card-container { perspective: 1000px; cursor: pointer; }
+        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; }
+        .card-container:hover .card-inner { transform: translateY(-10px); }
+        .card-container.flipped .card-inner { transform: rotateY(180deg); }
         
-        /* 複製成功的提示 */
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #BF953F; color: #000; padding: 8px 16px; border-radius: 4px; font-size: 12px; opacity: 0; transition: 0.3s; pointer-events: none; font-weight: bold; }
-        .toast.show { opacity: 1; bottom: 40px; }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 10px; border: 1px solid #BF953F; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* 牌背 (星空圖騰) */
+        .card-front { background: #111; background-image: radial-gradient(circle at center, #222 1px, transparent 1px); background-size: 20px 20px; display: flex; align-items: center; justify-content: center; }
+        /* 牌面 (結果) */
+        .card-back { background: #080808; transform: rotateY(180deg); display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+
+        /* 折扣券樣式 */
+        .coupon-border { border: 1px dashed #BF953F; position: relative; }
+        .coupon-border::before, .coupon-border::after { content: ''; position: absolute; top: 50%; width: 20px; height: 20px; background: #050505; border-radius: 50%; transform: translateY(-50%); }
+        .coupon-border::before { left: -11px; }
+        .coupon-border::after { right: -11px; }
+
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #BF953F; color: #000; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 12px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 50; }
+        .toast.show { opacity: 1; bottom: 50px; }
     </style>
 </head>
-<body class="flex flex-col items-center min-h-screen p-4 font-sans selection:bg-[#BF953F] selection:text-black">
+<body class="flex flex-col items-center min-h-screen font-sans selection:bg-[#BF953F] selection:text-black">
 
     <div class="bg-noise"></div>
 
-    <header class="relative z-10 w-full max-w-xl flex justify-between items-center mb-8 mt-4 fade-in">
-        <a href="index.html" class="text-[10px] tracking-[0.2em] text-gray-500 hover:text-[#BF953F] transition-colors">← EDEN LAB</a>
-        <div class="font-serif text-[#BF953F] tracking-widest text-xs">VISUAL SYSTEM GEN</div>
+    <header class="relative z-10 w-full flex justify-center py-8 fade-in">
+        <div class="text-center">
+            <a href="index.html" class="block text-[10px] tracking-[0.3em] text-gray-500 hover:text-[#BF953F] mb-2">EDEN LAB</a>
+            <h1 class="font-serif text-[#BF953F] text-xl tracking-widest">VISUAL ORACLE</h1>
+        </div>
     </header>
 
-    <main class="relative z-10 w-full max-w-md mb-20">
+    <main class="relative z-10 w-full max-w-md px-6 mb-20">
         
-        <div id="inputSection" class="glass-panel p-8 rounded-lg animate-fade-in">
-            <h1 class="font-serif text-2xl text-center mb-2 text-white">Visual Identity</h1>
-            <p class="text-center text-gray-500 text-[10px] tracking-[0.2em] mb-8">GENERATE YOUR BRAND ASSETS</p>
+        <div id="step1" class="animate-fade-in text-center">
+            <h2 class="font-serif text-2xl text-white mb-2">The Connection</h2>
+            <p class="text-gray-400 text-xs mb-8 font-mono">輸入生日以校準你的能量場</p>
             
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-[10px] text-[#BF953F] mb-2 tracking-widest uppercase">Name / Brand</label>
-                    <input type="text" id="userName" class="input-field w-full p-3 text-center rounded text-sm font-mono" placeholder="NAME">
-                </div>
-                <div>
-                    <label class="block text-[10px] text-[#BF953F] mb-2 tracking-widest uppercase">Founder Birthday</label>
-                    <input type="date" id="userDate" class="input-field w-full p-3 text-center rounded text-sm uppercase font-mono">
-                </div>
-                
-                <button onclick="calculateDNA()" class="btn-gold w-full py-3 rounded text-xs mt-4">GENERATE ASSETS</button>
+            <div class="glass-panel p-8 rounded-xl space-y-6">
+                <input type="text" id="userName" class="input-field w-full p-3 rounded font-mono text-sm" placeholder="YOUR NAME">
+                <input type="date" id="userDate" class="input-field w-full p-3 rounded font-mono text-sm uppercase">
+                <button onclick="goToDeck()" class="btn-gold w-full py-3 rounded text-xs mt-4">BEGIN RITUAL</button>
             </div>
         </div>
 
-        <div id="loadingSection" class="hidden text-center py-20">
-            <div class="font-mono text-[#BF953F] text-xs tracking-widest space-y-3">
-                <p class="animate-pulse">EXTRACTING COLOR PALETTE...</p>
-                <p class="animate-pulse delay-75">COMPILING AI PROMPTS...</p>
-                <p class="animate-pulse delay-150">FINALIZING SYSTEM...</p>
-            </div>
-        </div>
-
-        <div id="resultSection" class="hidden animate-fade-in space-y-4">
+        <div id="step2" class="hidden text-center">
+            <h2 class="font-serif text-2xl text-white mb-2 animate-pulse">The Choice</h2>
+            <p class="text-gray-400 text-xs mb-10 font-mono">深呼吸，憑直覺選一張牌</p>
             
-            <div class="glass-panel p-0 rounded-lg overflow-hidden border border-[#333]">
-                <div class="bg-[#151515] p-6 border-b border-[#222] flex justify-between items-end">
-                    <div>
-                        <div class="text-[#BF953F] text-[10px] tracking-widest mb-1">ARCHETYPE 0<span id="resultNumber"></span></div>
-                        <h2 id="resultTitle" class="font-serif text-xl text-white"></h2>
+            <div class="flex justify-center gap-4 h-[300px]">
+                <div class="card-container w-1/3 animate-float" style="animation-delay: 0s;" onclick="revealCard(0)">
+                    <div class="card-inner">
+                        <div class="card-front"><span class="text-[#BF953F] text-2xl">I</span></div>
+                        <div class="card-back"></div>
                     </div>
-                    <div id="resultKeyword" class="font-mono text-xs text-gray-500 border border-gray-700 px-2 py-1 rounded"></div>
+                </div>
+                <div class="card-container w-1/3 animate-float" style="animation-delay: 0.5s;" onclick="revealCard(1)">
+                    <div class="card-inner">
+                        <div class="card-front"><span class="text-[#BF953F] text-2xl">II</span></div>
+                        <div class="card-back"></div>
+                    </div>
+                </div>
+                <div class="card-container w-1/3 animate-float" style="animation-delay: 1s;" onclick="revealCard(2)">
+                    <div class="card-inner">
+                        <div class="card-front"><span class="text-[#BF953F] text-2xl">III</span></div>
+                        <div class="card-back"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="step3" class="hidden animate-fade-in space-y-6">
+            
+            <div class="glass-panel p-0 rounded-xl overflow-hidden">
+                <div class="bg-[#111] p-6 text-center border-b border-[#333]">
+                    <div class="text-[10px] text-[#BF953F] tracking-[0.2em] mb-2">THE ORACLE REVEALS</div>
+                    <h2 id="cardTitle" class="font-serif text-2xl text-white mb-1"></h2>
+                    <p id="cardSub" class="font-mono text-xs text-gray-500 italic"></p>
                 </div>
 
-                <div class="p-6 space-y-8">
-                    
+                <div class="p-8 space-y-8">
                     <div>
-                        <h3 class="font-mono text-[10px] text-gray-400 mb-3 tracking-wider flex items-center gap-2">
-                            <span class="w-1 h-1 bg-[#BF953F] rounded-full"></span> BRAND PALETTE (CLICK TO COPY)
-                        </h3>
-                        <div class="grid grid-cols-4 gap-2 h-16" id="colorContainer">
+                        <h3 class="font-serif text-[#BF953F] text-sm mb-3">✦ 能量解讀</h3>
+                        <p id="cardDesc" class="text-sm text-gray-300 leading-relaxed text-justify font-light"></p>
+                    </div>
+
+                    <div>
+                        <h3 class="font-serif text-[#BF953F] text-sm mb-3">✦ 本週幸運色票 (Lucky Palette)</h3>
+                        <div class="grid grid-cols-4 gap-2 h-12" id="colorContainer">
                             </div>
+                        <p class="text-[10px] text-gray-600 mt-2 text-center">點擊色塊複製 Hex Code</p>
                     </div>
 
-                    <div>
-                        <div class="flex justify-between items-end mb-3">
-                            <h3 class="font-mono text-[10px] text-gray-400 tracking-wider flex items-center gap-2">
-                                <span class="w-1 h-1 bg-[#BF953F] rounded-full"></span> MIDJOURNEY PROMPT
-                            </h3>
-                            <button onclick="copyPrompt()" class="text-[10px] text-[#BF953F] hover:text-white underline decoration-dotted">COPY ALL</button>
-                        </div>
-                        <div class="bg-[#0a0a0a] p-3 rounded border border-[#333] relative group cursor-pointer" onclick="copyPrompt()">
-                            <p id="aiPrompt" class="font-mono text-[10px] text-gray-400 leading-relaxed break-words opacity-80 group-hover:opacity-100 transition-opacity"></p>
-                            <div class="absolute top-2 right-2 text-gray-600 group-hover:text-white text-xs">📋</div>
-                        </div>
+                    <div class="bg-[#BF953F] bg-opacity-10 p-4 rounded border border-[#BF953F] border-opacity-30">
+                        <h3 class="font-serif text-[#BF953F] text-sm mb-2">EDEN'S ADVICE</h3>
+                        <p id="cardAdvice" class="text-xs text-gray-300 font-mono leading-relaxed"></p>
                     </div>
-
-                    <div>
-                        <h3 class="font-mono text-[10px] text-gray-400 mb-2 tracking-wider">VISUAL STRATEGY</h3>
-                        <p id="resultDesc" class="text-sm text-gray-300 leading-relaxed font-light"></p>
-                    </div>
-
-                </div>
-                
-                <div class="bg-[#BF953F] p-4 text-center cursor-pointer hover:bg-[#d4a84e] transition-colors" onclick="window.open('https://www.instagram.com/eden_d_photo/', '_blank')">
-                    <p class="text-black font-bold text-xs tracking-[0.15em]">NEED THIS STYLE EXECUTED? BOOK EDEN ↗</p>
                 </div>
             </div>
 
-            <button onclick="location.reload()" class="w-full py-4 text-[10px] text-gray-600 hover:text-gray-400 tracking-widest">RESTART</button>
+            <div class="coupon-border bg-[#1a1a1a] p-6 rounded text-center cursor-pointer hover:bg-[#222] transition-colors" onclick="window.open('https://www.instagram.com/eden_d_photo/', '_blank')">
+                <p class="text-[10px] text-gray-500 tracking-widest mb-1">LIMITED OFFER</p>
+                <h3 class="font-serif text-xl text-white mb-2">10% OFF BOOKING</h3>
+                <p class="font-mono text-[#BF953F] text-lg tracking-widest border border-[#BF953F] inline-block px-4 py-1 mb-2">EDEN2026</p>
+                <p class="text-[10px] text-gray-400">截圖此畫面私訊預約，即可啟用折扣</p>
+            </div>
+
+            <button onclick="location.reload()" class="w-full text-[10px] text-gray-600 hover:text-white tracking-widest py-4">DRAW AGAIN</button>
         </div>
 
     </main>
 
-    <div id="toast" class="toast">COPIED TO CLIPBOARD</div>
+    <div id="toast" class="toast">COLOR COPIED</div>
 
     <script>
-        // --- DATA ASSETS ---
-        const styles = {
-            1: {
-                title: "THE MINIMALIST",
-                keyword: "Structure",
-                colors: ["#1A1A1A", "#F2F2F2", "#8C8C8C", "#2D2D2D"],
-                prompt: "Professional architectural portrait, minimalistic style, high contrast black and white, sharp focus, geometric shadows, shot on Hasselblad X2D, 85mm lens, clean background --ar 4:5 --q 2",
-                desc: "極簡不是空洞，而是極致的精準。你的品牌色票應以黑白灰為主，強調線條與結構。攝影風格建議使用高反差黑白或低飽和色調。"
+        // --- ORACLE DATABASE ---
+        const cards = [
+            {
+                title: "THE MIRROR (鏡像)",
+                sub: "Reflection • Truth • Symmetry",
+                desc: "你最近是否感到有些混亂，急於尋找外在的答案？這張牌顯示，你需要的是「回歸內在」。現在不是向外擴張的時候，而是整理自己的時刻。如同鏡子一般，你看到的世界是你內心的投射。",
+                advice: "建議拍攝風格：Symmetrical Composition (對稱構圖)。在混亂中尋找秩序，利用倒影或鏡面材質，展現你內心渴望的平靜與真實。",
+                colors: ["#E0E0E0", "#757575", "#212121", "#BF953F"]
             },
-            2: {
-                title: "THE NATURALIST",
-                keyword: "Softness",
-                colors: ["#E6DCCA", "#A6B5A1", "#8C7B6C", "#F5F0E6"],
-                prompt: "Soft lifestyle photography, natural lighting, beige and sage green color palette, linen textures, organic shapes, blurry foreground, shot on Sony A7IV, 35mm f1.4, golden hour --ar 4:5 --style raw",
-                desc: "你的視覺語言是柔和且具有呼吸感的。使用大地色系與莫蘭迪色。拍攝時尋找自然光與亞麻、原木等有機材質的細節。"
+            {
+                title: "THE PRISM (稜鏡)",
+                sub: "Complexity • Perspective • Light",
+                desc: "你正處於一個能量轉換的階段。單一的視角已經無法滿足你，你的靈魂渴望展現多面性。這張牌象徵著「折射」，你即將把原本看似單調的生活，折射出彩虹般的光譜。",
+                advice: "建議拍攝風格：Artistic Light (光影藝術)。嘗試利用三稜鏡、玻璃紙或強烈的光影切割，拍出迷幻且多層次的視覺效果。",
+                colors: ["#FF9A9E", "#FECFEF", "#A18CD1", "#FBC2EB"]
             },
-            3: {
-                title: "THE VISIONARY",
-                keyword: "Vibrant",
-                colors: ["#2E0249", "#F806CC", "#570A57", "#A91079"],
-                prompt: "Cinematic portrait, neon lighting, cyberpunk aesthetic, vibrant purple and pink hues, dramatic shadows, moody atmosphere, emotional expression, shot on Fujifilm GFX100 --ar 4:5 --stylize 250",
-                desc: "大膽、前衛、充滿戲劇張力。不要害怕使用高飽和度的色彩與霓虹光感。你的影像應該像電影劇照一樣，充滿故事性。"
+            {
+                title: "THE VOID (虛空)",
+                sub: "Silence • Potential • Space",
+                desc: "抽到這張牌，代表你最近承載了太多資訊與情緒。宇宙在提醒你：「留白」是最高的藝術。唯有清空杯子裡的水，才能裝入新的能量。享受孤獨，那不是寂寞，是自由。",
+                advice: "建議拍攝風格：Minimalist Negative Space (極簡留白)。大量的天空或牆面，人物渺小，強調空間感與呼吸感。",
+                colors: ["#F5F5F5", "#D7D7D7", "#8E8E8E", "#000000"]
             },
-            4: {
-                title: "THE CLASSICIST",
-                keyword: "Order",
-                colors: ["#0C161C", "#BF953F", "#FFFFFF", "#333333"],
-                prompt: "Luxury editorial portrait, symmetrical composition, rich textures, deep navy and gold palette, rim lighting, elegant pose, shot on Canon R5, 50mm lens, studio lighting --ar 4:5 --v 6.0",
-                desc: "經典、對稱、權威。深藍與金色是你的代表色。影像構圖必須嚴謹工整，強調穩定感與高級感，避免過於隨意的抓拍。"
+            {
+                title: "THE BLAZE (烈焰)",
+                sub: "Passion • Action • Now",
+                desc: "猶豫已經結束了。這張牌充滿了火元素的能量，顯示你現在擁有強大的行動力。不要再等待「完美的時機」，現在就是最好的時刻。燃燒你的熱情，讓世界看到你的光芒。",
+                advice: "建議拍攝風格：High Saturation & Motion (高飽和動態)。大膽的紅色或暖色調，甚至嘗試慢快門的動態模糊，展現生命力。",
+                colors: ["#FF416C", "#FF4B2B", "#1A0000", "#FFD700"]
             },
-            5: {
-                title: "THE MAVERICK",
-                keyword: "Freedom",
-                colors: ["#FF4C29", "#2C3333", "#395B64", "#E7F6F2"],
-                prompt: "Urban street photography, wide angle shot, dynamic movement, gritty textures, candid moment, high energy, brutalist architecture background, shot on Leica Q2, 28mm lens --ar 16:9 --style raw",
-                desc: "不拘一格的街頭美學。高對比的色彩與粗糙的質感。嘗試廣角鏡頭與非傳統構圖，捕捉瞬間的動態與生命力。"
-            },
-            6: {
-                title: "THE HEALER",
-                keyword: "Warmth",
-                colors: ["#FFB3B3", "#FFF2CC", "#FFD966", "#FAD4D4"],
-                prompt: "Warm cozy interior photography, sunlight streaming through curtains, pastel color palette, soft focus, home aesthetic, plants and books, shot on Canon AE-1, Kodak Portra 400 film look --ar 4:5",
-                desc: "溫暖、療癒、居家感。暖黃色與粉膚色是關鍵。影像應充滿陽光感，模擬底片顆粒的質感能增加親切度。"
-            },
-            7: {
-                title: "THE FUTURIST",
-                keyword: "Tech",
-                colors: ["#000000", "#00FF00", "#444444", "#FFFFFF"],
-                prompt: "Abstract technology photography, glass and metal textures, cool blue tones, macro details, clean lines, laboratory aesthetic, futuristic vibe, shot on Sony A7R V, 90mm macro lens --ar 4:5",
-                desc: "冷靜、理智、科技感。黑色與螢光綠或冰藍色。專注於物體的材質與局部特寫，展現出一種抽離的智性美。"
-            },
-            8: {
-                title: "THE NOBLE",
-                keyword: "Luxury",
-                colors: ["#141414", "#C0C0C0", "#500000", "#F5F5F5"],
-                prompt: "High-end fashion photography, Rembrandt lighting, velvet textures, dark red and silver accents, confident pose, expensive atmosphere, shot on Phase One IQ4, 80mm lens --ar 4:5 --q 2",
-                desc: "奢華、大氣、貴族氣息。酒紅、銀色與深黑。使用戲劇性的打光（如倫勃朗光）來強調質感與地位。"
-            },
-            9: {
-                title: "THE ZEN",
-                keyword: "Space",
-                colors: ["#FFFFFF", "#F0F0F0", "#D3D3D3", "#8E8E8E"],
-                prompt: "Minimalist landscape photography, vast negative space, foggy atmosphere, muted tones, solitary figure in distance, zen composition, ethereal vibe, shot on Mamiya 7, varying grey tones --ar 16:9",
-                desc: "空靈、留白、禪意。大面積的白與灰。讓影像呼吸，人物只是風景中的點綴，強調天人合一的意境。"
+            {
+                title: "THE GRAIN (顆粒)",
+                sub: "Nostalgia • Memory • Time",
+                desc: "你是一個念舊的人，最近可能頻繁回想起過去。這不是壞事，過去的經驗正在滋養你的現在。這張牌象徵著「時間的質感」，提醒你即使是不完美的瑕疵，也是美的來源。",
+                advice: "建議拍攝風格：Vintage Film Look (復古底片感)。高ISO顆粒感，暖黃色調，捕捉不經意的瞬間與情感流露。",
+                colors: ["#D4C4A8", "#8C7B6C", "#5D4037", "#3E2723"]
             }
-        };
+        ];
 
-        function calculateDNA() {
-            const name = document.getElementById('userName').value;
-            const dateInput = document.getElementById('userDate').value;
+        let userName = "";
+
+        function goToDeck() {
+            const nameInput = document.getElementById('userName');
+            const dateInput = document.getElementById('userDate');
             
-            if(!dateInput) {
-                alert("Please enter a date.");
+            if(!nameInput.value || !dateInput.value) {
+                alert("The ritual requires your identity.");
                 return;
             }
+            userName = nameInput.value;
 
-            document.getElementById('inputSection').classList.add('hidden');
-            document.getElementById('loadingSection').classList.remove('hidden');
-
-            // Numerology logic
-            let dateStr = dateInput.replace(/-/g, '');
-            let sum = 0;
-            for(let char of dateStr) sum += parseInt(char);
-            while(sum > 9) {
-                let tempSum = 0;
-                let s = sum.toString();
-                for(let c of s) tempSum += parseInt(c);
-                sum = tempSum;
-            }
-            if(sum === 0) sum = 1; // Fallback
-
-            setTimeout(() => {
-                renderResult(sum);
-            }, 1500);
+            document.getElementById('step1').classList.add('hidden');
+            document.getElementById('step2').classList.remove('hidden');
         }
 
-        function renderResult(num) {
-            const data = styles[num];
-            document.getElementById('resultNumber').innerText = num;
-            document.getElementById('resultTitle').innerText = data.title;
-            document.getElementById('resultKeyword').innerText = data.keyword;
-            document.getElementById('resultDesc').innerText = data.desc;
-            document.getElementById('aiPrompt').innerText = data.prompt;
+        function revealCard(index) {
+            // 1. 隨機決定結果 (這就是算命的精髓: 隨機性即命運)
+            // 這裡不依照點哪張牌決定，而是點下去的瞬間，宇宙隨機分配一張牌給你
+            const randomCardIndex = Math.floor(Math.random() * cards.length);
+            const resultData = cards[randomCardIndex];
+
+            // 2. 翻牌動畫
+            const selectedContainer = document.querySelectorAll('.card-container')[index];
+            selectedContainer.classList.add('flipped');
+
+            // 3. 延遲後顯示結果
+            setTimeout(() => {
+                document.getElementById('step2').classList.add('hidden');
+                showResult(resultData);
+            }, 800);
+        }
+
+        function showResult(data) {
+            document.getElementById('cardTitle').innerText = data.title;
+            document.getElementById('cardSub').innerText = data.sub;
+            document.getElementById('cardDesc').innerText = data.desc;
+            document.getElementById('cardAdvice').innerText = data.advice;
 
             // Render Colors
-            const colorContainer = document.getElementById('colorContainer');
-            colorContainer.innerHTML = '';
-            data.colors.forEach(color => {
+            const colorBox = document.getElementById('colorContainer');
+            colorBox.innerHTML = '';
+            data.colors.forEach(c => {
                 const div = document.createElement('div');
-                div.className = 'color-swatch h-full w-full rounded shadow-lg flex items-center justify-center group relative';
-                div.style.backgroundColor = color;
-                div.onclick = () => copyText(color);
-                
-                // Tooltip
-                div.innerHTML = `<span class="opacity-0 group-hover:opacity-100 absolute bg-black text-white text-[8px] px-1 rounded pointer-events-none transition-opacity">${color}</span>`;
-                
-                colorContainer.appendChild(div);
+                div.className = 'h-full w-full rounded cursor-pointer transform hover:scale-105 transition-transform border border-white/20';
+                div.style.backgroundColor = c;
+                div.onclick = () => {
+                    navigator.clipboard.writeText(c);
+                    const toast = document.getElementById('toast');
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 2000);
+                };
+                colorBox.appendChild(div);
             });
 
-            document.getElementById('loadingSection').classList.add('hidden');
-            document.getElementById('resultSection').classList.remove('hidden');
-        }
-
-        function copyPrompt() {
-            const text = document.getElementById('aiPrompt').innerText;
-            copyText(text);
-        }
-
-        function copyText(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                const toast = document.getElementById('toast');
-                toast.classList.add('show');
-                setTimeout(() => toast.classList.remove('show'), 2000);
-            });
+            document.getElementById('step3').classList.remove('hidden');
         }
     </script>
 </body>
