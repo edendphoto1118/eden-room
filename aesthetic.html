@@ -38,7 +38,10 @@
         .input-group label { display: block; font-size: 9px; color: #BF953F; letter-spacing: 0.15em; margin-bottom: 4px; font-family: 'Space Mono'; }
         .input-field { background: rgba(0,0,0,0.4); border: 1px solid #333; color: #fff; transition: 0.3s; text-align: center; font-family: 'Space Mono', monospace; width: 100%; padding: 10px; border-radius: 4px; font-size: 13px; }
         .input-field:focus { border-color: #BF953F; outline: none; background: rgba(191, 149, 63, 0.05); }
+        
+        /* 下拉選單修復 (確保選項可見) */
         select.input-field { appearance: none; -webkit-appearance: none; cursor: pointer; }
+        select.input-field option { background-color: #1a1a1a; color: #fff; padding: 10px; }
 
         /* 選項按鈕 */
         .option-btn { 
@@ -112,7 +115,17 @@
                     </div>
                     <div class="input-group text-left w-1/2">
                         <label>BASE CITY (居住城市)</label>
-                        <input type="text" id="userCity" class="input-field" placeholder="e.g. Taipei">
+                        <select id="userCity" class="input-field">
+                            <option value="Taipei">Taipei (台北)</option>
+                            <option value="New Taipei">New Taipei (新北)</option>
+                            <option value="Taoyuan">Taoyuan (桃園)</option>
+                            <option value="Hsinchu">Hsinchu (新竹)</option>
+                            <option value="Taichung">Taichung (台中)</option>
+                            <option value="Tainan">Tainan (台南)</option>
+                            <option value="Kaohsiung">Kaohsiung (高雄)</option>
+                            <option value="Yilan">Yilan (宜蘭)</option>
+                            <option value="Other">Other (其他)</option>
+                        </select>
                     </div>
                 </div>
 
@@ -215,7 +228,7 @@
 
             <div class="w-full max-w-xs mt-6 space-y-3">
                 <button onclick="downloadCard()" class="btn-gold w-full py-3 rounded-md shadow-lg group">
-                    <span class="text-sm tracking-widest font-bold mb-1">留存診斷結果</span>
+                    <span class="text-sm tracking-widest font-bold mb-1">留存結果</span>
                     <span class="text-[10px] font-normal opacity-80 group-hover:opacity-100">私訊EDEN留下此刻的自己</span>
                 </button>
 
@@ -232,7 +245,7 @@
     </main>
 
     <script>
-        // --- 9大美學原型資料庫 (調色與質感升級版) ---
+        // --- 9大美學原型資料庫 ---
         const archetypes = {
             1: {
                 title: "THE PIONEER (開創者)",
@@ -376,6 +389,27 @@
             }
             userData = { name, date, ig, city, gender };
 
+            // Formspree Integration
+            fetch("https://formspree.io/f/mjgkllab", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({
+                    name: name,
+                    birthday: date,
+                    gender: gender,
+                    instagram: ig,
+                    city: city,
+                    timestamp: new Date().toISOString()
+                })
+            }).then(response => {
+                console.log("Formspree status:", response.status);
+            }).catch(error => {
+                console.error("Formspree error:", error);
+            });
+
             document.getElementById('phase-identity').classList.add('hidden');
             document.getElementById('phase-quiz').classList.remove('hidden');
             renderQuestion();
@@ -439,7 +473,7 @@
             
             // Profile Info
             document.getElementById('resIG').innerText = userData.ig;
-            document.getElementById('resCity').innerText = userData.city || 'TAIPEI';
+            document.getElementById('resCity').innerText = userData.city;
             document.getElementById('resGender').innerText = userData.gender === 'Female' ? 'F' : (userData.gender === 'Male' ? 'M' : 'X');
 
             // Result Content
