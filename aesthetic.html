@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aesthetic DNA | EDEN VISUALS</title>
+    <title>Visual Identity Generator | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
     
@@ -12,11 +12,10 @@
             theme: {
                 extend: {
                     fontFamily: { serif: ['Cinzel', 'serif'], mono: ['Space Mono', 'monospace'] },
-                    colors: { eden: { dark: '#121212', gold: '#BF953F', glass: 'rgba(26, 26, 26, 0.8)' } },
-                    animation: { 'fade-in': 'fadeIn 1s ease-out', 'pulse-gold': 'pulseGold 3s infinite' },
+                    colors: { eden: { dark: '#121212', gold: '#BF953F', glass: 'rgba(26, 26, 26, 0.9)' } },
+                    animation: { 'fade-in': 'fadeIn 0.8s ease-out' },
                     keyframes: {
-                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-                        pulseGold: { '0%, 100%': { boxShadow: '0 0 0px #BF953F' }, '50%': { boxShadow: '0 0 20px rgba(191, 149, 63, 0.3)' } }
+                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
                     }
                 }
             }
@@ -25,215 +24,249 @@
 
     <style>
         body { background-color: #0f172a; color: #e2e8f0; overflow-x: hidden; }
-        /* 背景質感：噪點與深邃漸層 */
         .bg-noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.04; pointer-events: none; z-index: 0; filter: contrast(320%); background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E"); }
-        .bg-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%); z-index: -1; }
         
-        /* 玻璃面板與輸入框 */
-        .glass-panel { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(191, 149, 63, 0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; transition: 0.3s; letter-spacing: 0.1em; }
-        .input-field:focus { border-color: #BF953F; outline: none; background: rgba(255,255,255,0.08); }
+        .glass-panel { background: rgba(18, 18, 18, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .input-field { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); color: #fff; transition: 0.3s; letter-spacing: 0.05em; }
+        .input-field:focus { border-color: #BF953F; outline: none; background: rgba(255,255,255,0.05); }
         
-        /* 金色按鈕 */
-        .btn-gold { background: linear-gradient(45deg, #946f23, #BF953F); color: #000; font-weight: bold; letter-spacing: 0.15em; transition: 0.3s; position: relative; overflow: hidden; }
-        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(191, 149, 63, 0.3); }
+        .btn-gold { background: #BF953F; color: #000; font-weight: 700; letter-spacing: 0.1em; transition: 0.3s; }
+        .btn-gold:hover { background: #d4a84e; transform: translateY(-1px); }
+
+        .color-swatch { transition: transform 0.2s; cursor: pointer; position: relative; }
+        .color-swatch:hover { transform: scale(1.05); z-index: 10; border: 1px solid #fff; }
+        .color-swatch:active { transform: scale(0.95); }
         
-        /* 結果頁裝飾 */
-        .archetype-badge { border: 1px solid #BF953F; padding: 5px 15px; font-size: 0.7rem; letter-spacing: 0.2em; color: #BF953F; display: inline-block; margin-bottom: 1rem; }
+        /* 複製成功的提示 */
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #BF953F; color: #000; padding: 8px 16px; border-radius: 4px; font-size: 12px; opacity: 0; transition: 0.3s; pointer-events: none; font-weight: bold; }
+        .toast.show { opacity: 1; bottom: 40px; }
     </style>
 </head>
-<body class="flex flex-col items-center min-h-screen p-6 font-sans">
+<body class="flex flex-col items-center min-h-screen p-4 font-sans selection:bg-[#BF953F] selection:text-black">
 
     <div class="bg-noise"></div>
-    <div class="bg-gradient"></div>
 
-    <header class="relative z-10 w-full max-w-2xl flex justify-between items-center mb-10 fade-in">
+    <header class="relative z-10 w-full max-w-xl flex justify-between items-center mb-8 mt-4 fade-in">
         <a href="index.html" class="text-[10px] tracking-[0.2em] text-gray-500 hover:text-[#BF953F] transition-colors">← EDEN LAB</a>
-        <div class="font-serif text-[#BF953F] tracking-widest text-sm">AESTHETIC DNA</div>
+        <div class="font-serif text-[#BF953F] tracking-widest text-xs">VISUAL SYSTEM GEN</div>
     </header>
 
-    <main class="relative z-10 w-full max-w-md">
+    <main class="relative z-10 w-full max-w-md mb-20">
         
-        <div id="inputSection" class="glass-panel p-10 rounded-xl animate-fade-in">
-            <h1 class="font-serif text-3xl text-center mb-2 text-white">Style Origin</h1>
-            <p class="text-center text-gray-400 text-[10px] tracking-[0.2em] mb-10">DECODE YOUR VISUAL IDENTITY</p>
+        <div id="inputSection" class="glass-panel p-8 rounded-lg animate-fade-in">
+            <h1 class="font-serif text-2xl text-center mb-2 text-white">Visual Identity</h1>
+            <p class="text-center text-gray-500 text-[10px] tracking-[0.2em] mb-8">GENERATE YOUR BRAND ASSETS</p>
             
-            <div class="space-y-8">
+            <div class="space-y-6">
                 <div>
-                    <label class="block text-[10px] text-[#BF953F] mb-3 tracking-widest uppercase">Name (Alias)</label>
-                    <input type="text" id="userName" class="input-field w-full p-4 text-center rounded text-sm" placeholder="TYPE YOUR NAME">
+                    <label class="block text-[10px] text-[#BF953F] mb-2 tracking-widest uppercase">Name / Brand</label>
+                    <input type="text" id="userName" class="input-field w-full p-3 text-center rounded text-sm font-mono" placeholder="NAME">
                 </div>
                 <div>
-                    <label class="block text-[10px] text-[#BF953F] mb-3 tracking-widest uppercase">Date of Birth</label>
-                    <input type="date" id="userDate" class="input-field w-full p-4 text-center rounded text-sm uppercase">
+                    <label class="block text-[10px] text-[#BF953F] mb-2 tracking-widest uppercase">Founder Birthday</label>
+                    <input type="date" id="userDate" class="input-field w-full p-3 text-center rounded text-sm uppercase font-mono">
                 </div>
                 
-                <button onclick="calculateDNA()" class="btn-gold w-full py-4 rounded-sm font-serif text-sm mt-6">INITIATE ANALYSIS</button>
-            </div>
-            
-            <p class="text-center text-gray-600 text-[10px] mt-8 tracking-wider">SECURE CONNECTION // EDEN ALGORITHM V2.0</p>
-        </div>
-
-        <div id="loadingSection" class="hidden text-center py-32">
-            <div class="inline-block w-12 h-12 border-[1px] border-[#BF953F] border-t-transparent rounded-full animate-spin mb-6"></div>
-            <div class="font-mono text-[#BF953F] text-xs tracking-widest space-y-2">
-                <p class="animate-pulse">CALCULATING NUMEROLOGY...</p>
-                <p class="animate-pulse delay-75">MATCHING ARCHETYPES...</p>
-                <p class="animate-pulse delay-150">RENDERING PROFILE...</p>
+                <button onclick="calculateDNA()" class="btn-gold w-full py-3 rounded text-xs mt-4">GENERATE ASSETS</button>
             </div>
         </div>
 
-        <div id="resultSection" class="hidden animate-fade-in">
-            <div class="glass-panel p-0 rounded-xl overflow-hidden border-t-4 border-[#BF953F]">
-                
-                <div class="bg-[#1a1a1a] p-8 text-center relative overflow-hidden">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#BF953F] to-transparent opacity-50"></div>
-                    <span id="resultNumber" class="font-serif text-6xl text-white opacity-10 font-bold absolute top-2 right-4"></span>
-                    
-                    <div class="archetype-badge">AESTHETIC ARCHETYPE</div>
-                    <h2 id="resultTitle" class="font-serif text-2xl text-white mb-2 tracking-wide"></h2>
-                    <p id="resultKeywords" class="font-mono text-xs text-[#BF953F] tracking-widest"></p>
-                </div>
+        <div id="loadingSection" class="hidden text-center py-20">
+            <div class="font-mono text-[#BF953F] text-xs tracking-widest space-y-3">
+                <p class="animate-pulse">EXTRACTING COLOR PALETTE...</p>
+                <p class="animate-pulse delay-75">COMPILING AI PROMPTS...</p>
+                <p class="animate-pulse delay-150">FINALIZING SYSTEM...</p>
+            </div>
+        </div>
 
-                <div class="p-8 space-y-8">
+        <div id="resultSection" class="hidden animate-fade-in space-y-4">
+            
+            <div class="glass-panel p-0 rounded-lg overflow-hidden border border-[#333]">
+                <div class="bg-[#151515] p-6 border-b border-[#222] flex justify-between items-end">
                     <div>
-                        <h3 class="font-serif text-white text-sm mb-3 flex items-center gap-2">
-                            <span class="w-1 h-4 bg-[#BF953F]"></span> VISUAL DIAGNOSIS
+                        <div class="text-[#BF953F] text-[10px] tracking-widest mb-1">ARCHETYPE 0<span id="resultNumber"></span></div>
+                        <h2 id="resultTitle" class="font-serif text-xl text-white"></h2>
+                    </div>
+                    <div id="resultKeyword" class="font-mono text-xs text-gray-500 border border-gray-700 px-2 py-1 rounded"></div>
+                </div>
+
+                <div class="p-6 space-y-8">
+                    
+                    <div>
+                        <h3 class="font-mono text-[10px] text-gray-400 mb-3 tracking-wider flex items-center gap-2">
+                            <span class="w-1 h-1 bg-[#BF953F] rounded-full"></span> BRAND PALETTE (CLICK TO COPY)
                         </h3>
-                        <p id="resultDesc" class="text-gray-400 text-sm leading-relaxed text-justify font-light"></p>
+                        <div class="grid grid-cols-4 gap-2 h-16" id="colorContainer">
+                            </div>
                     </div>
 
-                    <div class="bg-[#BF953F] bg-opacity-5 p-5 rounded border border-[#BF953F] border-opacity-20">
-                        <h3 class="font-serif text-[#BF953F] text-sm mb-2">EDEN'S PRESCRIPTION</h3>
-                        <p id="resultAdvice" class="text-gray-300 text-xs leading-relaxed font-mono"></p>
+                    <div>
+                        <div class="flex justify-between items-end mb-3">
+                            <h3 class="font-mono text-[10px] text-gray-400 tracking-wider flex items-center gap-2">
+                                <span class="w-1 h-1 bg-[#BF953F] rounded-full"></span> MIDJOURNEY PROMPT
+                            </h3>
+                            <button onclick="copyPrompt()" class="text-[10px] text-[#BF953F] hover:text-white underline decoration-dotted">COPY ALL</button>
+                        </div>
+                        <div class="bg-[#0a0a0a] p-3 rounded border border-[#333] relative group cursor-pointer" onclick="copyPrompt()">
+                            <p id="aiPrompt" class="font-mono text-[10px] text-gray-400 leading-relaxed break-words opacity-80 group-hover:opacity-100 transition-opacity"></p>
+                            <div class="absolute top-2 right-2 text-gray-600 group-hover:text-white text-xs">📋</div>
+                        </div>
                     </div>
 
-                    <div class="text-center pt-4 border-t border-gray-800">
-                        <p class="text-gray-500 text-[10px] mb-4 tracking-wider">READY TO VISUALIZE YOUR ESSENCE?</p>
-                        <a href="https://www.instagram.com/eden_d_photo/" target="_blank" id="ctaBtn" class="block w-full border border-[#BF953F] text-[#BF953F] py-3 text-xs tracking-[0.2em] hover:bg-[#BF953F] hover:text-black transition-all">
-                            BOOK THIS STYLE
-                        </a>
+                    <div>
+                        <h3 class="font-mono text-[10px] text-gray-400 mb-2 tracking-wider">VISUAL STRATEGY</h3>
+                        <p id="resultDesc" class="text-sm text-gray-300 leading-relaxed font-light"></p>
                     </div>
+
+                </div>
+                
+                <div class="bg-[#BF953F] p-4 text-center cursor-pointer hover:bg-[#d4a84e] transition-colors" onclick="window.open('https://www.instagram.com/eden_d_photo/', '_blank')">
+                    <p class="text-black font-bold text-xs tracking-[0.15em]">NEED THIS STYLE EXECUTED? BOOK EDEN ↗</p>
                 </div>
             </div>
-            
-            <button onclick="location.reload()" class="w-full mt-8 text-[10px] text-gray-600 hover:text-gray-400 tracking-widest">RESTART SEQUENCE</button>
+
+            <button onclick="location.reload()" class="w-full py-4 text-[10px] text-gray-600 hover:text-gray-400 tracking-widest">RESTART</button>
         </div>
 
     </main>
 
+    <div id="toast" class="toast">COPIED TO CLIPBOARD</div>
+
     <script>
-        // --- 9大美學原型資料庫 ---
-        const archetypes = {
+        // --- DATA ASSETS ---
+        const styles = {
             1: {
-                title: "THE PIONEER (開創者)",
-                keywords: "#MINIMAL #CONTRAST #BOLD",
-                desc: "你擁有強烈的個人意志與領導力。在視覺上，繁複的裝飾會掩蓋你的鋒芒。你適合極致的「減法美學」，高對比的黑白影像，或是大面積的留白，讓焦點完全集中在你堅毅的眼神與輪廓。",
-                advice: "推薦風格：High-Contrast Portrait (高反差肖像)。場景選擇清水模或純色背景，使用硬光 (Hard Light) 勾勒線條。"
+                title: "THE MINIMALIST",
+                keyword: "Structure",
+                colors: ["#1A1A1A", "#F2F2F2", "#8C8C8C", "#2D2D2D"],
+                prompt: "Professional architectural portrait, minimalistic style, high contrast black and white, sharp focus, geometric shadows, shot on Hasselblad X2D, 85mm lens, clean background --ar 4:5 --q 2",
+                desc: "極簡不是空洞，而是極致的精準。你的品牌色票應以黑白灰為主，強調線條與結構。攝影風格建議使用高反差黑白或低飽和色調。"
             },
             2: {
-                title: "THE DIPLOMAT (協調者)",
-                keywords: "#SOFT #MORANDI #FLOW",
-                desc: "你對細節與和諧有著天生的敏感度。銳利的線條不適合你，你需要的是柔和的光影過渡與細膩的材質感。你的美感存在於那些不言而喻的曖昧氛圍中。",
-                advice: "推薦風格：Cinematic Soft Focus (電影柔焦)。適合自然光、亞麻色調、捕捉布料紋理與肢體的流動感。"
+                title: "THE NATURALIST",
+                keyword: "Softness",
+                colors: ["#E6DCCA", "#A6B5A1", "#8C7B6C", "#F5F0E6"],
+                prompt: "Soft lifestyle photography, natural lighting, beige and sage green color palette, linen textures, organic shapes, blurry foreground, shot on Sony A7IV, 35mm f1.4, golden hour --ar 4:5 --style raw",
+                desc: "你的視覺語言是柔和且具有呼吸感的。使用大地色系與莫蘭迪色。拍攝時尋找自然光與亞麻、原木等有機材質的細節。"
             },
             3: {
-                title: "THE ARTIST (藝術家)",
-                keywords: "#VIBRANT #DRAMA #EXPRESSION",
-                desc: "你不需要低調，你的靈魂渴望表達。標準的證件照式拍攝會扼殺你的靈氣。你需要戲劇性的張力、大膽的色彩運用，甚至是動態模糊帶來的藝術感。",
-                advice: "推薦風格：Artistic Mood (藝術情緒片)。嘗試霓虹光感、強烈的色彩對比，或具有故事性的電影劇照風格。"
+                title: "THE VISIONARY",
+                keyword: "Vibrant",
+                colors: ["#2E0249", "#F806CC", "#570A57", "#A91079"],
+                prompt: "Cinematic portrait, neon lighting, cyberpunk aesthetic, vibrant purple and pink hues, dramatic shadows, moody atmosphere, emotional expression, shot on Fujifilm GFX100 --ar 4:5 --stylize 250",
+                desc: "大膽、前衛、充滿戲劇張力。不要害怕使用高飽和度的色彩與霓虹光感。你的影像應該像電影劇照一樣，充滿故事性。"
             },
             4: {
-                title: "THE BUILDER (建構者)",
-                keywords: "#ORDER #STRUCTURE #SYMMETRY",
-                desc: "你在秩序與結構中找到安寧。混亂的背景會讓你感到焦慮。適合你的視覺風格需要嚴謹的幾何構圖、完美的水平垂直，展現出一種穩重且值得信賴的權威感。",
-                advice: "推薦風格：Structured Composition (結構主義構圖)。適合搭配西裝、俐落的建築背景，強調對稱性與穩定感。"
+                title: "THE CLASSICIST",
+                keyword: "Order",
+                colors: ["#0C161C", "#BF953F", "#FFFFFF", "#333333"],
+                prompt: "Luxury editorial portrait, symmetrical composition, rich textures, deep navy and gold palette, rim lighting, elegant pose, shot on Canon R5, 50mm lens, studio lighting --ar 4:5 --v 6.0",
+                desc: "經典、對稱、權威。深藍與金色是你的代表色。影像構圖必須嚴謹工整，強調穩定感與高級感，避免過於隨意的抓拍。"
             },
             5: {
-                title: "THE EXPLORER (探索者)",
-                keywords: "#STREET #WIDE #FREE",
-                desc: "你不受框架拘束，渴望自由。傳統的攝影棚拍對你來說太過拘謹。你需要走入街頭、廢墟或大自然，用廣角鏡頭捕捉你不羈的靈魂與瞬間的張力。",
-                advice: "推薦風格：Urban Snapshot (街頭抓拍)。使用廣角鏡頭，不看鏡頭的自然動態，展現與環境互動的生命力。"
+                title: "THE MAVERICK",
+                keyword: "Freedom",
+                colors: ["#FF4C29", "#2C3333", "#395B64", "#E7F6F2"],
+                prompt: "Urban street photography, wide angle shot, dynamic movement, gritty textures, candid moment, high energy, brutalist architecture background, shot on Leica Q2, 28mm lens --ar 16:9 --style raw",
+                desc: "不拘一格的街頭美學。高對比的色彩與粗糙的質感。嘗試廣角鏡頭與非傳統構圖，捕捉瞬間的動態與生命力。"
             },
             6: {
-                title: "THE NURTURER (療癒者)",
-                keywords: "#WARM #HOME #LIGHT",
-                desc: "你自帶溫暖的治癒氣場。冷冽的科技感不適合你。你的影像應該充滿溫度，像是午後三點的陽光，或是充滿生活感的居家氛圍，讓人看一眼就感到放鬆。",
-                advice: "推薦風格：Golden Hour Lifestyle (暖調生活感)。逆光拍攝、原木色調、充滿植栽與柔和光暈的場景。"
+                title: "THE HEALER",
+                keyword: "Warmth",
+                colors: ["#FFB3B3", "#FFF2CC", "#FFD966", "#FAD4D4"],
+                prompt: "Warm cozy interior photography, sunlight streaming through curtains, pastel color palette, soft focus, home aesthetic, plants and books, shot on Canon AE-1, Kodak Portra 400 film look --ar 4:5",
+                desc: "溫暖、療癒、居家感。暖黃色與粉膚色是關鍵。影像應充滿陽光感，模擬底片顆粒的質感能增加親切度。"
             },
             7: {
-                title: "THE ANALYST (哲學家)",
-                keywords: "#COOL #ABSTRACT #ESSENCE",
-                desc: "你透過思考來理解世界。過多的情緒表達對你來說是多餘的。適合你的風格是冷靜、抽離且帶有哲學意味的。藍灰色調、局部特寫，展現出一種高智感的疏離美。",
-                advice: "推薦風格：Minimalist Tech (極簡科技感)。冷色調、玻璃與金屬材質、失焦或局部構圖，強調神秘感。"
+                title: "THE FUTURIST",
+                keyword: "Tech",
+                colors: ["#000000", "#00FF00", "#444444", "#FFFFFF"],
+                prompt: "Abstract technology photography, glass and metal textures, cool blue tones, macro details, clean lines, laboratory aesthetic, futuristic vibe, shot on Sony A7R V, 90mm macro lens --ar 4:5",
+                desc: "冷靜、理智、科技感。黑色與螢光綠或冰藍色。專注於物體的材質與局部特寫，展現出一種抽離的智性美。"
             },
             8: {
-                title: "THE EXECUTIVE (權威者)",
-                keywords: "#LUXURY #PRECISION #POWER",
-                desc: "你天生屬於舞台中央，擁有掌控全局的氣場。你需要的是能夠展現「價值感」的影像。精緻的打光、深邃的暗部細節、金色或黑色的基調，襯托你的高貴與力量。",
-                advice: "推薦風格：Editorial Luxury (商業大片)。使用倫勃朗光 (Rembrandt Lighting)，強調質感、西裝與深色背景的層次。"
+                title: "THE NOBLE",
+                keyword: "Luxury",
+                colors: ["#141414", "#C0C0C0", "#500000", "#F5F5F5"],
+                prompt: "High-end fashion photography, Rembrandt lighting, velvet textures, dark red and silver accents, confident pose, expensive atmosphere, shot on Phase One IQ4, 80mm lens --ar 4:5 --q 2",
+                desc: "奢華、大氣、貴族氣息。酒紅、銀色與深黑。使用戲劇性的打光（如倫勃朗光）來強調質感與地位。"
             },
             9: {
-                title: "THE HUMANITARIAN (博愛者)",
-                keywords: "#NATURE #ZEN #PANORAMIC",
-                desc: "你的視野宏大，關注群體與自然。狹窄的室內不適合你。你需要在廣闊的空間中才能展現那種超脫世俗的空靈感。天人合一的禪意美學最適合你。",
-                advice: "推薦風格：Atmospheric Landscape (環境人像)。超廣角大景、將人物縮小置於大自然中，展現意境與留白。"
+                title: "THE ZEN",
+                keyword: "Space",
+                colors: ["#FFFFFF", "#F0F0F0", "#D3D3D3", "#8E8E8E"],
+                prompt: "Minimalist landscape photography, vast negative space, foggy atmosphere, muted tones, solitary figure in distance, zen composition, ethereal vibe, shot on Mamiya 7, varying grey tones --ar 16:9",
+                desc: "空靈、留白、禪意。大面積的白與灰。讓影像呼吸，人物只是風景中的點綴，強調天人合一的意境。"
             }
         };
 
-        // --- 核心運算邏輯 (生命靈數) ---
         function calculateDNA() {
             const name = document.getElementById('userName').value;
             const dateInput = document.getElementById('userDate').value;
             
-            if(!name || !dateInput) {
-                alert("ACCESS DENIED: 請輸入完整資料以啟動運算。");
+            if(!dateInput) {
+                alert("Please enter a date.");
                 return;
             }
 
-            // 1. 切換到載入畫面
             document.getElementById('inputSection').classList.add('hidden');
             document.getElementById('loadingSection').classList.remove('hidden');
 
-            // 2. 計算生命靈數 (西元年生日數字加總)
+            // Numerology logic
             let dateStr = dateInput.replace(/-/g, '');
             let sum = 0;
-            
-            for(let char of dateStr) {
-                sum += parseInt(char);
-            }
-
+            for(let char of dateStr) sum += parseInt(char);
             while(sum > 9) {
                 let tempSum = 0;
-                let sumStr = sum.toString();
-                for(let char of sumStr) {
-                    tempSum += parseInt(char);
-                }
+                let s = sum.toString();
+                for(let c of s) tempSum += parseInt(c);
                 sum = tempSum;
             }
+            if(sum === 0) sum = 1; // Fallback
 
-            // 3. 模擬運算延遲
             setTimeout(() => {
-                showResult(sum, name);
-            }, 2000);
+                renderResult(sum);
+            }, 1500);
         }
 
-        function showResult(number, name) {
-            const data = archetypes[number];
-            
-            // 填入資料
-            document.getElementById('resultNumber').innerText = "0" + number;
+        function renderResult(num) {
+            const data = styles[num];
+            document.getElementById('resultNumber').innerText = num;
             document.getElementById('resultTitle').innerText = data.title;
-            document.getElementById('resultKeywords').innerText = data.keywords;
+            document.getElementById('resultKeyword').innerText = data.keyword;
             document.getElementById('resultDesc').innerText = data.desc;
-            document.getElementById('resultAdvice').innerText = data.advice;
-            
-            // CTA 按鈕文字客製化
-            document.getElementById('ctaBtn').innerText = `BOOK MY "${data.keywords.split(' ')[0].replace('#','')}" SESSION`;
+            document.getElementById('aiPrompt').innerText = data.prompt;
 
-            // 切換畫面
+            // Render Colors
+            const colorContainer = document.getElementById('colorContainer');
+            colorContainer.innerHTML = '';
+            data.colors.forEach(color => {
+                const div = document.createElement('div');
+                div.className = 'color-swatch h-full w-full rounded shadow-lg flex items-center justify-center group relative';
+                div.style.backgroundColor = color;
+                div.onclick = () => copyText(color);
+                
+                // Tooltip
+                div.innerHTML = `<span class="opacity-0 group-hover:opacity-100 absolute bg-black text-white text-[8px] px-1 rounded pointer-events-none transition-opacity">${color}</span>`;
+                
+                colorContainer.appendChild(div);
+            });
+
             document.getElementById('loadingSection').classList.add('hidden');
             document.getElementById('resultSection').classList.remove('hidden');
+        }
+
+        function copyPrompt() {
+            const text = document.getElementById('aiPrompt').innerText;
+            copyText(text);
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                const toast = document.getElementById('toast');
+                toast.classList.add('show');
+                setTimeout(() => toast.classList.remove('show'), 2000);
+            });
         }
     </script>
 </body>
