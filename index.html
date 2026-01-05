@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EDEN ROOM</title>
     <style>
-        /* 基礎設定 */
+        /* --- 基礎設定 --- */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
-            background-color: #f2f2f2; /* 沉靜的淺灰 */
+            background-color: #f2f2f2;
             color: #333;
             margin: 0;
             padding: 60px 20px;
@@ -17,16 +17,16 @@
             align-items: center;
         }
 
-        /* 標題區域 */
+        /* --- 標題區域 --- */
         header {
             text-align: center;
             margin-bottom: 60px;
         }
         
         h1 {
-            font-size: 3rem; /* 大標題 */
-            font-weight: 300; /* 纖細字體展現質感 */
-            letter-spacing: 0.2em; /* 寬字距增加呼吸感 */
+            font-size: 3rem;
+            font-weight: 300;
+            letter-spacing: 0.2em;
             margin: 0 0 15px 0;
             text-transform: uppercase;
         }
@@ -38,7 +38,7 @@
             text-transform: uppercase;
         }
 
-        /* 卡片容器 */
+        /* --- 卡片容器 --- */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -47,22 +47,23 @@
             width: 100%;
         }
 
-        /* 卡片設計 */
+        /* --- 卡片通用設計 --- */
         .card {
             background: white;
             padding: 40px;
-            text-decoration: none;
-            color: inherit;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03); /* 極淡的陰影 */
+            border-radius: 4px; /* 微圓角，增加精緻感 */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
             transition: all 0.3s ease;
             border: 1px solid transparent;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 200px;
+            min-height: 220px;
+            position: relative;
+            text-decoration: none; /* 移除連結底線 */
+            color: inherit;
         }
 
-        /* 滑鼠移上去的微互動 */
         .card:hover {
             transform: translateY(-5px);
             box-shadow: 0 20px 40px rgba(0,0,0,0.06);
@@ -89,11 +90,52 @@
             margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 0.1em;
+            display: block;
         }
 
-        /* 讓氣氛博士的卡片稍微特別一點 */
-        .card.active h2 {
-            color: #000;
+        /* --- 互動工具介面 (計算機專用) --- */
+        .tool-interface {
+            background: #fcfcfc;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            margin-top: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            font-family: inherit;
+            background: #fff;
+            outline: none;
+            transition: 0.2s;
+        }
+
+        input[type="number"]:focus {
+            border-color: #BF953F;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .result-val {
+            font-family: monospace;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #BF953F; /* 香檳金 */
         }
     </style>
 </head>
@@ -106,31 +148,60 @@
 
     <div class="grid-container">
 
-        <a href="https://vibe-check-ih3e.vercel.app/" class="card active" target="_blank">
+        <a href="https://vibe-check-ih3e.vercel.app/" class="card" target="_blank">
             <span class="status">● Available</span>
             <div>
                 <h2>Vibe Doctor 氣氛博士</h2>
                 <p>社交場域調節器。隨機生成話題與互動挑戰，優化聚會氛圍。</p>
             </div>
+            <div style="text-align: right; margin-top: 20px; color: #ccc;">↗</div>
         </a>
 
-        <a href="#" class="card" style="opacity: 0.6; cursor: default;">
-            <span class="status">○ In Development</span>
+        <div class="card" style="cursor: default;">
+            <span class="status" style="color: #BF953F;">● Operational</span>
+            
             <div>
-                <h2>Golden Ratio 黃金比例</h2>
-                <p>建築與攝影構圖輔助計算工具。</p>
+                <h2>Golden Ratio 📐</h2>
+                <p>輸入任一數值 (如照片長度)，自動計算 1:1.618 黃金分割值。</p>
             </div>
-        </a>
+            
+            <div class="tool-interface">
+                <div class="input-group">
+                    <input type="number" id="baseInput" placeholder="輸入數值...">
+                </div>
+                <div class="result-row">
+                    <span>Golden Value (x 1.618)</span>
+                    <span id="resultValue" class="result-val">-</span>
+                </div>
+            </div>
+        </div>
 
-        <a href="#" class="card" style="opacity: 0.6; cursor: default;">
+        <div class="card" style="opacity: 0.6; cursor: default;">
             <span class="status">○ In Development</span>
             <div>
-                <h2>Palette Extractor 色票提取</h2>
+                <h2>Palette Extractor</h2>
                 <p>影像色彩分析與色碼轉換工具。</p>
             </div>
-        </a>
+            <div style="margin-top: 20px; font-size: 0.8rem; color: #999;">COMING SOON</div>
+        </div>
 
     </div>
+
+    <script>
+        // 監聽輸入框
+        document.getElementById('baseInput').addEventListener('input', function(e) {
+            const val = parseFloat(e.target.value);
+            const display = document.getElementById('resultValue');
+            
+            if (val) {
+                // 計算邏輯：數值 * 1.618
+                const golden = (val * 1.618).toFixed(1); // 取小數點後一位
+                display.innerText = golden;
+            } else {
+                display.innerText = '-';
+            }
+        });
+    </script>
 
 </body>
 </html>
