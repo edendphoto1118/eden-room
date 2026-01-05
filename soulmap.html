@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoulMap | 靈魂導航</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { serif: ['Cinzel', 'serif'], mono: ['Space Mono', 'monospace'] },
+                    colors: { eden: { dark: '#121212', gold: '#BF953F', glass: 'rgba(26, 26, 26, 0.6)' } },
+                    animation: { 'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite' }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; overflow-x: hidden; }
+        /* 背景動態雜訊與極光 */
+        .bg-noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.05; pointer-events: none; z-index: 0; filter: contrast(320%) brightness(100%); background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E"); }
+        .aurora-glow { position: fixed; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at center, rgba(191, 149, 63, 0.1) 0%, rgba(15, 23, 42, 0) 60%); animation: rotate 20s linear infinite; z-index: 0; pointer-events: none; }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        .glass-panel { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(191, 149, 63, 0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .input-field { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; transition: 0.3s; }
+        .input-field:focus { border-color: #BF953F; outline: none; box-shadow: 0 0 15px rgba(191, 149, 63, 0.2); }
+        .btn-gold { background: linear-gradient(45deg, #946f23, #BF953F); color: #000; font-weight: bold; letter-spacing: 0.1em; transition: 0.3s; }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(191, 149, 63, 0.3); }
+        
+        /* 塔羅牌翻轉特效 */
+        .tarot-card { perspective: 1000px; width: 200px; height: 340px; cursor: pointer; }
+        .tarot-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; }
+        .tarot-card.flipped .tarot-inner { transform: rotateY(180deg); }
+        .tarot-front, .tarot-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid #BF953F; }
+        .tarot-front { background: #1a1a1a; background-image: url('https://www.transparenttextures.com/patterns/stardust.png'); display: flex; align-items: center; justify-content: center; }
+        .tarot-back { background: #000; color: #BF953F; transform: rotateY(180deg); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+    </style>
+</head>
+<body class="flex flex-col items-center min-h-screen p-4 sm:p-8">
+
+    <div class="bg-noise"></div>
+    <div class="aurora-glow"></div>
+
+    <header class="relative z-10 w-full max-w-4xl flex justify-between items-center mb-12 fade-in">
+        <a href="index.html" class="text-xs tracking-[0.2em] text-gray-500 hover:text-[#BF953F] transition-colors">← RETURN TO EDEN</a>
+        <h1 class="font-serif text-2xl text-[#BF953F] tracking-widest">SOULMAP</h1>
+    </header>
+
+    <main class="relative z-10 w-full max-w-lg">
+        
+        <div id="inputSection" class="glass-panel p-8 rounded-xl fade-in-up">
+            <h2 class="font-serif text-3xl text-center mb-2 text-white">Identity Matrix</h2>
+            <p class="text-center text-gray-400 text-xs tracking-widest mb-8">INPUT BIOMETRIC DATA FOR ANALYSIS</p>
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-xs text-[#BF953F] mb-2 tracking-wider">NAME / ALIAS</label>
+                    <input type="text" id="userName" class="input-field w-full p-3 rounded" placeholder="Enter your name">
+                </div>
+                <div>
+                    <label class="block text-xs text-[#BF953F] mb-2 tracking-wider">DATE OF ORIGIN</label>
+                    <input type="date" id="userDate" class="input-field w-full p-3 rounded">
+                </div>
+                <div>
+                    <label class="block text-xs text-[#BF953F] mb-2 tracking-wider">QUERY FOCUS</label>
+                    <select id="userQuery" class="input-field w-full p-3 rounded">
+                        <option value="career">Career & Ambition (事業)</option>
+                        <option value="love">Connection & Resonance (感情)</option>
+                        <option value="self">Self-Actualization (靈性)</option>
+                    </select>
+                </div>
+                
+                <button onclick="startReading()" class="btn-gold w-full py-4 rounded font-serif mt-4">INITIALIZE SEQUENCE</button>
+            </div>
+        </div>
+
+        <div id="loadingSection" class="hidden text-center py-20">
+            <div class="inline-block w-16 h-16 border-2 border-[#BF953F] border-t-transparent rounded-full animate-spin mb-8"></div>
+            <p id="loadingText" class="font-mono text-[#BF953F] text-sm animate-pulse">CALIBRATING ASTROLOGICAL DATA...</p>
+        </div>
+
+        <div id="resultSection" class="hidden flex flex-col items-center">
+            
+            <div class="tarot-card mb-10" onclick="this.classList.toggle('flipped')">
+                <div class="tarot-inner">
+                    <div class="tarot-front">
+                        <div class="text-[#BF953F] font-serif text-4xl border-2 border-[#BF953F] w-12 h-12 flex items-center justify-center rounded-full">?</div>
+                    </div>
+                    <div class="tarot-back glass-panel">
+                        <h3 id="cardName" class="font-serif text-xl mb-2 text-white">THE FOOL</h3>
+                        <p id="cardKeywords" class="text-xs text-gray-400 mb-4 tracking-widest">BEGINNING • SPONTANEITY</p>
+                        <div class="w-8 h-[1px] bg-[#BF953F] mb-4"></div>
+                        <div class="text-4xl text-[#BF953F]">✦</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-panel p-8 rounded-xl w-full text-center">
+                <h3 class="font-serif text-xl text-[#BF953F] mb-6">ANALYSIS COMPLETE</h3>
+                <p id="readingText" class="font-mono text-sm leading-relaxed text-gray-300 text-justify">
+                    </p>
+                <button onclick="location.reload()" class="mt-8 text-xs text-gray-500 hover:text-white border-b border-transparent hover:border-white pb-1 transition-all">RESTART PROTOCOL</button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // --- 簡易命理資料庫 (Simulated AI) ---
+        const tarotDeck = [
+            { name: "THE MAGICIAN", keys: "創造、顯化、意志力", desc: "此刻是你展現天賦的最佳時機。如同建築師將藍圖化為現實，你擁有所需的一切資源。" },
+            { name: "THE HIGH PRIESTESS", keys: "直覺、潛意識、神秘", desc: "答案不在外在數據，而在你的直覺之中。暫時抽離喧囂，傾聽內在的聲音。" },
+            { name: "THE EMPRESS", keys: "豐盛、感官、創造力", desc: "這是一個充滿美與豐盛的時刻。適合進行藝術創作或享受生活中的質感。" },
+            { name: "THE EMPEROR", keys: "結構、權力、穩定", desc: "你需要建立秩序。如同攝影需要穩定的構圖，現在的生活需要邏輯與紀律。" },
+            { name: "THE HERMIT", keys: "內省、孤獨、指引", desc: "向內探索的時刻。遠離社交媒體的雜訊，在獨處中你會找到真正的方向。" },
+            { name: "WHEEL OF FORTUNE", keys: "改變、命運、轉折", desc: "命運的齒輪正在轉動。無論發生什麼改變，順應它，這是一個新的循環。" },
+            { name: "THE STAR", keys: "希望、靈感、療癒", desc: "風暴後的寧靜。保持信念，你是被宇宙眷顧的。創作靈感將源源不絕。" }
+        ];
+
+        const hdTypes = ["Generator (生產者)", "Projector (投射者)", "Manifestor (顯示者)", "Reflector (反映者)"];
+
+        async function startReading() {
+            const name = document.getElementById('userName').value;
+            const date = document.getElementById('userDate').value;
+            
+            if(!name || !date) {
+                alert("ERR: MISSING DATA. 請輸入完整資料。");
+                return;
+            }
+
+            // 切換畫面
+            document.getElementById('inputSection').classList.add('hidden');
+            document.getElementById('loadingSection').classList.remove('hidden');
+
+            // 模擬運算過程 (Ritual)
+            const steps = [
+                "ACCESSING AKASHIC RECORDS...",
+                "CALCULATING HUMAN DESIGN CHART...",
+                "SHUFFLING TAROT DECK...",
+                "SYNCHRONIZING..."
+            ];
+
+            for (let i = 0; i < steps.length; i++) {
+                document.getElementById('loadingText').innerText = steps[i];
+                await new Promise(r => setTimeout(r, 800)); // 每個步驟停頓 0.8 秒
+            }
+
+            showResult(name);
+        }
+
+        function showResult(name) {
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.remove('hidden');
+
+            // 隨機抽選
+            const card = tarotDeck[Math.floor(Math.random() * tarotDeck.length)];
+            const hdType = hdTypes[Math.floor(Math.random() * hdTypes.length)]; // 簡單模擬，實際需複雜演算法
+            
+            // 填入資料
+            document.getElementById('cardName').innerText = card.name;
+            document.getElementById('cardKeywords').innerText = card.keys;
+            
+            const reading = `致 ${name} (${hdType})：\n\n抽到這張「${card.name}」，象徵著目前的能量核心在於${card.keys}。\n\n${card.desc}\n\n建議：作為一名追求美感的創作者，試著將這張牌的意象融入你接下來的作品或決策中。宇宙的演算法正在為你優化路徑。`;
+            
+            document.getElementById('readingText').innerText = reading;
+            
+            // 自動翻牌特效
+            setTimeout(() => {
+                document.querySelector('.tarot-card').classList.add('flipped');
+            }, 500);
+        }
+    </script>
+</body>
+</html>
