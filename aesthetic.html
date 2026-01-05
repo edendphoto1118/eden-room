@@ -6,13 +6,17 @@
     <title>Aesthetic DNA Test | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;1,400&family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    fontFamily: { serif: ['Cinzel', 'serif'], mono: ['Space Mono', 'monospace'] },
+                    fontFamily: { 
+                        serif: ['Cinzel', 'serif'], 
+                        mono: ['Space Mono', 'monospace'],
+                        zh: ['Noto Serif TC', 'serif'] 
+                    },
                     colors: { eden: { dark: '#0a0a0a', gold: '#BF953F', glass: 'rgba(20, 20, 20, 0.95)' } },
                     animation: { 'fade-in': 'fadeIn 0.8s ease-out' },
                     keyframes: {
@@ -39,8 +43,18 @@
         }
         .option-btn:hover { border-color: #BF953F; background: rgba(191, 149, 63, 0.1); transform: translateX(5px); }
 
-        /* 金色按鈕 */
-        .btn-gold { background: linear-gradient(to bottom, #BF953F, #9e7b30); color: #000; font-weight: 700; letter-spacing: 0.15em; transition: 0.3s; box-shadow: 0 4px 15px rgba(191, 149, 63, 0.2); }
+        /* 金色按鈕 (雙層文字設計) */
+        .btn-gold { 
+            background: linear-gradient(to bottom, #BF953F, #9e7b30); 
+            color: #000; 
+            transition: 0.3s; 
+            box-shadow: 0 4px 15px rgba(191, 149, 63, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+        }
         .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(191, 149, 63, 0.4); filter: brightness(1.1); }
 
         /* 結果卡片 (IG Story 尺寸 9:16) */
@@ -49,14 +63,11 @@
             border: 1px solid #BF953F;
             padding: 30px;
             width: 100%;
-            max-width: 380px; /* 控制寬度 */
+            max-width: 380px; 
             margin: 0 auto;
             position: relative;
             background-image: radial-gradient(circle at top right, rgba(191, 149, 63, 0.05) 0%, transparent 40%);
         }
-        
-        /* 裝飾線條 */
-        .deco-line { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, #333, transparent); margin: 20px 0; }
     </style>
 </head>
 <body class="flex flex-col items-center min-h-screen font-sans selection:bg-[#BF953F] selection:text-black pb-20">
@@ -85,7 +96,7 @@
                     <label class="text-[10px] text-[#BF953F] tracking-widest block mb-1">DATE OF BIRTH</label>
                     <input type="date" id="userDate" class="input-field w-full p-3 rounded text-xs uppercase">
                 </div>
-                <button onclick="startQuiz()" class="btn-gold w-full py-3 rounded text-xs mt-4">START DIAGNOSIS</button>
+                <button onclick="startQuiz()" class="btn-gold w-full py-4 rounded text-sm tracking-widest font-bold">START DIAGNOSIS</button>
             </div>
         </div>
 
@@ -96,7 +107,7 @@
                     <span class="text-gray-600 text-[10px] tracking-widest">VISUAL PSYCHOLOGY</span>
                 </div>
                 
-                <h3 id="questionText" class="font-serif text-lg text-white mb-6 leading-relaxed min-h-[60px]">Question text here...</h3>
+                <h3 id="questionText" class="font-serif text-lg text-white mb-6 leading-relaxed min-h-[60px]">Question text...</h3>
                 
                 <div id="optionsContainer">
                     </div>
@@ -124,10 +135,11 @@
                     </div>
                 </div>
 
-                <div class="text-center py-4 border-t border-b border-[#222]">
-                    <p class="text-[10px] text-gray-400 tracking-widest mb-2">YOUR AESTHETIC ARCHETYPE</p>
-                    <h2 id="resTitle" class="font-serif text-3xl text-[#BF953F] mb-2 leading-none">THE ARCHETYPE</h2>
-                    <p id="resKeywords" class="font-mono text-[10px] text-gray-500 tracking-widest">#KEYWORD #KEYWORD</p>
+                <div class="text-center py-5 border-t border-b border-[#222]">
+                    <p class="text-[10px] text-gray-400 tracking-widest mb-1">YOUR AESTHETIC ARCHETYPE</p>
+                    <h2 id="resTitleEn" class="font-serif text-2xl text-[#BF953F] leading-none mb-1">THE ARCHETYPE</h2>
+                    <h2 id="resTitleZh" class="font-zh text-xl text-white tracking-widest font-light">原型中文</h2>
+                    <p id="resKeywords" class="font-mono text-[9px] text-gray-500 tracking-widest mt-2">#KEYWORD #KEYWORD</p>
                 </div>
 
                 <div class="py-6 space-y-6">
@@ -145,30 +157,34 @@
 
                     <div>
                         <h4 class="font-mono text-[9px] text-gray-500 mb-2 tracking-widest uppercase">Signature Palette</h4>
-                        <div class="grid grid-cols-4 gap-2 h-12" id="resColors">
-                            </div>
+                        <div class="grid grid-cols-4 gap-2 h-12" id="resColors"></div>
                     </div>
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-[#333] text-center">
                     <p class="text-[9px] text-gray-400 mb-2">VERIFIED BY EDEN PHOTOGRAPHY</p>
-                    <div class="inline-block border border-[#BF953F] px-4 py-1">
+                    <div class="inline-block border border-[#BF953F] px-4 py-1 mb-2">
                         <p class="font-mono text-[#BF953F] text-xs tracking-widest">CODE: EDEN_DNA</p>
                     </div>
-                    <p class="text-[8px] text-gray-600 mt-2">截圖此診斷書預約拍攝，獲取專屬風格方案</p>
+                    <p class="text-[8px] text-gray-600">憑此診斷書預約拍攝，享專屬方案折扣</p>
                 </div>
             </div>
 
-            <div class="w-full max-w-xs mt-8 space-y-3">
-                <button onclick="downloadCard()" class="btn-gold w-full py-3 rounded text-xs tracking-widest">
-                    SAVE DIAGNOSIS (儲存診斷書)
+            <div class="w-full max-w-xs mt-8 space-y-4">
+                
+                <button onclick="downloadCard()" class="btn-gold w-full py-4 rounded-md shadow-lg group">
+                    <span class="text-sm tracking-widest font-bold mb-1">留存診斷結果</span>
+                    <span class="text-[10px] font-normal opacity-80 group-hover:opacity-100">截圖並私訊 EDEN 預約拍攝</span>
                 </button>
-                <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="block w-full text-center py-3 border border-[#BF953F] text-[#BF953F] rounded text-xs hover:bg-[#BF953F] hover:text-black transition-colors">
-                    BOOK THIS VIBE ↗
-                </a>
-                <button onclick="location.reload()" class="block w-full text-center py-2 text-[10px] text-gray-600 hover:text-white">
-                    RETAKE TEST
-                </button>
+
+                <div class="flex justify-between gap-3">
+                     <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="w-1/2 text-center py-3 border border-gray-800 text-gray-500 rounded text-[10px] hover:text-[#BF953F] hover:border-[#BF953F] transition-colors">
+                        前往 Instagram ↗
+                    </a>
+                    <button onclick="location.reload()" class="w-1/2 text-center py-3 border border-gray-800 text-gray-500 rounded text-[10px] hover:text-white hover:border-white transition-colors">
+                        ↺ 重新測驗
+                    </button>
+                </div>
             </div>
 
         </div>
@@ -176,7 +192,7 @@
     </main>
 
     <script>
-        // --- 9大美學原型資料庫 (完整版) ---
+        // --- 9大美學原型資料庫 (含中文標題) ---
         const archetypes = {
             1: {
                 title: "THE PIONEER (開創者)",
@@ -243,8 +259,6 @@
             }
         };
 
-        // --- 心理測驗題目庫 ---
-        // 每個選項對應加分的 Archetype ID (可複選)
         const questions = [
             {
                 text: "週末早晨，你理想的狀態是？",
@@ -293,7 +307,6 @@
             }
         ];
 
-        // --- 變數與邏輯 ---
         let currentQuestion = 0;
         let scores = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0};
         let userData = {};
@@ -331,15 +344,9 @@
         }
 
         function selectOption(points) {
-            // 加分邏輯
-            points.forEach(id => {
-                scores[id] += 1;
-            });
-
-            // 下一題或結束
+            points.forEach(id => { scores[id] += 1; });
             if (currentQuestion < questions.length - 1) {
                 currentQuestion++;
-                // 添加淡入動畫效果
                 const quizBox = document.getElementById('phase-quiz');
                 quizBox.classList.remove('hidden'); 
                 renderQuestion();
@@ -352,39 +359,41 @@
             document.getElementById('phase-quiz').classList.add('hidden');
             document.getElementById('phase-loading').classList.remove('hidden');
 
-            // 算出最高分的原型
             let maxScore = -1;
-            let winningId = 1; // 預設
-
-            // 簡單的演算法找出最高分
+            let winningId = 1;
             for (const [id, score] of Object.entries(scores)) {
                 if (score > maxScore) {
                     maxScore = score;
                     winningId = id;
                 } else if (score === maxScore) {
-                    // 同分時，隨機二選一，增加多樣性
                     if (Math.random() > 0.5) winningId = id;
                 }
             }
 
-            setTimeout(() => {
-                showResult(winningId);
-            }, 1500);
+            setTimeout(() => { showResult(winningId); }, 1500);
         }
 
         function showResult(id) {
             const data = archetypes[id];
             
-            // 填入資料到卡片 (這是要被截圖的區域)
+            // 處理標題：拆分中英文
+            // 假設 data.title 是 "THE PIONEER (開創者)"
+            // 我們用 split 拆成 "THE PIONEER" 和 "開創者)"
+            const parts = data.title.split(' (');
+            const enTitle = parts[0];
+            const zhTitle = parts[1] ? parts[1].replace(')', '') : '';
+
             document.getElementById('resName').innerText = userData.name;
             document.getElementById('resDate').innerText = new Date().toISOString().split('T')[0].replace(/-/g, '.');
             document.getElementById('resNum').innerText = `00${id}`;
-            document.getElementById('resTitle').innerText = data.title.split(' (')[0]; // 只顯示英文標題比較高級
+            
+            document.getElementById('resTitleEn').innerText = enTitle;
+            document.getElementById('resTitleZh').innerText = zhTitle;
+            
             document.getElementById('resKeywords').innerText = data.keywords;
             document.getElementById('resDesc').innerText = data.desc;
             document.getElementById('resAdvice').innerText = data.advice;
 
-            // 生成色票
             const colorBox = document.getElementById('resColors');
             colorBox.innerHTML = '';
             data.colors.forEach(c => {
@@ -400,13 +409,11 @@
 
         function downloadCard() {
             const card = document.getElementById('captureArea');
-            
-            // 暫時移除陰影以獲得更乾淨的截圖
             card.classList.remove('shadow-2xl');
-
+            
             html2canvas(card, {
                 backgroundColor: "#080808",
-                scale: 2, // 高解析度
+                scale: 2,
                 useCORS: true
             }).then(canvas => {
                 const link = document.createElement('a');
@@ -414,8 +421,11 @@
                 link.href = canvas.toDataURL();
                 link.click();
                 
-                // 加回陰影
                 card.classList.add('shadow-2xl');
+                
+                // 截圖後，彈出提示引導
+                alert("診斷書已儲存！請將此圖私訊給 EDEN 官方帳號以完成預約。");
+                window.open('https://www.instagram.com/eden_d_photo/', '_blank');
             });
         }
     </script>
