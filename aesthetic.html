@@ -6,7 +6,7 @@
     <title>Aesthetic DNA Test | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;1,400&family=Noto+Serif+TC:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;1,400&family=Noto+Serif+TC:wght@300;400;600&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -38,10 +38,10 @@
 
         /* 選項按鈕 */
         .option-btn { 
-            background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 15px; width: 100%; text-align: left; 
-            transition: all 0.3s; margin-bottom: 10px; border-radius: 8px; font-size: 0.9rem;
+            background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 18px; width: 100%; text-align: left; 
+            transition: all 0.3s; margin-bottom: 12px; border-radius: 4px; font-size: 0.95rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.05em; line-height: 1.6;
         }
-        .option-btn:hover { border-color: #BF953F; background: rgba(191, 149, 63, 0.1); transform: translateX(5px); }
+        .option-btn:hover { border-color: #BF953F; background: rgba(191, 149, 63, 0.1); transform: translateX(5px); color: #fff; }
 
         /* 金色按鈕 (雙層文字設計) */
         .btn-gold { 
@@ -68,6 +68,10 @@
             position: relative;
             background-image: radial-gradient(circle at top right, rgba(191, 149, 63, 0.05) 0%, transparent 40%);
         }
+
+        /* 雙色票樣式 */
+        .duo-swatch { height: 100%; border: 1px solid rgba(255,255,255,0.2); position: relative; }
+        .color-label { position: absolute; bottom: 5px; left: 5px; font-size: 9px; font-family: 'Space Mono'; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.5); padding: 2px 4px; border-radius: 2px;}
     </style>
 </head>
 <body class="flex flex-col items-center min-h-screen font-sans selection:bg-[#BF953F] selection:text-black pb-20">
@@ -104,10 +108,10 @@
             <div class="glass-panel p-6 rounded-xl">
                 <div class="flex justify-between items-end mb-6 border-b border-[#333] pb-2">
                     <span class="text-[#BF953F] font-mono text-xl" id="questionNumber">01</span>
-                    <span class="text-gray-600 text-[10px] tracking-widest">VISUAL PSYCHOLOGY</span>
+                    <span class="text-gray-600 text-[10px] tracking-widest">PSYCHOLOGY</span>
                 </div>
                 
-                <h3 id="questionText" class="font-serif text-lg text-white mb-6 leading-relaxed min-h-[60px]">Question text...</h3>
+                <h3 id="questionText" class="font-zh text-lg text-white mb-8 leading-relaxed font-light tracking-wide min-h-[60px]">Question text...</h3>
                 
                 <div id="optionsContainer">
                     </div>
@@ -145,19 +149,27 @@
                 <div class="py-6 space-y-6">
                     <div>
                         <h4 class="font-serif text-white text-xs mb-2 flex items-center gap-2">
-                            <span class="w-1 h-3 bg-[#BF953F]"></span> SOUL ANALYSIS
+                            <span class="w-1 h-3 bg-[#BF953F]"></span> INNER REFLECTION
                         </h4>
-                        <p id="resDesc" class="text-[11px] text-gray-300 leading-relaxed text-justify font-light opacity-90"></p>
+                        <p id="resDesc" class="font-zh text-[11px] text-gray-300 leading-relaxed text-justify font-light opacity-90"></p>
                     </div>
 
                     <div class="bg-[#111] p-3 border border-[#333] rounded">
-                        <h4 class="font-serif text-[#BF953F] text-xs mb-2">VISUAL DIRECTIVE</h4>
-                        <p id="resAdvice" class="text-[10px] text-gray-400 font-mono leading-relaxed italic"></p>
+                        <h4 class="font-serif text-[#BF953F] text-xs mb-2">WHY NOW?</h4>
+                        <p id="resReason" class="font-zh text-[10px] text-gray-400 leading-relaxed italic"></p>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-serif text-white text-xs mb-2 flex items-center gap-2">
+                            <span class="w-1 h-3 bg-[#BF953F]"></span> VISUAL MANIFESTATION
+                        </h4>
+                        <p id="resVisual" class="font-zh text-[11px] text-gray-300 leading-relaxed text-justify font-light"></p>
                     </div>
 
                     <div>
-                        <h4 class="font-mono text-[9px] text-gray-500 mb-2 tracking-widest uppercase">Signature Palette</h4>
-                        <div class="grid grid-cols-4 gap-2 h-12" id="resColors"></div>
+                        <h4 class="font-mono text-[9px] text-gray-500 mb-2 tracking-widest uppercase">Signature Duo-Tone</h4>
+                        <div class="flex h-16 w-full gap-0 border border-[#333]" id="resColors">
+                            </div>
                     </div>
                 </div>
 
@@ -192,117 +204,133 @@
     </main>
 
     <script>
-        // --- 9大美學原型資料庫 (含中文標題) ---
+        // --- 9大美學原型資料庫 (深度解析版) ---
         const archetypes = {
             1: {
                 title: "THE PIONEER (開創者)",
-                keywords: "#MINIMAL #SHARP #BOLD",
-                desc: "你擁有強烈的個人意志，討厭拖泥帶水。你的美感來自於「減法」。在視覺上，繁複的裝飾會掩蓋你的鋒芒，你需要的是極致的乾淨與俐落。",
-                advice: "指令：高反差黑白肖像。穿著剪裁俐落的黑色高領，背景留白，使用硬光 (Hard Light) 勾勒出堅毅的眼神。",
-                colors: ["#000000", "#FFFFFF", "#333333", "#BF953F"]
+                keywords: "#MINIMAL #BOLD",
+                // 1. 性格解析
+                desc: "你擁有強大的內在驅動力，習慣在混亂中迅速找到秩序。你討厭拖泥帶水，也不喜歡過度包裝。你的魅力來自於那種『我知道我要什麼』的堅定，但有時這份堅強也讓你忘了偶爾展示柔軟的一面。",
+                // 2. 拍攝動機
+                reason: "這是一個轉折點。現在的你，比以往任何時候都更需要一張能夠『定義自己』的照片。不需要討好任何人，只要純粹地宣告你的存在。",
+                // 3. 畫面顯化
+                visual: "高反差黑白肖像。背景是極致的純淨，一道硬光 (Hard Light) 俐落地勾勒出你的輪廓。你穿著剪裁合身的高領黑衣，眼神直視鏡頭，沒有多餘的表情，只有絕對的自信與力量。",
+                // 4. 雙色票
+                colors: ["#000000", "#BF953F"] // 黑/金
             },
             2: {
                 title: "THE DIPLOMAT (協調者)",
-                keywords: "#SOFT #FLOW #DETAIL",
-                desc: "你對細節與和諧有著天生的敏感度。銳利的線條不適合你，你的靈魂渴望柔和的光影與細膩的材質感。你的美是慢熱的，越看越有味道。",
-                advice: "指令：自然光下的莫蘭迪色調。穿著亞麻或絲質服裝，捕捉光影在臉龐上溫柔的過渡，眼神要放鬆且包容。",
-                colors: ["#D7D0C8", "#A6A29A", "#8C8680", "#EAE6E1"]
+                keywords: "#SOFT #FLOW",
+                desc: "你對周遭的情緒流動有著極高的敏銳度，總是能溫柔地接住他人的感受。你內心有一片寧靜的湖泊，雖然不常大聲喧嘩，但那份安定的力量卻能深深感染身邊的人。你不需要大張旗鼓，你的美是細水長流的。",
+                reason: "你總是習慣照顧別人，卻鮮少花時間好好看自己。這組照片是給你的禮物，記錄下你此刻溫柔而堅定的模樣，提醒你：你也很重要。",
+                visual: "自然光下的莫蘭迪色調。穿著亞麻或絲質的柔軟衣物，光影透過窗簾在你的臉龐上形成溫柔的漫射。你的眼神放鬆，嘴角帶著若有似無的笑意，氛圍是流動且舒展的。",
+                colors: ["#D7D0C8", "#8C8680"] // 亞麻白/灰褐
             },
             3: {
                 title: "THE ARTIST (藝術家)",
-                keywords: "#DRAMA #VIBRANT #MOOD",
-                desc: "你不需要低調，你的靈魂渴望表達。標準的證件照式拍攝會扼殺你的靈氣。你需要戲劇性的張力、大膽的色彩，甚至是動態模糊帶來的藝術感。",
-                advice: "指令：王家衛式的電影情緒片。嘗試霓虹光感或撞色打光，在雨後的街道或昏暗的酒吧，捕捉一瞬間的回眸。",
-                colors: ["#FF3366", "#3300FF", "#00FFCC", "#111111"]
+                keywords: "#DRAMA #VIBRANT",
+                desc: "你的靈魂拒絕平庸，對世界有著獨特的濾鏡。你感受到的情緒比常人更強烈、更鮮豔。你渴望表達，渴望被看見那些無法用言語形容的內在風景。標準的證件照式拍攝會扼殺你的靈氣。",
+                reason: "此刻你內心澎湃的情感需要一個出口。文字已經不足以承載你的靈魂，你需要透過影像的張力，將內在的火焰具象化，讓這份能量被永久封存。",
+                visual: "王家衛式的電影氛圍。霓虹光感與大膽的撞色，或許是在雨後的街道，或許是在昏暗的酒吧。動態模糊 (Motion Blur) 捕捉你回眸的瞬間，眼神裡充滿了欲言又止的故事。",
+                colors: ["#111111", "#FF3366"] // 深夜黑/霓虹紅
             },
             4: {
                 title: "THE BUILDER (建構者)",
-                keywords: "#ORDER #STRUCTURE #SOLID",
-                desc: "你在秩序與結構中找到安寧。混亂的背景會讓你感到焦慮。適合你的視覺風格需要嚴謹的幾何構圖，展現出一種穩重且值得信賴的專業權威感。",
-                advice: "指令：古典主義建築背景。構圖絕對水平垂直，穿著成套西裝，雙手插口袋，展現如建築物般的穩定氣場。",
-                colors: ["#1C2331", "#8B0000", "#F5F5F5", "#2F4F4F"]
+                keywords: "#ORDER #STRUCTURE",
+                desc: "你是一個值得信賴的人，像一座穩固的建築。你在秩序與結構中找到安寧，對專業與細節有著不妥協的堅持。你的權威感不是來自於聲量，而是來自於那份『說到做到』的可靠氣場。",
+                reason: "你的專業形象需要一次升級。現在的你已經累積了足夠的底氣，你需要一組能夠匹配你當前高度的影像，展現那種『不怒自威』的專業感。",
+                visual: "古典主義建築或幾何線條背景。構圖絕對水平垂直，展現秩序美。你穿著剪裁完美的成套西裝，雙手插口袋，身體站得筆直，如同一座宏偉的建築般穩定。",
+                colors: ["#1C2331", "#8B0000"] // 海軍藍/深酒紅
             },
             5: {
                 title: "THE EXPLORER (探索者)",
-                keywords: "#WILD #FREE #STREET",
-                desc: "你不受框架拘束，渴望自由。傳統的攝影棚拍對你來說太過拘謹。你需要走入街頭或荒野，用廣角鏡頭捕捉你不羈的靈魂與瞬間的張力。",
-                advice: "指令：廣角街頭抓拍 (Snapshot)。不看鏡頭，在奔跑或大笑中捕捉動態，背景是流動的城市或廢墟。",
-                colors: ["#FF4500", "#2F4F4F", "#708090", "#F0E68C"]
+                keywords: "#WILD #FREE",
+                desc: "你不受框架拘束，靈魂裡住著一陣風。你對未知充滿好奇，討厭一成不變的生活。你的生命力在流動中最強大，傳統的攝影棚擺拍只會讓你感到僵硬與不自在。",
+                reason: "記錄下你此刻不被馴服的樣子吧。這組照片不是為了展示給誰看，而是為了提醒未來的你：永遠不要失去這份奔跑的衝動與自由的靈魂。",
+                visual: "廣角鏡頭下的街頭抓拍。背景是流動的城市或粗獷的廢墟。你不看鏡頭，髮絲在風中飛揚，捕捉你在奔跑、大笑或沉思的動態瞬間，畫面充滿了呼吸感。",
+                colors: ["#FF4500", "#708090"] // 烈焰橘/岩石灰
             },
             6: {
                 title: "THE HEALER (療癒者)",
-                keywords: "#WARM #HOME #GLOW",
-                desc: "你自帶溫暖的治癒氣場。冷冽的科技感不適合你。你的影像應該充滿溫度，像是午後三點的陽光，讓人看一眼就感到放鬆與被接納。",
-                advice: "指令：逆光下的居家感。手捧熱咖啡，身邊有植栽或書籍，讓髮絲染上金邊，捕捉最沒有防備的溫柔時刻。",
-                colors: ["#FFD700", "#FFA07A", "#8B4513", "#FFF8DC"]
+                keywords: "#WARM #GLOW",
+                desc: "你自帶溫暖的治癒氣場，就像冬日的暖陽。人們喜歡靠近你，因為在你身邊能感到被接納。你內心柔軟，對生活中的小確幸有著極高的感知力，懂得欣賞不完美中的美。",
+                reason: "你的溫暖總是給了別人，現在該輪到你被溫柔以待。透過鏡頭，我們將捕捉你最放鬆、最沒有防備的時刻，讓你看見自己發光的樣子。",
+                visual: "逆光下的居家感。午後四點的金黃色陽光灑落，手捧熱咖啡，身邊有植栽或書籍。髮絲染上金邊，你的眼神溫柔而清澈，整個畫面充滿了溫度的顆粒感。",
+                colors: ["#FFD700", "#8B4513"] // 金黃/暖棕
             },
             7: {
                 title: "THE ANALYST (哲學家)",
-                keywords: "#COOL #ABSTRACT #DEEP",
-                desc: "你透過思考來理解世界。適合你的風格是冷靜、抽離且帶有哲學意味的。藍灰色調、局部特寫，展現出一種高智感的疏離美。",
-                advice: "指令：透過玻璃或鏡像拍攝。冷色調處理，聚焦在手部特寫或眼神，展現出一種正在解析世界的智性氛圍。",
-                colors: ["#000080", "#778899", "#C0C0C0", "#E0FFFF"]
+                keywords: "#COOL #DEEP",
+                desc: "你習慣透過思考來理解世界，喜歡抽離出來觀察本質。你擁有一種高智感的冷靜，不隨波逐流。對你來說，膚淺的熱鬧是多餘的，你追求的是深度的對話與獨處的品質。",
+                reason: "這是一個向內探索的階段。透過影像，我們不只要拍你的外表，更要拍出你那種『正在解析世界』的智性氛圍。這是一場與自我對話的紀錄。",
+                visual: "冷色調的極簡構圖。利用玻璃反射或鏡像，創造出一種抽離的視角。聚焦在你拿著眼鏡的手部特寫，或是沉思時的側臉，展現出一種神秘且深邃的疏離美。",
+                colors: ["#000080", "#C0C0C0"] // 深邃藍/冷銀
             },
             8: {
                 title: "THE EXECUTIVE (權威者)",
-                keywords: "#LUXURY #CLASSIC #POWER",
-                desc: "你天生屬於舞台中央。你需要的是能夠展現「價值感」的影像。精緻的打光、深邃的暗部細節，襯托你的高貴與掌控全局的力量。",
-                advice: "指令：倫勃朗光 (Rembrandt Lighting) 的商業大片。深色背景，強調服裝質感與珠寶手錶細節，坐姿霸氣。",
-                colors: ["#000000", "#DAA520", "#800000", "#4B0082"]
+                keywords: "#LUXURY #POWER",
+                desc: "你天生屬於舞台中央，擁有掌控全局的氣場。你追求卓越，享受挑戰，並且不掩飾對成功的渴望。你的自信不是傲慢，而是源於對自身實力的絕對掌控。",
+                reason: "你需要一張能夠鎮得住場子的『王牌』。無論是用於商業形象還是個人品牌，這組照片要讓人一眼就感受到你的價值感與不可忽視的地位。",
+                visual: "倫勃朗光 (Rembrandt Lighting) 的商業大片質感。深色背景，強調服裝的質感與珠寶手錶的細節。坐姿霸氣，眼神銳利，展現出高端、大氣的領袖風範。",
+                colors: ["#000000", "#DAA520"] // 極致黑/奢華金
             },
             9: {
                 title: "THE HUMANITARIAN (博愛者)",
-                keywords: "#ZEN #NATURE #VAST",
-                desc: "你的視野宏大，關注本質。狹窄的室內不適合你。你需要在廣闊的空間中才能展現那種超脫世俗的空靈感。天人合一的禪意美學最適合你。",
-                advice: "指令：超廣角大景。將人物縮小置於大自然中，大量留白，不強調表情，而是強調人與環境的和諧共存。",
-                colors: ["#228B22", "#87CEEB", "#F0FFF0", "#708090"]
+                keywords: "#ZEN #VAST",
+                desc: "你的視野宏大，關注本質與真理。狹窄的空間無法容納你的靈魂。你追求天人合一的境界，喜歡大自然勝過擁擠的人群。你有一種超脫世俗的空靈氣質。",
+                reason: "讓身心回歸自然的懷抱。這組照片是一場儀式，讓你暫時脫離世俗的紛擾，在廣闊的天地間找回內心的平靜與純粹。",
+                visual: "超廣角大景。將人物縮小置於大自然中（海邊、草原或山嵐），大量留白。不強調表情，而是強調人與環境的和諧共存，畫面充滿了禪意與呼吸感。",
+                colors: ["#228B22", "#E0FFFF"] // 森林綠/空靈白
             }
         };
 
         const questions = [
             {
-                text: "週末早晨，你理想的狀態是？",
+                text: "在一個完全沒有行程的週末，你會如何為自己充電？",
                 options: [
-                    { text: "在極簡的咖啡廳，專注規劃下週行程。", scores: [1, 4, 8] },
-                    { text: "窩在有陽光的沙發上，擼貓看書。", scores: [2, 6] },
-                    { text: "背上背包，去探索城市未知的角落。", scores: [3, 5] },
-                    { text: "去美術館看展，或是獨自冥想。", scores: [7, 9] }
+                    { text: "遠離人群，去海邊或山上看著風景發呆，感受渺小。", scores: [9] },
+                    { text: "窩在沙發上，點個香氛，讀一本好書或看部老電影。", scores: [6, 2] },
+                    { text: "去最熱鬧的街區或展覽，尋找視覺刺激與靈感。", scores: [3, 5] },
+                    { text: "整理房間，規劃下週目標，在秩序中獲得平靜。", scores: [4, 1, 8] },
+                    { text: "找個安靜的咖啡廳，觀察路人，思考人生的哲學問題。", scores: [7] }
                 ]
             },
             {
-                text: "打開你的衣櫃，最常見的色系是？",
+                text: "如果你要選一套服裝來代表今天的狀態，你會選？",
                 options: [
-                    { text: "黑、白、灰，剪裁俐落。", scores: [1, 7] },
-                    { text: "大地色、亞麻、柔軟的材質。", scores: [2, 6, 9] },
-                    { text: "鮮豔的撞色，或是獨特的印花。", scores: [3, 5] },
-                    { text: "深藍、西裝、有質感的精品。", scores: [4, 8] }
+                    { text: "剪裁極簡的黑色系，不囉唆，有質感。", scores: [1, 7] },
+                    { text: "亞麻、棉質等大地色系，舒服最重要。", scores: [2, 6, 9] },
+                    { text: "色彩鮮豔或有獨特印花的單品，我想被看見。", scores: [3, 5] },
+                    { text: "剪裁合宜的西裝或套裝，展現專業與氣勢。", scores: [4, 8] }
                 ]
             },
             {
-                text: "你希望別人如何形容你的照片？",
+                text: "朋友通常怎麼形容你給人的第一印象？",
                 options: [
-                    { text: "好酷、有個性、很有態度。", scores: [1, 3, 5] },
-                    { text: "好有氣質、看了很舒服。", scores: [2, 6, 9] },
-                    { text: "很專業、很成功、有質感。", scores: [4, 8] },
-                    { text: "很有深意、看不透、很高級。", scores: [7] }
+                    { text: "很有氣場、自信，甚至有點距離感。", scores: [1, 8] },
+                    { text: "溫柔、好相處，是很棒的傾聽者。", scores: [2, 6] },
+                    { text: "很特別、捉摸不定，很有藝術家氣息。", scores: [3, 5] },
+                    { text: "很理性、冷靜，講話很有邏輯。", scores: [7, 4] },
+                    { text: "很佛系、隨和，好像什麼都不計較。", scores: [9] }
                 ]
             },
             {
-                text: "如果讓你選擇一個拍攝場景，你會選？",
+                text: "你心中理想的「美」，最接近下列哪種畫面？",
                 options: [
-                    { text: "乾淨的清水模牆面或攝影棚。", scores: [1, 4] },
-                    { text: "充滿生活感的居家空間或森林。", scores: [2, 6, 9] },
-                    { text: "夜晚的霓虹街道或廢墟。", scores: [3, 5] },
-                    { text: "豪華的酒店大廳或辦公室。", scores: [8] }
+                    { text: "對稱的幾何線條，完美的光影結構。", scores: [4, 1] },
+                    { text: "流動的瞬間，模糊卻充滿情緒張力。", scores: [3, 5] },
+                    { text: "溫暖的陽光灑在木地板上，歲月靜好。", scores: [6, 2] },
+                    { text: "宏偉壯闊的大自然，人類顯得很渺小。", scores: [9] },
+                    { text: "精緻奢華的細節，金碧輝煌的質感。", scores: [8] }
                 ]
             },
             {
-                text: "你的靈魂關鍵詞是？",
+                text: "如果要拍一組照片，你內心深處最渴望展現的是？",
                 options: [
-                    { text: "秩序與精準。", scores: [1, 4, 7] },
-                    { text: "自由與表達。", scores: [3, 5] },
-                    { text: "溫暖與連結。", scores: [2, 6] },
-                    { text: "權力與影響。", scores: [8, 9] }
+                    { text: "我的專業與成功，我想看起來很強。", scores: [8, 4] },
+                    { text: "我真實的情緒，快樂或憂傷都不掩飾。", scores: [3, 5] },
+                    { text: "我最放鬆、最自然的樣子，不要擺拍。", scores: [6, 2, 9] },
+                    { text: "我獨特的思想與靈魂，那種神祕的氛圍。", scores: [7, 1] }
                 ]
             }
         ];
@@ -376,32 +404,40 @@
         function showResult(id) {
             const data = archetypes[id];
             
-            // 處理標題：拆分中英文
-            // 假設 data.title 是 "THE PIONEER (開創者)"
-            // 我們用 split 拆成 "THE PIONEER" 和 "開創者)"
+            // 標題處理
             const parts = data.title.split(' (');
-            const enTitle = parts[0];
-            const zhTitle = parts[1] ? parts[1].replace(')', '') : '';
+            document.getElementById('resTitleEn').innerText = parts[0];
+            document.getElementById('resTitleZh').innerText = parts[1].replace(')', '');
 
+            // 填入資料
             document.getElementById('resName').innerText = userData.name;
             document.getElementById('resDate').innerText = new Date().toISOString().split('T')[0].replace(/-/g, '.');
             document.getElementById('resNum').innerText = `00${id}`;
-            
-            document.getElementById('resTitleEn').innerText = enTitle;
-            document.getElementById('resTitleZh').innerText = zhTitle;
-            
             document.getElementById('resKeywords').innerText = data.keywords;
+            
             document.getElementById('resDesc').innerText = data.desc;
-            document.getElementById('resAdvice').innerText = data.advice;
+            document.getElementById('resReason').innerText = data.reason;
+            document.getElementById('resVisual').innerText = data.visual;
 
+            // 雙色票渲染 (Primary + Accent)
             const colorBox = document.getElementById('resColors');
             colorBox.innerHTML = '';
-            data.colors.forEach(c => {
-                const div = document.createElement('div');
-                div.className = 'h-full w-full border border-white/20';
-                div.style.backgroundColor = c;
-                colorBox.appendChild(div);
-            });
+            
+            // Primary Color (較寬)
+            const color1 = document.createElement('div');
+            color1.className = 'duo-swatch';
+            color1.style.width = '60%';
+            color1.style.backgroundColor = data.colors[0];
+            color1.innerHTML = `<span class="color-label">${data.colors[0]}</span>`;
+            colorBox.appendChild(color1);
+
+            // Accent Color (較窄)
+            const color2 = document.createElement('div');
+            color2.className = 'duo-swatch';
+            color2.style.width = '40%';
+            color2.style.backgroundColor = data.colors[1];
+            color2.innerHTML = `<span class="color-label">${data.colors[1]}</span>`;
+            colorBox.appendChild(color2);
 
             document.getElementById('phase-loading').classList.add('hidden');
             document.getElementById('phase-result').classList.remove('hidden');
@@ -423,7 +459,7 @@
                 
                 card.classList.add('shadow-2xl');
                 
-                // 截圖後，彈出提示引導
+                // 引導提示
                 alert("診斷書已儲存！請將此圖私訊給 EDEN 官方帳號以完成預約。");
                 window.open('https://www.instagram.com/eden_d_photo/', '_blank');
             });
