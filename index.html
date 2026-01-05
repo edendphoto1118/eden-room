@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDEN ROOM</title>
+    <style>
+        /* 基礎設定 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
+            background-color: #f2f2f2; /* 沉靜的淺灰 */
+            color: #333;
+            margin: 0;
+            padding: 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 標題區域 */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        
+        h1 {
+            font-size: 3rem; /* 大標題 */
+            font-weight: 300; /* 纖細字體展現質感 */
+            letter-spacing: 0.2em; /* 寬字距增加呼吸感 */
+            margin: 0 0 15px 0;
+            text-transform: uppercase;
+        }
+        
+        p.subtitle {
+            color: #888;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* 卡片容器 */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1000px;
+            width: 100%;
+        }
+
+        /* 卡片設計 */
+        .card {
+            background: white;
+            padding: 40px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03); /* 極淡的陰影 */
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 200px;
+        }
+
+        /* 滑鼠移上去的微互動 */
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+            border-color: #ccc;
+        }
+
+        .card h2 {
+            margin: 0 0 15px 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .status {
+            font-size: 0.7rem;
+            color: #aaa;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* 讓氣氛博士的卡片稍微特別一點 */
+        .card.active h2 {
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Eden Room</h1>
+        <p class="subtitle">Digital Archive & Utilities</p>
+    </header>
+
+    <div class="grid-container">
+
+        <a href="https://vibe-check-ih3e.vercel.app/" class="card active" target="_blank">
+            <span class="status">● Available</span>
+            <div>
+                <h2>Vibe Doctor 氣氛博士</h2>
+                <p>社交場域調節器。隨機生成話題與互動挑戰，優化聚會氛圍。</p>
+            </div>
+        </a>
+
+        <a href="#" class="card" style="opacity: 0.6; cursor: default;">
+            <span class="status">○ In Development</span>
+            <div>
+                <h2>Golden Ratio 黃金比例</h2>
+                <p>建築與攝影構圖輔助計算工具。</p>
+            </div>
+        </a>
+
+        <a href="#" class="card" style="opacity: 0.6; cursor: default;">
+            <span class="status">○ In Development</span>
+            <div>
+                <h2>Palette Extractor 色票提取</h2>
+                <p>影像色彩分析與色碼轉換工具。</p>
+            </div>
+        </a>
+
+    </div>
+
+</body>
+</html>
