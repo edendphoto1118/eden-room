@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aesthetic DNA | EDEN VISUALS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { serif: ['Cinzel', 'serif'], mono: ['Space Mono', 'monospace'] },
+                    colors: { eden: { dark: '#121212', gold: '#BF953F', glass: 'rgba(26, 26, 26, 0.8)' } },
+                    animation: { 'fade-in': 'fadeIn 1s ease-out', 'pulse-gold': 'pulseGold 3s infinite' },
+                    keyframes: {
+                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        pulseGold: { '0%, 100%': { boxShadow: '0 0 0px #BF953F' }, '50%': { boxShadow: '0 0 20px rgba(191, 149, 63, 0.3)' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #0f172a; color: #e2e8f0; overflow-x: hidden; }
+        /* 背景質感：噪點與深邃漸層 */
+        .bg-noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.04; pointer-events: none; z-index: 0; filter: contrast(320%); background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E"); }
+        .bg-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%); z-index: -1; }
+        
+        /* 玻璃面板與輸入框 */
+        .glass-panel { background: rgba(20, 20, 20, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(191, 149, 63, 0.2); box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        .input-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; transition: 0.3s; letter-spacing: 0.1em; }
+        .input-field:focus { border-color: #BF953F; outline: none; background: rgba(255,255,255,0.08); }
+        
+        /* 金色按鈕 */
+        .btn-gold { background: linear-gradient(45deg, #946f23, #BF953F); color: #000; font-weight: bold; letter-spacing: 0.15em; transition: 0.3s; position: relative; overflow: hidden; }
+        .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(191, 149, 63, 0.3); }
+        
+        /* 結果頁裝飾 */
+        .archetype-badge { border: 1px solid #BF953F; padding: 5px 15px; font-size: 0.7rem; letter-spacing: 0.2em; color: #BF953F; display: inline-block; margin-bottom: 1rem; }
+    </style>
+</head>
+<body class="flex flex-col items-center min-h-screen p-6 font-sans">
+
+    <div class="bg-noise"></div>
+    <div class="bg-gradient"></div>
+
+    <header class="relative z-10 w-full max-w-2xl flex justify-between items-center mb-10 fade-in">
+        <a href="index.html" class="text-[10px] tracking-[0.2em] text-gray-500 hover:text-[#BF953F] transition-colors">← EDEN LAB</a>
+        <div class="font-serif text-[#BF953F] tracking-widest text-sm">AESTHETIC DNA</div>
+    </header>
+
+    <main class="relative z-10 w-full max-w-md">
+        
+        <div id="inputSection" class="glass-panel p-10 rounded-xl animate-fade-in">
+            <h1 class="font-serif text-3xl text-center mb-2 text-white">Style Origin</h1>
+            <p class="text-center text-gray-400 text-[10px] tracking-[0.2em] mb-10">DECODE YOUR VISUAL IDENTITY</p>
+            
+            <div class="space-y-8">
+                <div>
+                    <label class="block text-[10px] text-[#BF953F] mb-3 tracking-widest uppercase">Name (Alias)</label>
+                    <input type="text" id="userName" class="input-field w-full p-4 text-center rounded text-sm" placeholder="TYPE YOUR NAME">
+                </div>
+                <div>
+                    <label class="block text-[10px] text-[#BF953F] mb-3 tracking-widest uppercase">Date of Birth</label>
+                    <input type="date" id="userDate" class="input-field w-full p-4 text-center rounded text-sm uppercase">
+                </div>
+                
+                <button onclick="calculateDNA()" class="btn-gold w-full py-4 rounded-sm font-serif text-sm mt-6">INITIATE ANALYSIS</button>
+            </div>
+            
+            <p class="text-center text-gray-600 text-[10px] mt-8 tracking-wider">SECURE CONNECTION // EDEN ALGORITHM V2.0</p>
+        </div>
+
+        <div id="loadingSection" class="hidden text-center py-32">
+            <div class="inline-block w-12 h-12 border-[1px] border-[#BF953F] border-t-transparent rounded-full animate-spin mb-6"></div>
+            <div class="font-mono text-[#BF953F] text-xs tracking-widest space-y-2">
+                <p class="animate-pulse">CALCULATING NUMEROLOGY...</p>
+                <p class="animate-pulse delay-75">MATCHING ARCHETYPES...</p>
+                <p class="animate-pulse delay-150">RENDERING PROFILE...</p>
+            </div>
+        </div>
+
+        <div id="resultSection" class="hidden animate-fade-in">
+            <div class="glass-panel p-0 rounded-xl overflow-hidden border-t-4 border-[#BF953F]">
+                
+                <div class="bg-[#1a1a1a] p-8 text-center relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#BF953F] to-transparent opacity-50"></div>
+                    <span id="resultNumber" class="font-serif text-6xl text-white opacity-10 font-bold absolute top-2 right-4"></span>
+                    
+                    <div class="archetype-badge">AESTHETIC ARCHETYPE</div>
+                    <h2 id="resultTitle" class="font-serif text-2xl text-white mb-2 tracking-wide"></h2>
+                    <p id="resultKeywords" class="font-mono text-xs text-[#BF953F] tracking-widest"></p>
+                </div>
+
+                <div class="p-8 space-y-8">
+                    <div>
+                        <h3 class="font-serif text-white text-sm mb-3 flex items-center gap-2">
+                            <span class="w-1 h-4 bg-[#BF953F]"></span> VISUAL DIAGNOSIS
+                        </h3>
+                        <p id="resultDesc" class="text-gray-400 text-sm leading-relaxed text-justify font-light"></p>
+                    </div>
+
+                    <div class="bg-[#BF953F] bg-opacity-5 p-5 rounded border border-[#BF953F] border-opacity-20">
+                        <h3 class="font-serif text-[#BF953F] text-sm mb-2">EDEN'S PRESCRIPTION</h3>
+                        <p id="resultAdvice" class="text-gray-300 text-xs leading-relaxed font-mono"></p>
+                    </div>
+
+                    <div class="text-center pt-4 border-t border-gray-800">
+                        <p class="text-gray-500 text-[10px] mb-4 tracking-wider">READY TO VISUALIZE YOUR ESSENCE?</p>
+                        <a href="https://instagram.com" target="_blank" id="ctaBtn" class="block w-full border border-[#BF953F] text-[#BF953F] py-3 text-xs tracking-[0.2em] hover:bg-[#BF953F] hover:text-black transition-all">
+                            BOOK THIS STYLE
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="location.reload()" class="w-full mt-8 text-[10px] text-gray-600 hover:text-gray-400 tracking-widest">RESTART SEQUENCE</button>
+        </div>
+
+    </main>
+
+    <script>
+        // --- 9大美學原型資料庫 ---
+        const archetypes = {
+            1: {
+                title: "THE PIONEER (開創者)",
+                keywords: "#MINIMAL #CONTRAST #BOLD",
+                desc: "你擁有強烈的個人意志與領導力。在視覺上，繁複的裝飾會掩蓋你的鋒芒。你適合極致的「減法美學」，高對比的黑白影像，或是大面積的留白，讓焦點完全集中在你堅毅的眼神與輪廓。",
+                advice: "推薦風格：High-Contrast Portrait (高反差肖像)。場景選擇清水模或純色背景，使用硬光 (Hard Light) 勾勒線條。"
+            },
+            2: {
+                title: "THE DIPLOMAT (協調者)",
+                keywords: "#SOFT #MORANDI #FLOW",
+                desc: "你對細節與和諧有著天生的敏感度。銳利的線條不適合你，你需要的是柔和的光影過渡與細膩的材質感。你的美感存在於那些不言而喻的曖昧氛圍中。",
+                advice: "推薦風格：Cinematic Soft Focus (電影柔焦)。適合自然光、亞麻色調、捕捉布料紋理與肢體的流動感。"
+            },
+            3: {
+                title: "THE ARTIST (藝術家)",
+                keywords: "#VIBRANT #DRAMA #EXPRESSION",
+                desc: "你不需要低調，你的靈魂渴望表達。標準的證件照式拍攝會扼殺你的靈氣。你需要戲劇性的張力、大膽的色彩運用，甚至是動態模糊帶來的藝術感。",
+                advice: "推薦風格：Artistic Mood (藝術情緒片)。嘗試霓虹光感、強烈的色彩對比，或具有故事性的電影劇照風格。"
+            },
+            4: {
+                title: "THE BUILDER (建構者)",
+                keywords: "#ORDER #STRUCTURE #SYMMETRY",
+                desc: "你在秩序與結構中找到安寧。混亂的背景會讓你感到焦慮。適合你的視覺風格需要嚴謹的幾何構圖、完美的水平垂直，展現出一種穩重且值得信賴的權威感。",
+                advice: "推薦風格：Structured Composition (結構主義構圖)。適合搭配西裝、俐落的建築背景，強調對稱性與穩定感。"
+            },
+            5: {
+                title: "THE EXPLORER (探索者)",
+                keywords: "#STREET #WIDE #FREE",
+                desc: "你不受框架拘束，渴望自由。傳統的攝影棚拍對你來說太過拘謹。你需要走入街頭、廢墟或大自然，用廣角鏡頭捕捉你不羈的靈魂與瞬間的張力。",
+                advice: "推薦風格：Urban Snapshot (街頭抓拍)。使用廣角鏡頭，不看鏡頭的自然動態，展現與環境互動的生命力。"
+            },
+            6: {
+                title: "THE NURTURER (療癒者)",
+                keywords: "#WARM #HOME #LIGHT",
+                desc: "你自帶溫暖的治癒氣場。冷冽的科技感不適合你。你的影像應該充滿溫度，像是午後三點的陽光，或是充滿生活感的居家氛圍，讓人看一眼就感到放鬆。",
+                advice: "推薦風格：Golden Hour Lifestyle (暖調生活感)。逆光拍攝、原木色調、充滿植栽與柔和光暈的場景。"
+            },
+            7: {
+                title: "THE ANALYST (哲學家)",
+                keywords: "#COOL #ABSTRACT #ESSENCE",
+                desc: "你透過思考來理解世界。過多的情緒表達對你來說是多餘的。適合你的風格是冷靜、抽離且帶有哲學意味的。藍灰色調、局部特寫，展現出一種高智感的疏離美。",
+                advice: "推薦風格：Minimalist Tech (極簡科技感)。冷色調、玻璃與金屬材質、失焦或局部構圖，強調神秘感。"
+            },
+            8: {
+                title: "THE EXECUTIVE (權威者)",
+                keywords: "#LUXURY #PRECISION #POWER",
+                desc: "你天生屬於舞台中央，擁有掌控全局的氣場。你需要的是能夠展現「價值感」的影像。精緻的打光、深邃的暗部細節、金色或黑色的基調，襯托你的高貴與力量。",
+                advice: "推薦風格：Editorial Luxury (商業大片)。使用倫勃朗光 (Rembrandt Lighting)，強調質感、西裝與深色背景的層次。"
+            },
+            9: {
+                title: "THE HUMANITARIAN (博愛者)",
+                keywords: "#NATURE #ZEN #PANORAMIC",
+                desc: "你的視野宏大，關注群體與自然。狹窄的室內不適合你。你需要在廣闊的空間中才能展現那種超脫世俗的空靈感。天人合一的禪意美學最適合你。",
+                advice: "推薦風格：Atmospheric Landscape (環境人像)。超廣角大景、將人物縮小置於大自然中，展現意境與留白。"
+            }
+        };
+
+        // --- 核心運算邏輯 (生命靈數) ---
+        function calculateDNA() {
+            const name = document.getElementById('userName').value;
+            const dateInput = document.getElementById('userDate').value;
+            
+            if(!name || !dateInput) {
+                alert("ACCESS DENIED: 請輸入完整資料以啟動運算。");
+                return;
+            }
+
+            // 1. 切換到載入畫面
+            document.getElementById('inputSection').classList.add('hidden');
+            document.getElementById('loadingSection').classList.remove('hidden');
+
+            // 2. 計算生命靈數 (西元年生日數字加總)
+            // 例: 1995-12-05 -> 1+9+9+5+1+2+0+5 = 32 -> 3+2 = 5
+            let dateStr = dateInput.replace(/-/g, ''); // 移除橫線
+            let sum = 0;
+            
+            // 第一次加總
+            for(let char of dateStr) {
+                sum += parseInt(char);
+            }
+
+            // 縮減至個位數 (遞迴)
+            while(sum > 9) {
+                let tempSum = 0;
+                let sumStr = sum.toString();
+                for(let char of sumStr) {
+                    tempSum += parseInt(char);
+                }
+                sum = tempSum;
+            }
+
+            // 3. 模擬運算延遲 (增加儀式感)
+            setTimeout(() => {
+                showResult(sum, name);
+            }, 2000);
+        }
+
+        function showResult(number, name) {
+            const data = archetypes[number];
+            
+            // 填入資料
+            document.getElementById('resultNumber').innerText = "0" + number;
+            document.getElementById('resultTitle').innerText = data.title;
+            document.getElementById('resultKeywords').innerText = data.keywords;
+            document.getElementById('resultDesc').innerText = data.desc;
+            document.getElementById('resultAdvice').innerText = data.advice;
+            
+            // CTA 按鈕文字客製化
+            document.getElementById('ctaBtn').innerText = `BOOK MY "${data.keywords.split(' ')[0].replace('#','')}" SESSION`;
+
+            // 切換畫面
+            document.getElementById('loadingSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
