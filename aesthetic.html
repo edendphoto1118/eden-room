@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Oracle | EDEN LAB</title>
+    <title>Aesthetic DNA Test | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
@@ -14,13 +14,8 @@
                 extend: {
                     fontFamily: { serif: ['Cinzel', 'serif'], mono: ['Space Mono', 'monospace'] },
                     colors: { eden: { dark: '#0a0a0a', gold: '#BF953F', glass: 'rgba(20, 20, 20, 0.95)' } },
-                    animation: { 
-                        'float': 'float 6s ease-in-out infinite',
-                        'fade-in': 'fadeIn 0.8s ease-out',
-                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-                    },
+                    animation: { 'fade-in': 'fadeIn 0.8s ease-out' },
                     keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
                         fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
                     }
                 }
@@ -32,395 +27,395 @@
         body { background-color: #050505; color: #e2e8f0; overflow-x: hidden; }
         .bg-noise { position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.04; pointer-events: none; z-index: 0; filter: contrast(300%); background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E"); }
         
-        /* 玻璃質感 */
-        .glass-panel { background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        /* 玻璃面板 */
+        .glass-panel { background: rgba(30, 30, 30, 0.7); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
         .input-field { background: rgba(0,0,0,0.4); border: 1px solid #333; color: #fff; transition: 0.3s; text-align: center; font-family: 'Space Mono', monospace; }
         .input-field:focus { border-color: #BF953F; outline: none; background: rgba(191, 149, 63, 0.05); }
-        
-        /* 選單樣式優化 */
-        select.input-field { appearance: none; -webkit-appearance: none; }
+
+        /* 選項按鈕 */
+        .option-btn { 
+            background: rgba(255,255,255,0.03); border: 1px solid #333; padding: 15px; width: 100%; text-align: left; 
+            transition: all 0.3s; margin-bottom: 10px; border-radius: 8px; font-size: 0.9rem;
+        }
+        .option-btn:hover { border-color: #BF953F; background: rgba(191, 149, 63, 0.1); transform: translateX(5px); }
 
         /* 金色按鈕 */
-        .btn-gold { background: linear-gradient(to bottom, #BF953F, #9e7b30); color: #000; font-weight: 700; letter-spacing: 0.15em; transition: 0.3s; box-shadow: 0 4px 15px rgba(191, 149, 63, 0.2); border: none; }
+        .btn-gold { background: linear-gradient(to bottom, #BF953F, #9e7b30); color: #000; font-weight: 700; letter-spacing: 0.15em; transition: 0.3s; box-shadow: 0 4px 15px rgba(191, 149, 63, 0.2); }
         .btn-gold:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(191, 149, 63, 0.4); filter: brightness(1.1); }
-        
-        /* 卡牌樣式 */
-        .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 320px; margin: 0 auto; }
-        .card-container { perspective: 1000px; cursor: pointer; height: 140px; width: 100%; }
-        .card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1); transform-style: preserve-3d; }
-        .card-container:hover .card-inner { transform: translateY(-5px); }
-        .card-container.flipped .card-inner { transform: rotateY(180deg); }
-        
-        .card-front, .card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 8px; border: 1px solid #444; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .card-front { background: #111; background-image: radial-gradient(circle at center, #222 1px, transparent 1px); background-size: 10px 10px; display: flex; align-items: center; justify-content: center; border: 1px solid #333; }
-        .card-back { background: #080808; transform: rotateY(180deg); border: 1px solid #BF953F; }
 
-        /* 票券樣式 (Ticket) */
-        .ticket-visual { 
-            background: #111; 
-            border: 1px solid #BF953F; 
-            position: relative; 
-            overflow: hidden;
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23bf953f' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+        /* 結果卡片 (IG Story 尺寸 9:16) */
+        .result-card {
+            background: #080808;
+            border: 1px solid #BF953F;
+            padding: 30px;
+            width: 100%;
+            max-width: 380px; /* 控制寬度 */
+            margin: 0 auto;
+            position: relative;
+            background-image: radial-gradient(circle at top right, rgba(191, 149, 63, 0.05) 0%, transparent 40%);
         }
-        .ticket-rip { border-top: 2px dashed #333; margin: 15px 0; position: relative; }
-        .ticket-rip::before, .ticket-rip::after { content: ''; position: absolute; top: -10px; width: 20px; height: 20px; background: #050505; border-radius: 50%; }
-        .ticket-rip::before { left: -25px; }
-        .ticket-rip::after { right: -25px; }
-
-        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #BF953F; color: #000; padding: 10px 20px; border-radius: 30px; font-weight: bold; font-size: 12px; opacity: 0; transition: 0.3s; pointer-events: none; z-index: 50; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .toast.show { opacity: 1; bottom: 50px; }
+        
+        /* 裝飾線條 */
+        .deco-line { width: 100%; height: 1px; background: linear-gradient(90deg, transparent, #333, transparent); margin: 20px 0; }
     </style>
 </head>
 <body class="flex flex-col items-center min-h-screen font-sans selection:bg-[#BF953F] selection:text-black pb-20">
 
     <div class="bg-noise"></div>
 
-    <header class="relative z-10 w-full flex justify-center py-8 fade-in">
+    <header class="relative z-10 w-full flex justify-center py-6 fade-in">
         <div class="text-center">
-            <a href="index.html" class="block text-[10px] tracking-[0.3em] text-gray-500 hover:text-[#BF953F] mb-2 transition-colors">← EDEN LAB</a>
-            <h1 class="font-serif text-[#BF953F] text-xl tracking-widest">VISUAL ORACLE</h1>
+            <a href="index.html" class="block text-[10px] tracking-[0.3em] text-gray-500 hover:text-[#BF953F] mb-1 transition-colors">← EDEN LAB</a>
+            <h1 class="font-serif text-[#BF953F] text-lg tracking-widest">AESTHETIC DNA TEST</h1>
         </div>
     </header>
 
     <main class="relative z-10 w-full max-w-md px-6">
         
-        <div id="step1" class="animate-fade-in text-center">
-            <h2 class="font-serif text-2xl text-white mb-2">Energy Calibration</h2>
-            <p class="text-gray-400 text-xs mb-8 font-mono">輸入資料，校準你的美學頻率</p>
+        <div id="phase-identity" class="animate-fade-in text-center">
+            <h2 class="font-serif text-2xl text-white mb-2">Subject Identity</h2>
+            <p class="text-gray-400 text-xs mb-8 font-mono">建立檔案，開始你的美感分析</p>
             
             <div class="glass-panel p-8 rounded-xl space-y-5">
                 <div class="text-left">
-                    <label class="text-[10px] text-[#BF953F] tracking-widest block mb-1">NAME</label>
-                    <input type="text" id="userName" class="input-field w-full p-3 rounded text-sm" placeholder="輸入姓名或暱稱">
+                    <label class="text-[10px] text-[#BF953F] tracking-widest block mb-1">NAME / ALIAS</label>
+                    <input type="text" id="userName" class="input-field w-full p-3 rounded text-sm" placeholder="輸入你的名字">
                 </div>
-
-                <div class="flex gap-4">
-                    <div class="w-2/3 text-left">
-                        <label class="text-[10px] text-[#BF953F] tracking-widest block mb-1">DATE OF BIRTH</label>
-                        <input type="date" id="userDate" class="input-field w-full p-3 rounded text-xs uppercase">
-                    </div>
-                    <div class="w-1/3 text-left">
-                        <label class="text-[10px] text-[#BF953F] tracking-widest block mb-1">GENDER</label>
-                        <select id="userGender" class="input-field w-full p-3 rounded text-xs">
-                            <option value="F">Female</option>
-                            <option value="M">Male</option>
-                            <option value="X">Other</option>
-                        </select>
-                    </div>
-                </div>
-
                 <div class="text-left">
-                    <label class="text-[10px] text-[#BF953F] tracking-widest block mb-1">QUERY FOCUS</label>
-                    <select id="userQuery" class="input-field w-full p-3 rounded text-xs">
-                        <option value="CAREER">事業 (Professional Image)</option>
-                        <option value="LOVE">感情 (Attraction & Vibes)</option>
-                        <option value="SOCIAL">人際 (Social Charisma)</option>
-                        <option value="WEALTH">財富 (Wealth Aura)</option>
-                        <option value="GROWTH">成長 (Self Actualization)</option>
-                    </select>
+                    <label class="text-[10px] text-[#BF953F] tracking-widest block mb-1">DATE OF BIRTH</label>
+                    <input type="date" id="userDate" class="input-field w-full p-3 rounded text-xs uppercase">
                 </div>
-
-                <button onclick="goToDeck()" class="btn-gold w-full py-3 rounded text-xs mt-4">INITIATE RITUAL</button>
+                <button onclick="startQuiz()" class="btn-gold w-full py-3 rounded text-xs mt-4">START DIAGNOSIS</button>
             </div>
         </div>
 
-        <div id="step2" class="hidden text-center w-full">
-            <h2 class="font-serif text-2xl text-white mb-2 animate-pulse-slow">The Manifestation</h2>
-            <p class="text-gray-400 text-xs mb-8 font-mono">深呼吸，專注你的問題，憑直覺點選一張牌</p>
-            
-            <div class="card-grid" id="cardGrid">
+        <div id="phase-quiz" class="hidden w-full">
+            <div class="glass-panel p-6 rounded-xl">
+                <div class="flex justify-between items-end mb-6 border-b border-[#333] pb-2">
+                    <span class="text-[#BF953F] font-mono text-xl" id="questionNumber">01</span>
+                    <span class="text-gray-600 text-[10px] tracking-widest">VISUAL PSYCHOLOGY</span>
                 </div>
+                
+                <h3 id="questionText" class="font-serif text-lg text-white mb-6 leading-relaxed min-h-[60px]">Question text here...</h3>
+                
+                <div id="optionsContainer">
+                    </div>
+            </div>
         </div>
 
-        <div id="step3" class="hidden animate-fade-in space-y-6">
+        <div id="phase-loading" class="hidden text-center py-20">
+            <div class="inline-block w-12 h-12 border-[1px] border-[#BF953F] border-t-transparent rounded-full animate-spin mb-6"></div>
+            <p class="font-mono text-[#BF953F] text-xs tracking-widest animate-pulse">ANALYZING SUBCONSCIOUS DATA...</p>
+        </div>
+
+        <div id="phase-result" class="hidden flex flex-col items-center w-full">
             
-            <div class="glass-panel p-0 rounded-xl overflow-hidden">
-                <div class="bg-[#0f0f0f] p-6 text-center border-b border-[#333] relative">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-[#BF953F] opacity-50"></div>
-                    <div class="text-[10px] text-[#BF953F] tracking-[0.2em] mb-2 uppercase">Archetype Revealed</div>
-                    <h2 id="cardTitle" class="font-serif text-2xl text-white mb-1"></h2>
-                    <p id="cardKeywords" class="font-mono text-[10px] text-gray-500 border border-gray-800 inline-block px-2 py-1 mt-2 rounded"></p>
+            <p class="text-gray-400 text-[10px] mb-4 tracking-widest">DIAGNOSIS COMPLETE</p>
+
+            <div id="captureArea" class="result-card shadow-2xl">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <p class="text-[9px] text-[#BF953F] tracking-[0.2em] mb-1">EDEN LAB // VISUAL REPORT</p>
+                        <h3 id="resName" class="font-serif text-white text-xl uppercase">USER</h3>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[9px] text-gray-500 font-mono" id="resDate">2026.01.05</p>
+                        <p class="text-[9px] text-gray-500 font-mono">ID: <span id="resNum">001</span></p>
+                    </div>
                 </div>
 
-                <div class="p-8 space-y-8">
-                    
+                <div class="text-center py-4 border-t border-b border-[#222]">
+                    <p class="text-[10px] text-gray-400 tracking-widest mb-2">YOUR AESTHETIC ARCHETYPE</p>
+                    <h2 id="resTitle" class="font-serif text-3xl text-[#BF953F] mb-2 leading-none">THE ARCHETYPE</h2>
+                    <p id="resKeywords" class="font-mono text-[10px] text-gray-500 tracking-widest">#KEYWORD #KEYWORD</p>
+                </div>
+
+                <div class="py-6 space-y-6">
                     <div>
-                        <h3 class="font-serif text-[#BF953F] text-sm mb-3">✦ ORACLE READING</h3>
-                        <p id="oracleText" class="text-sm text-gray-300 leading-relaxed text-justify font-light"></p>
+                        <h4 class="font-serif text-white text-xs mb-2 flex items-center gap-2">
+                            <span class="w-1 h-3 bg-[#BF953F]"></span> SOUL ANALYSIS
+                        </h4>
+                        <p id="resDesc" class="text-[11px] text-gray-300 leading-relaxed text-justify font-light opacity-90"></p>
                     </div>
 
-                    <div class="bg-[#151515] p-5 rounded border-l-2 border-[#BF953F]">
-                        <h3 class="font-serif text-[#BF953F] text-sm mb-2 flex items-center gap-2">
-                            <span class="text-lg">👁</span> VISUAL MANIFESTATION
-                        </h3>
-                        <p id="cardAdvice" class="text-xs text-gray-400 font-mono leading-relaxed italic"></p>
+                    <div class="bg-[#111] p-3 border border-[#333] rounded">
+                        <h4 class="font-serif text-[#BF953F] text-xs mb-2">VISUAL DIRECTIVE</h4>
+                        <p id="resAdvice" class="text-[10px] text-gray-400 font-mono leading-relaxed italic"></p>
                     </div>
 
                     <div>
-                        <h3 class="font-serif text-white text-xs mb-3 tracking-widest opacity-60">LUCKY PALETTE</h3>
-                        <div class="grid grid-cols-4 gap-2 h-10" id="colorContainer">
+                        <h4 class="font-mono text-[9px] text-gray-500 mb-2 tracking-widest uppercase">Signature Palette</h4>
+                        <div class="grid grid-cols-4 gap-2 h-12" id="resColors">
                             </div>
                     </div>
                 </div>
-            </div>
 
-            <button onclick="generateTicket()" class="btn-gold w-full py-4 rounded text-xs tracking-widest">
-                GENERATE DIGITAL PASS (生成票券)
-            </button>
-            
-            <button onclick="resetDraw()" class="w-full text-[10px] text-gray-500 hover:text-white tracking-widest py-3 border border-gray-800 rounded">
-                ↺ RESHUFFLE (重新感應)
-            </button>
-        </div>
-
-        <div id="step4" class="hidden animate-fade-in flex flex-col items-center">
-            <h2 class="font-serif text-xl text-white mb-4">Your Style Pass</h2>
-            
-            <div id="ticketArea" class="ticket-visual w-full max-w-sm p-6 rounded-sm mb-6 text-center">
-                <div class="flex justify-between items-center border-b border-[#333] pb-4 mb-4">
-                    <span class="font-serif text-[#BF953F] tracking-widest text-sm">EDEN LAB</span>
-                    <span class="font-mono text-[10px] text-gray-500" id="ticketDate">2026.01.01</span>
-                </div>
-                
-                <h3 id="ticketName" class="font-serif text-2xl text-white uppercase mb-1">USER NAME</h3>
-                <p id="ticketArchetype" class="font-mono text-xs text-[#BF953F] mb-4">THE PIONEER</p>
-                
-                <div class="ticket-rip"></div>
-                
-                <div class="space-y-2">
-                    <p class="text-[10px] text-gray-500 tracking-[0.2em] uppercase">ACCESS CODE</p>
-                    <div class="font-mono text-xl text-white border border-[#BF953F] inline-block px-4 py-2 tracking-widest">EDEN_ORACLE</div>
-                    <p class="text-[9px] text-gray-400 mt-2">憑此券截圖預約 EDEN 攝影，享專屬方案折扣</p>
-                </div>
-
-                <div class="mt-6 pt-4 border-t border-[#333] flex justify-between items-end">
-                    <div class="text-left">
-                        <p class="text-[8px] text-gray-600">QUERY FOCUS</p>
-                        <p id="ticketQuery" class="text-[10px] text-gray-400">CAREER</p>
+                <div class="mt-4 pt-4 border-t border-[#333] text-center">
+                    <p class="text-[9px] text-gray-400 mb-2">VERIFIED BY EDEN PHOTOGRAPHY</p>
+                    <div class="inline-block border border-[#BF953F] px-4 py-1">
+                        <p class="font-mono text-[#BF953F] text-xs tracking-widest">CODE: EDEN_DNA</p>
                     </div>
-                    <div class="text-right">
-                        <p class="text-[8px] text-gray-600">LUCKY COLOR</p>
-                        <div id="ticketColor" class="w-4 h-4 rounded-full bg-white ml-auto"></div>
-                    </div>
+                    <p class="text-[8px] text-gray-600 mt-2">截圖此診斷書預約拍攝，獲取專屬風格方案</p>
                 </div>
             </div>
 
-            <button onclick="downloadTicket()" class="btn-gold w-full py-3 rounded text-xs tracking-widest mb-3">
-                SAVE TICKET (儲存截圖)
-            </button>
-            
-            <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="block w-full text-center text-xs text-[#BF953F] border border-[#BF953F] py-3 rounded hover:bg-[#BF953F] hover:text-black transition-colors">
-                BOOK WITH TICKET ↗
-            </a>
+            <div class="w-full max-w-xs mt-8 space-y-3">
+                <button onclick="downloadCard()" class="btn-gold w-full py-3 rounded text-xs tracking-widest">
+                    SAVE DIAGNOSIS (儲存診斷書)
+                </button>
+                <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="block w-full text-center py-3 border border-[#BF953F] text-[#BF953F] rounded text-xs hover:bg-[#BF953F] hover:text-black transition-colors">
+                    BOOK THIS VIBE ↗
+                </a>
+                <button onclick="location.reload()" class="block w-full text-center py-2 text-[10px] text-gray-600 hover:text-white">
+                    RETAKE TEST
+                </button>
+            </div>
+
         </div>
 
     </main>
 
-    <div id="toast" class="toast">COLOR COPIED</div>
-
     <script>
-        // --- 9大美學原型 & 神諭資料庫 ---
-        // 畫面想像 (Visual Imagery) + 原型資料
-        const archetypes = [
-            {
-                id: 1, title: "THE PIONEER (開創者)", keywords: "#MINIMAL #SHARP",
-                visual: "想像你置身於一個巨大的清水模空間，只有一道銳利的硬光 (Hard Light) 從上方打下。你穿著極簡的黑色高領，不需要多餘的動作，只要一個堅定的眼神直視鏡頭。周圍是絕對的寂靜，你是唯一的焦點。",
+        // --- 9大美學原型資料庫 (完整版) ---
+        const archetypes = {
+            1: {
+                title: "THE PIONEER (開創者)",
+                keywords: "#MINIMAL #SHARP #BOLD",
+                desc: "你擁有強烈的個人意志，討厭拖泥帶水。你的美感來自於「減法」。在視覺上，繁複的裝飾會掩蓋你的鋒芒，你需要的是極致的乾淨與俐落。",
+                advice: "指令：高反差黑白肖像。穿著剪裁俐落的黑色高領，背景留白，使用硬光 (Hard Light) 勾勒出堅毅的眼神。",
                 colors: ["#000000", "#FFFFFF", "#333333", "#BF953F"]
             },
-            {
-                id: 2, title: "THE DIPLOMAT (協調者)", keywords: "#SOFT #FLOW",
-                visual: "想像午後三點的陽光透過白色紗簾灑進來，空氣中漂浮著細微的塵埃。你身穿亞麻材質的服裝，隨意地坐在原木地板上。鏡頭透過前景的植物窺視你，捕捉你不經意低頭時，光影在臉龐上溫柔的過渡。",
+            2: {
+                title: "THE DIPLOMAT (協調者)",
+                keywords: "#SOFT #FLOW #DETAIL",
+                desc: "你對細節與和諧有著天生的敏感度。銳利的線條不適合你，你的靈魂渴望柔和的光影與細膩的材質感。你的美是慢熱的，越看越有味道。",
+                advice: "指令：自然光下的莫蘭迪色調。穿著亞麻或絲質服裝，捕捉光影在臉龐上溫柔的過渡，眼神要放鬆且包容。",
                 colors: ["#D7D0C8", "#A6A29A", "#8C8680", "#EAE6E1"]
             },
-            {
-                id: 3, title: "THE ARTIST (藝術家)", keywords: "#DRAMA #NEON",
-                visual: "想像夜晚的城市霓虹倒映在雨後的柏油路上。你站在紅藍交錯的光影中，回眸的一瞬間，世界為了你而慢動作模糊。這不是一張靜止的照片，這是一幀王家衛電影的定格，充滿了情緒的張力。",
+            3: {
+                title: "THE ARTIST (藝術家)",
+                keywords: "#DRAMA #VIBRANT #MOOD",
+                desc: "你不需要低調，你的靈魂渴望表達。標準的證件照式拍攝會扼殺你的靈氣。你需要戲劇性的張力、大膽的色彩，甚至是動態模糊帶來的藝術感。",
+                advice: "指令：王家衛式的電影情緒片。嘗試霓虹光感或撞色打光，在雨後的街道或昏暗的酒吧，捕捉一瞬間的回眸。",
                 colors: ["#FF3366", "#3300FF", "#00FFCC", "#111111"]
             },
-            {
-                id: 4, title: "THE BUILDER (建構者)", keywords: "#ORDER #STRUCTURE",
-                visual: "想像你站在宏偉的古典建築前，巨大的石柱與幾何線條構成了完美的對稱背景。你穿著剪裁合宜的西裝，雙手插口袋，身體站得筆直。畫面中每一條線都指向你，展現出一種不可撼動的穩定與權威。",
+            4: {
+                title: "THE BUILDER (建構者)",
+                keywords: "#ORDER #STRUCTURE #SOLID",
+                desc: "你在秩序與結構中找到安寧。混亂的背景會讓你感到焦慮。適合你的視覺風格需要嚴謹的幾何構圖，展現出一種穩重且值得信賴的專業權威感。",
+                advice: "指令：古典主義建築背景。構圖絕對水平垂直，穿著成套西裝，雙手插口袋，展現如建築物般的穩定氣場。",
                 colors: ["#1C2331", "#8B0000", "#F5F5F5", "#2F4F4F"]
             },
-            {
-                id: 5, title: "THE EXPLORER (探索者)", keywords: "#FREE #WILD",
-                visual: "想像你在風大的頂樓天台，或者是充滿塗鴉的工業廢墟。廣角鏡頭貼近你，捕捉你髮絲飛揚、大笑或是奔跑的瞬間。沒有固定的姿勢，只有流動的生命力，與不被拘束的靈魂。",
+            5: {
+                title: "THE EXPLORER (探索者)",
+                keywords: "#WILD #FREE #STREET",
+                desc: "你不受框架拘束，渴望自由。傳統的攝影棚拍對你來說太過拘謹。你需要走入街頭或荒野，用廣角鏡頭捕捉你不羈的靈魂與瞬間的張力。",
+                advice: "指令：廣角街頭抓拍 (Snapshot)。不看鏡頭，在奔跑或大笑中捕捉動態，背景是流動的城市或廢墟。",
                 colors: ["#FF4500", "#2F4F4F", "#708090", "#F0E68C"]
             },
-            {
-                id: 6, title: "THE HEALER (療癒者)", keywords: "#WARM #HOME",
-                visual: "想像手裡捧著一杯熱咖啡，身邊圍繞著綠色植栽與書本。暖黃色的逆光勾勒出你的輪廓金邊。這不是擺拍，而是紀錄你最放鬆、最沒有防備的居家時刻。畫面傳遞出的溫度，讓人看一眼就想靠近。",
+            6: {
+                title: "THE HEALER (療癒者)",
+                keywords: "#WARM #HOME #GLOW",
+                desc: "你自帶溫暖的治癒氣場。冷冽的科技感不適合你。你的影像應該充滿溫度，像是午後三點的陽光，讓人看一眼就感到放鬆與被接納。",
+                advice: "指令：逆光下的居家感。手捧熱咖啡，身邊有植栽或書籍，讓髮絲染上金邊，捕捉最沒有防備的溫柔時刻。",
                 colors: ["#FFD700", "#FFA07A", "#8B4513", "#FFF8DC"]
             },
-            {
-                id: 7, title: "THE ANALYST (哲學家)", keywords: "#COOL #ABSTRACT",
-                visual: "想像一個充滿玻璃與金屬的冷色調空間。我們不拍你的全臉，而是透過鏡面反射，或是聚焦在你拿著眼鏡的手部特寫。藍灰色的色調，展現出一種冷靜、抽離，彷彿正在透過鏡頭解析世界的智性美。",
+            7: {
+                title: "THE ANALYST (哲學家)",
+                keywords: "#COOL #ABSTRACT #DEEP",
+                desc: "你透過思考來理解世界。適合你的風格是冷靜、抽離且帶有哲學意味的。藍灰色調、局部特寫，展現出一種高智感的疏離美。",
+                advice: "指令：透過玻璃或鏡像拍攝。冷色調處理，聚焦在手部特寫或眼神，展現出一種正在解析世界的智性氛圍。",
                 colors: ["#000080", "#778899", "#C0C0C0", "#E0FFFF"]
             },
-            {
-                id: 8, title: "THE EXECUTIVE (權威者)", keywords: "#LUXURY #CLASSIC",
-                visual: "想像你坐在深色的絲絨沙發上，背景是暗調的桃花心木。一束精緻的倫勃朗光 (Rembrandt Light) 點亮你的臉龐三角區。畫面充滿了油畫般的厚重質感，每一個細節都在訴說著「價值」與「地位」。",
+            8: {
+                title: "THE EXECUTIVE (權威者)",
+                keywords: "#LUXURY #CLASSIC #POWER",
+                desc: "你天生屬於舞台中央。你需要的是能夠展現「價值感」的影像。精緻的打光、深邃的暗部細節，襯托你的高貴與掌控全局的力量。",
+                advice: "指令：倫勃朗光 (Rembrandt Lighting) 的商業大片。深色背景，強調服裝質感與珠寶手錶細節，坐姿霸氣。",
                 colors: ["#000000", "#DAA520", "#800000", "#4B0082"]
             },
-            {
-                id: 9, title: "THE HUMANITARIAN (博愛者)", keywords: "#ZEN #NATURE",
-                visual: "想像一片無邊際的海灘或草原，天空佔據了畫面的三分之二。你只是一個小小的剪影，與天地融為一體。畫面大量留白，沒有多餘的雜訊，只有一種極致的寧靜與禪意，彷彿時間都靜止了。",
+            9: {
+                title: "THE HUMANITARIAN (博愛者)",
+                keywords: "#ZEN #NATURE #VAST",
+                desc: "你的視野宏大，關注本質。狹窄的室內不適合你。你需要在廣闊的空間中才能展現那種超脫世俗的空靈感。天人合一的禪意美學最適合你。",
+                advice: "指令：超廣角大景。將人物縮小置於大自然中，大量留白，不強調表情，而是強調人與環境的和諧共存。",
                 colors: ["#228B22", "#87CEEB", "#F0FFF0", "#708090"]
+            }
+        };
+
+        // --- 心理測驗題目庫 ---
+        // 每個選項對應加分的 Archetype ID (可複選)
+        const questions = [
+            {
+                text: "週末早晨，你理想的狀態是？",
+                options: [
+                    { text: "在極簡的咖啡廳，專注規劃下週行程。", scores: [1, 4, 8] },
+                    { text: "窩在有陽光的沙發上，擼貓看書。", scores: [2, 6] },
+                    { text: "背上背包，去探索城市未知的角落。", scores: [3, 5] },
+                    { text: "去美術館看展，或是獨自冥想。", scores: [7, 9] }
+                ]
+            },
+            {
+                text: "打開你的衣櫃，最常見的色系是？",
+                options: [
+                    { text: "黑、白、灰，剪裁俐落。", scores: [1, 7] },
+                    { text: "大地色、亞麻、柔軟的材質。", scores: [2, 6, 9] },
+                    { text: "鮮豔的撞色，或是獨特的印花。", scores: [3, 5] },
+                    { text: "深藍、西裝、有質感的精品。", scores: [4, 8] }
+                ]
+            },
+            {
+                text: "你希望別人如何形容你的照片？",
+                options: [
+                    { text: "好酷、有個性、很有態度。", scores: [1, 3, 5] },
+                    { text: "好有氣質、看了很舒服。", scores: [2, 6, 9] },
+                    { text: "很專業、很成功、有質感。", scores: [4, 8] },
+                    { text: "很有深意、看不透、很高級。", scores: [7] }
+                ]
+            },
+            {
+                text: "如果讓你選擇一個拍攝場景，你會選？",
+                options: [
+                    { text: "乾淨的清水模牆面或攝影棚。", scores: [1, 4] },
+                    { text: "充滿生活感的居家空間或森林。", scores: [2, 6, 9] },
+                    { text: "夜晚的霓虹街道或廢墟。", scores: [3, 5] },
+                    { text: "豪華的酒店大廳或辦公室。", scores: [8] }
+                ]
+            },
+            {
+                text: "你的靈魂關鍵詞是？",
+                options: [
+                    { text: "秩序與精準。", scores: [1, 4, 7] },
+                    { text: "自由與表達。", scores: [3, 5] },
+                    { text: "溫暖與連結。", scores: [2, 6] },
+                    { text: "權力與影響。", scores: [8, 9] }
+                ]
             }
         ];
 
-        // 針對不同方向 (Query) 的算命解析 (Oracle Text)
-        // 這裡做簡單的邏輯映射，讓每次結果看起來不同
-        const oracleReadings = {
-            'CAREER': [
-                "在事業上，你需要建立更鮮明的個人邊界。這張牌顯示，專業形象的建立在於「減法」。",
-                "職場上，你的氣場勝過言語。透過視覺建立權威感，將是你近期突破瓶頸的關鍵。",
-                "是時候展現你的野心了。不要隱藏鋒芒，這張牌暗示你需要更高調、更具侵略性的視覺策略。"
-            ],
-            'LOVE': [
-                "感情中，神秘感是你最強的武器。不要一次展現全部，留一點想像空間，會讓人更想探索你。",
-                "這張牌象徵「自信」。當你愛上鏡子裡的自己時，對的人自然會被你發光的頻率吸引。",
-                "在關係裡試著展現這張牌的特質：溫柔而堅定。視覺上傳遞出的氛圍，會幫你過濾掉不適合的人。"
-            ],
-            'SOCIAL': [
-                "在群體中，你不需要刻意合群。這張牌建議你成為那個「不一樣」的人，獨特性會讓你成為焦點。",
-                "社交場合的魅力來自於放鬆。這張牌顯示，當你展現真實的自我（即使是不完美的一面）時，最迷人。",
-                "透過視覺語言告訴世界你是誰。一個強烈的個人風格標籤，會讓人在人群中一眼記住你。"
-            ],
-            'WEALTH': [
-                "財富喜歡流向有質感的容器。提升你的外在形象質感，實際上是在向宇宙宣告你值得更好的豐盛。",
-                "這張牌帶有精準的決策能量。在視覺上展現俐落與果斷，有助於吸引高價值的合作機會。",
-                "金錢能量正在靠近。試著在穿搭或視覺中加入這張牌的幸運色，作為接收財富的訊號。"
-            ],
-            'GROWTH': [
-                "你正在經歷一場蛻變。舊的殼已經太小了，這張牌鼓勵你透過全新的形象，來迎接升級後的自己。",
-                "內在的轉變需要外在的儀式來確認。這次的拍攝不只是拍照，而是一場宣告「我已經不同了」的儀式。",
-                "這張牌象徵平衡。在追求成長的路上，別忘了停下來欣賞自己的美。看見自己的光，是成長的第一步。"
-            ]
-        };
-
-        // --- 初始化頁面 ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const grid = document.getElementById('cardGrid');
-            // 生成9張卡片
-            for(let i=0; i<9; i++) {
-                grid.innerHTML += `
-                    <div class="card-container" onclick="revealCard(${i})">
-                        <div class="card-inner">
-                            <div class="card-front"><span class="text-[#BF953F] text-2xl font-serif">${romanize(i+1)}</span></div>
-                            <div class="card-back"></div>
-                        </div>
-                    </div>
-                `;
-            }
-        });
-
-        function romanize(num) {
-            const lookup = {X:10,IX:9,V:5,IV:4,I:1};
-            let roman = '',i;
-            for (i in lookup) {
-                while (num >= lookup[i]) { roman += i; num -= lookup[i]; }
-            }
-            return roman;
-        }
-
+        // --- 變數與邏輯 ---
+        let currentQuestion = 0;
+        let scores = {1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0};
         let userData = {};
 
-        function goToDeck() {
+        function startQuiz() {
             const name = document.getElementById('userName').value;
             const date = document.getElementById('userDate').value;
-            const gender = document.getElementById('userGender').value;
-            const query = document.getElementById('userQuery').value;
             
             if(!name || !date) {
-                alert("請輸入完整資料以啟動儀式。");
+                alert("請輸入完整資料以建立檔案。");
                 return;
             }
+            userData = { name, date };
 
-            userData = { name, date, gender, query };
-
-            document.getElementById('step1').classList.add('hidden');
-            document.getElementById('step2').classList.remove('hidden');
+            document.getElementById('phase-identity').classList.add('hidden');
+            document.getElementById('phase-quiz').classList.remove('hidden');
+            renderQuestion();
         }
 
-        function revealCard(index) {
-            // 隨機抽選結果 (核心邏輯)
-            const randomArchetype = archetypes[Math.floor(Math.random() * archetypes.length)];
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            document.getElementById('questionNumber').innerText = `0${currentQuestion + 1}`;
+            document.getElementById('questionText').innerText = q.text;
             
-            // 隨機選取一句對應方向的神諭
-            const readings = oracleReadings[userData.query];
-            const randomReading = readings[Math.floor(Math.random() * readings.length)];
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
 
-            // 翻牌動畫
-            const cards = document.querySelectorAll('.card-container');
-            cards[index].classList.add('flipped');
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn font-mono text-gray-300';
+                btn.innerText = opt.text;
+                btn.onclick = () => selectOption(opt.scores);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectOption(points) {
+            // 加分邏輯
+            points.forEach(id => {
+                scores[id] += 1;
+            });
+
+            // 下一題或結束
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                // 添加淡入動畫效果
+                const quizBox = document.getElementById('phase-quiz');
+                quizBox.classList.remove('hidden'); 
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            document.getElementById('phase-quiz').classList.add('hidden');
+            document.getElementById('phase-loading').classList.remove('hidden');
+
+            // 算出最高分的原型
+            let maxScore = -1;
+            let winningId = 1; // 預設
+
+            // 簡單的演算法找出最高分
+            for (const [id, score] of Object.entries(scores)) {
+                if (score > maxScore) {
+                    maxScore = score;
+                    winningId = id;
+                } else if (score === maxScore) {
+                    // 同分時，隨機二選一，增加多樣性
+                    if (Math.random() > 0.5) winningId = id;
+                }
+            }
 
             setTimeout(() => {
-                document.getElementById('step2').classList.add('hidden');
-                showResult(randomArchetype, randomReading);
-            }, 800);
+                showResult(winningId);
+            }, 1500);
         }
 
-        function showResult(data, reading) {
-            // 填入結果
-            document.getElementById('cardTitle').innerText = data.title;
-            document.getElementById('cardKeywords').innerText = data.keywords;
-            document.getElementById('oracleText').innerText = reading;
-            document.getElementById('cardAdvice').innerText = data.visual;
+        function showResult(id) {
+            const data = archetypes[id];
+            
+            // 填入資料到卡片 (這是要被截圖的區域)
+            document.getElementById('resName').innerText = userData.name;
+            document.getElementById('resDate').innerText = new Date().toISOString().split('T')[0].replace(/-/g, '.');
+            document.getElementById('resNum').innerText = `00${id}`;
+            document.getElementById('resTitle').innerText = data.title.split(' (')[0]; // 只顯示英文標題比較高級
+            document.getElementById('resKeywords').innerText = data.keywords;
+            document.getElementById('resDesc').innerText = data.desc;
+            document.getElementById('resAdvice').innerText = data.advice;
 
-            // 色票
-            const colorBox = document.getElementById('colorContainer');
+            // 生成色票
+            const colorBox = document.getElementById('resColors');
             colorBox.innerHTML = '';
             data.colors.forEach(c => {
                 const div = document.createElement('div');
-                div.className = 'h-full w-full rounded cursor-pointer border border-white/20';
+                div.className = 'h-full w-full border border-white/20';
                 div.style.backgroundColor = c;
-                div.onclick = () => copyColor(c);
                 colorBox.appendChild(div);
             });
 
-            // 準備票券資料
-            document.getElementById('ticketName').innerText = userData.name;
-            document.getElementById('ticketDate').innerText = new Date().toISOString().split('T')[0].replace(/-/g, '.');
-            document.getElementById('ticketArchetype').innerText = data.title.split(' (')[0];
-            document.getElementById('ticketQuery').innerText = userData.query;
-            document.getElementById('ticketColor').style.backgroundColor = data.colors[3]; // 使用最後一個強調色
-
-            document.getElementById('step3').classList.remove('hidden');
+            document.getElementById('phase-loading').classList.add('hidden');
+            document.getElementById('phase-result').classList.remove('hidden');
         }
 
-        function copyColor(c) {
-            navigator.clipboard.writeText(c);
-            const toast = document.getElementById('toast');
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2000);
-        }
-
-        function resetDraw() {
-            document.getElementById('step3').classList.add('hidden');
-            document.getElementById('step4').classList.add('hidden');
-            const cards = document.querySelectorAll('.card-container');
-            cards.forEach(card => card.classList.remove('flipped'));
-            document.getElementById('step2').classList.remove('hidden');
-        }
-
-        function generateTicket() {
-            document.getElementById('step3').classList.add('hidden');
-            document.getElementById('step4').classList.remove('hidden');
-        }
-
-        function downloadTicket() {
-            const ticketNode = document.getElementById('ticketArea');
+        function downloadCard() {
+            const card = document.getElementById('captureArea');
             
-            html2canvas(ticketNode, {
-                backgroundColor: "#111111", // 確保背景不是透明
-                scale: 2 // 提高解析度
+            // 暫時移除陰影以獲得更乾淨的截圖
+            card.classList.remove('shadow-2xl');
+
+            html2canvas(card, {
+                backgroundColor: "#080808",
+                scale: 2, // 高解析度
+                useCORS: true
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `EDEN_PASS_${userData.name}.png`;
+                link.download = `EDEN_DNA_${userData.name}.png`;
                 link.href = canvas.toDataURL();
                 link.click();
+                
+                // 加回陰影
+                card.classList.add('shadow-2xl');
             });
         }
     </script>
