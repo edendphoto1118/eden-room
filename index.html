@@ -8,8 +8,8 @@
         /* --- 基礎設定 --- */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
-            background-color: #f2f2f2;
-            color: #333;
+            background-color: #f5f5f7; /* 更有質感的灰白 */
+            color: #1d1d1f;
             margin: 0;
             padding: 60px 20px;
             display: flex;
@@ -29,20 +29,21 @@
             letter-spacing: 0.2em;
             margin: 0 0 15px 0;
             text-transform: uppercase;
+            color: #000;
         }
         
         p.subtitle {
-            color: #888;
+            color: #86868b;
             font-size: 0.9rem;
             letter-spacing: 0.1em;
             text-transform: uppercase;
         }
 
-        /* --- 卡片容器 --- */
+        /* --- 卡片容器 (Bento Grid) --- */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            gap: 25px;
             max-width: 1000px;
             width: 100%;
         }
@@ -50,31 +51,33 @@
         /* --- 卡片通用設計 --- */
         .card {
             background: white;
-            padding: 40px;
-            border-radius: 4px; /* 微圓角，增加精緻感 */
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 220px;
-            position: relative;
-            text-decoration: none; /* 移除連結底線 */
+            min-height: 240px;
+            text-decoration: none;
             color: inherit;
+            position: relative;
+            overflow: hidden;
         }
 
+        /* Hover 特效 */
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
-            border-color: #ccc;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+            border-color: rgba(0,0,0,0.1);
         }
 
         .card h2 {
-            margin: 0 0 15px 0;
-            font-size: 1.2rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
+            margin: 0 0 10px 0;
+            font-size: 1.3rem;
+            font-weight: 500;
+            letter-spacing: 0.02em;
         }
 
         .card p {
@@ -86,56 +89,80 @@
 
         .status {
             font-size: 0.7rem;
-            color: #aaa;
+            font-weight: 600;
             margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             display: block;
         }
 
-        /* --- 互動工具介面 (計算機專用) --- */
+        /* 連結箭頭 */
+        .link-arrow {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 1.2rem;
+            opacity: 0.3;
+            transition: 0.3s;
+        }
+        .card:hover .link-arrow {
+            opacity: 1;
+            transform: translateX(5px);
+        }
+
+        /* --- 特殊卡片樣式 --- */
+        /* SoulMap 金色邊框 */
+        .card.premium {
+            border: 1px solid #BF953F;
+            background: linear-gradient(to bottom right, #fff, #fffcf5);
+        }
+        .card.premium .status {
+            color: #BF953F;
+        }
+        .card.premium .link-arrow {
+            color: #BF953F;
+        }
+
+        /* --- 計算機工具介面 --- */
         .tool-interface {
-            background: #fcfcfc;
+            background: #f9f9f9;
             padding: 15px;
-            border-radius: 6px;
-            border: 1px solid #eee;
+            border-radius: 8px;
             margin-top: 20px;
         }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
         input[type="number"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #e0e0e0;
-            border-radius: 4px;
+            border-radius: 6px;
             font-family: inherit;
-            background: #fff;
             outline: none;
-            transition: 0.2s;
+            background: #fff;
+            box-sizing: border-box; /* 修正寬度跑版問題 */
         }
-
         input[type="number"]:focus {
             border-color: #BF953F;
         }
-
         .result-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-top: 10px;
             font-size: 0.85rem;
             color: #888;
         }
-
         .result-val {
             font-family: monospace;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
             font-weight: bold;
-            color: #BF953F; /* 香檳金 */
+            color: #333;
+        }
+
+        /* --- Footer --- */
+        footer {
+            margin-top: 80px;
+            color: #aaa;
+            font-size: 0.8rem;
+            letter-spacing: 0.1em;
         }
     </style>
 </head>
@@ -148,57 +175,68 @@
 
     <div class="grid-container">
 
+        <a href="soulmap.html" class="card premium">
+            <span class="status">● New Release</span>
+            <div>
+                <h2>SoulMap 靈魂導航 🔮</h2>
+                <p>結合人類圖與塔羅的數位神諭。輸入個人資料，即時解析當下能量場與指引。</p>
+            </div>
+            <div class="link-arrow">OPEN APP ↗</div>
+        </a>
+
         <a href="https://vibe-check-ih3e.vercel.app/" class="card" target="_blank">
-            <span class="status">● Available</span>
+            <span class="status" style="color: #666;">● Web App</span>
             <div>
                 <h2>Vibe Doctor 氣氛博士</h2>
                 <p>社交場域調節器。隨機生成話題與互動挑戰，優化聚會氛圍。</p>
             </div>
-            <div style="text-align: right; margin-top: 20px; color: #ccc;">↗</div>
+            <div class="link-arrow">↗</div>
         </a>
 
         <div class="card" style="cursor: default;">
-            <span class="status" style="color: #BF953F;">● Operational</span>
-            
+            <span class="status" style="color: #666;">● Tool</span>
             <div>
                 <h2>Golden Ratio 📐</h2>
-                <p>輸入任一數值 (如照片長度)，自動計算 1:1.618 黃金分割值。</p>
+                <p>建築構圖輔助。輸入數值，自動計算 1.618 黃金分割。</p>
             </div>
             
             <div class="tool-interface">
-                <div class="input-group">
-                    <input type="number" id="baseInput" placeholder="輸入數值...">
-                </div>
+                <input type="number" id="baseInput" placeholder="輸入長度 (例如: 100)">
                 <div class="result-row">
-                    <span>Golden Value (x 1.618)</span>
+                    <span>Golden Value:</span>
                     <span id="resultValue" class="result-val">-</span>
                 </div>
             </div>
         </div>
 
-        <div class="card" style="opacity: 0.6; cursor: default;">
-            <span class="status">○ In Development</span>
+        <div class="card" style="opacity: 0.5; cursor: default;">
+            <span class="status">○ Coming Soon</span>
             <div>
                 <h2>Palette Extractor</h2>
-                <p>影像色彩分析與色碼轉換工具。</p>
+                <p>影像色彩分析與色碼轉換工具 (開發中)。</p>
             </div>
-            <div style="margin-top: 20px; font-size: 0.8rem; color: #999;">COMING SOON</div>
         </div>
 
     </div>
 
+    <footer>
+        &copy; 2026 EDEN ROOM.
+    </footer>
+
     <script>
-        // 監聽輸入框
-        document.getElementById('baseInput').addEventListener('input', function(e) {
+        // 黃金比例計算邏輯
+        const input = document.getElementById('baseInput');
+        const output = document.getElementById('resultValue');
+
+        input.addEventListener('input', function(e) {
             const val = parseFloat(e.target.value);
-            const display = document.getElementById('resultValue');
-            
             if (val) {
-                // 計算邏輯：數值 * 1.618
-                const golden = (val * 1.618).toFixed(1); // 取小數點後一位
-                display.innerText = golden;
+                const golden = (val * 1.618).toFixed(2);
+                output.innerText = golden;
+                output.style.color = "#BF953F"; // 有數值時變金色
             } else {
-                display.innerText = '-';
+                output.innerText = '-';
+                output.style.color = "#333";
             }
         });
     </script>
