@@ -110,7 +110,7 @@
 
                     <div class="text-center pt-4 border-t border-gray-800">
                         <p class="text-gray-500 text-[10px] mb-4 tracking-wider">READY TO VISUALIZE YOUR ESSENCE?</p>
-                        <a href="https://instagram.com" target="_blank" id="ctaBtn" class="block w-full border border-[#BF953F] text-[#BF953F] py-3 text-xs tracking-[0.2em] hover:bg-[#BF953F] hover:text-black transition-all">
+                        <a href="https://www.instagram.com/eden_d_photo/" target="_blank" id="ctaBtn" class="block w-full border border-[#BF953F] text-[#BF953F] py-3 text-xs tracking-[0.2em] hover:bg-[#BF953F] hover:text-black transition-all">
                             BOOK THIS STYLE
                         </a>
                     </div>
@@ -196,16 +196,13 @@
             document.getElementById('loadingSection').classList.remove('hidden');
 
             // 2. 計算生命靈數 (西元年生日數字加總)
-            // 例: 1995-12-05 -> 1+9+9+5+1+2+0+5 = 32 -> 3+2 = 5
-            let dateStr = dateInput.replace(/-/g, ''); // 移除橫線
+            let dateStr = dateInput.replace(/-/g, '');
             let sum = 0;
             
-            // 第一次加總
             for(let char of dateStr) {
                 sum += parseInt(char);
             }
 
-            // 縮減至個位數 (遞迴)
             while(sum > 9) {
                 let tempSum = 0;
                 let sumStr = sum.toString();
@@ -215,7 +212,7 @@
                 sum = tempSum;
             }
 
-            // 3. 模擬運算延遲 (增加儀式感)
+            // 3. 模擬運算延遲
             setTimeout(() => {
                 showResult(sum, name);
             }, 2000);
