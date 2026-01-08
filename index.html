@@ -16,13 +16,17 @@
                         mono: ['Space Mono', 'monospace'],
                         zh: ['Noto Serif TC', 'serif'] 
                     },
-                    animation: {
-                        'float': 'float 8s ease-in-out infinite',
-                        'fade-in': 'fadeIn 1.5s ease-out'
+                    colors: { 
+                        eden: { 
+                            black: '#020202', 
+                            gold: '#C5A059', 
+                            gray: '#1a1a1a',
+                            text: '#888888'
+                        } 
                     },
+                    animation: { 'fade-in': 'fadeIn 1.2s ease-out forwards' },
                     keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
-                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
+                        fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
                     }
                 }
             }
@@ -30,220 +34,240 @@
     </script>
 
     <style>
-        /* --- 基礎環境 --- */
+        /* --- MASTER-LEVEL AESTHETICS --- */
         body { 
-            /* 背景基底改為深邃夜空藍黑漸層 */
-            background: linear-gradient(to bottom, #0a0a1a, #050505);
+            background-color: #020202; 
             color: #e2e8f0; 
             overflow-x: hidden; 
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            /* 靜態質感噪點 (不卡頓) */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
         }
 
-        /* --- 白銀極光背景 (取代雜訊) --- */
-        .aurora-bg {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 0; overflow: hidden; pointer-events: none;
+        /* 裝飾線條 (Hairlines) */
+        .hairline {
+            width: 1px; height: 40px; background: #222; margin: 0 auto 20px auto;
         }
 
-        /* 極光光束通用樣式 */
-        .aurora-beam {
-            position: absolute;
-            width: 200%; height: 200%; /* 做得很大以便移動覆蓋 */
-            top: -50%; left: -50%;
-            filter: blur(70px); /* 強烈模糊製造柔和感 */
-            mix-blend-mode: screen; /* 讓光疊加 */
-            animation-timing-function: ease-in-out;
-            animation-iteration-count: infinite;
-            animation-direction: alternate;
-            opacity: 0.3;
-        }
-
-        /* 光束層次 1 (主體流動) */
-        .beam-1 {
-            /* 使用橢圓和錐形漸層模擬光簾結構，純白與銀色系 */
-            background: 
-                radial-gradient(ellipse at 30% 40%, rgba(255, 255, 255, 0.4), transparent 50%),
-                conic-gradient(from 160deg at 50% 50%, transparent 0deg, rgba(220, 230, 255, 0.1) 40deg, transparent 80deg);
-            animation-name: aurora-flow-1;
-            animation-duration: 30s;
-            transform: rotate(-10deg) scale(1.2);
-        }
-
-        /* 光束層次 2 (冷銀色輔助) */
-        .beam-2 {
-            background: radial-gradient(ellipse at 70% 20%, rgba(230, 240, 255, 0.3), transparent 60%);
-            animation-name: aurora-flow-2;
-            animation-duration: 45s;
-            opacity: 0.2;
-            transform: rotate(5deg) scale(1.5);
-        }
-
-        /* 光束層次 3 (暖銀色底層) */
-        .beam-3 {
-            background: radial-gradient(ellipse at bottom, rgba(250, 250, 255, 0.25), transparent 50%);
-            animation-name: aurora-flow-3;
-            animation-duration: 60s;
-            opacity: 0.15;
-        }
-
-        /* 極光動畫定義 */
-        @keyframes aurora-flow-1 {
-            0% { transform: rotate(-10deg) translate(0, 0) scale(1.2); opacity: 0.3; }
-            100% { transform: rotate(0deg) translate(10%, 5%) scale(1.3); opacity: 0.5; }
-        }
-        @keyframes aurora-flow-2 {
-            0% { transform: rotate(5deg) translate(0, 0) scale(1.5); }
-            50% { opacity: 0.4; }
-            100% { transform: rotate(15deg) translate(-15%, -10%) scale(1.4); }
-        }
-        @keyframes aurora-flow-3 {
-            0% { transform: rotate(0deg) translate(0, 0); }
-            100% { transform: rotate(-5deg) translate(5%, -5%); }
-        }
-
-        /* --- 卡片設計 (深色玻璃態) --- */
-        .glass-card { 
-            background: rgba(20, 20, 20, 0.5); /* 稍微降低不透明度以透出極光 */
-            backdrop-filter: blur(16px); /* 提高模糊度增加質感 */
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        /* 頂級卡片設計 (Editorial Card) */
+        .editorial-card {
+            background-color: #050505; /* 極深灰，幾乎是黑 */
+            border: 1px solid #151515; /* 極低調的邊框 */
+            padding: 40px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             position: relative;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Hover: 邊框亮起金色，背景微亮 */
+        .editorial-card:hover {
+            border-color: #444; /* 稍微亮一點的灰 */
+            background-color: #080808;
+            transform: translateY(-2px);
         }
         
-        /* 懸浮發光效果 */
-        .glass-card::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-            transition: 0.6s;
+        /* 專屬金色 Hover (給重點項目) */
+        .editorial-card.premium:hover {
+            border-color: #C5A059; /* EDEN Gold */
         }
-        .glass-card:hover { 
-            transform: translateY(-5px); 
-            border-color: rgba(191, 149, 63, 0.4); 
-            background: rgba(30, 30, 30, 0.7);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-        }
-        .glass-card:hover::before { left: 100%; }
 
-        /* --- 專屬顏色 --- */
-        .text-gold { color: #BF953F; }
-        .border-gold { border-color: #BF953F; }
-
-        /* 計算機輸入框 */
-        .input-dark {
-            background: rgba(0,0,0,0.3); border: 1px solid #333; color: #fff;
-            font-family: 'Space Mono', monospace; text-align: center;
+        /* 文字排版細節 */
+        .meta-tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.2em;
+            color: #444;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            display: block;
+            transition: color 0.3s;
         }
-        .input-dark:focus { border-color: #BF953F; outline: none; }
+        .editorial-card:hover .meta-tag { color: #C5A059; }
+
+        .card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.6rem;
+            color: #fff;
+            margin-bottom: 10px;
+            font-weight: 400;
+        }
+
+        .card-desc {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 300;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            max-width: 90%;
+        }
+
+        /* 箭頭微動效 */
+        .arrow-icon {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            color: #333;
+            transition: all 0.3s;
+        }
+        .editorial-card:hover .arrow-icon {
+            color: #fff;
+            transform: translateX(5px);
+        }
+
+        /* 輸入框美學 */
+        .input-minimal {
+            background: transparent;
+            border-bottom: 1px solid #333;
+            color: #fff;
+            font-family: 'Space Mono', monospace;
+            text-align: center;
+            width: 100%;
+            padding: 8px;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+        .input-minimal:focus {
+            border-color: #C5A059;
+            outline: none;
+        }
+
+        /* Footer IG Link */
+        .footer-link {
+            position: relative;
+            display: inline-block;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .footer-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: #C5A059;
+            transition: width 0.3s;
+        }
+        .footer-link:hover { color: #C5A059; }
+        .footer-link:hover::after { width: 100%; }
 
     </style>
 </head>
-<body class="py-20 px-6">
+<body class="pt-24 pb-12 px-6">
 
-    <div class="aurora-bg">
-        <div class="aurora-beam beam-1"></div>
-        <div class="aurora-beam beam-2"></div>
-        <div class="aurora-beam beam-3"></div>
-    </div>
-
-    <header class="relative z-10 text-center mb-16 animate-fade-in">
-        <h1 class="font-serif text-4xl md:text-5xl text-white tracking-[0.2em] mb-3 font-light">EDEN ROOM</h1>
-        <p class="font-mono text-[10px] text-gray-500 tracking-[0.4em] uppercase">Digital Sanctuary & Tools</p>
+    <header class="relative z-10 text-center mb-24 animate-fade-in">
+        <div class="hairline"></div> <h1 class="font-serif text-5xl md:text-6xl text-white tracking-[0.25em] mb-4 font-light">EDEN ROOM</h1>
+        <p class="font-mono text-[10px] text-[#444] tracking-[0.6em] uppercase">Digital Archive // Est. 2026</p>
     </header>
 
-    <main class="relative z-10 w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in" style="animation-delay: 0.2s;">
+    <main class="relative z-10 w-full max-w-6xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in" style="animation-delay: 0.1s;">
 
-        <a href="https://edendphoto1118.github.io/" target="_blank" class="glass-card p-8 rounded-xl col-span-1 md:col-span-2 lg:col-span-2 flex flex-col justify-between group">
-            <div class="flex justify-between items-start mb-4">
-                <span class="font-mono text-[9px] text-gold tracking-widest border border-yellow-900/30 px-2 py-1 rounded bg-yellow-900/10">PORTFOLIO</span>
-                <span class="text-2xl group-hover:translate-x-1 transition-transform duration-300">↗</span>
-            </div>
+        <a href="https://edendphoto1118.github.io/" target="_blank" class="editorial-card premium col-span-1 md:col-span-2 lg:col-span-2 group">
             <div>
-                <h2 class="font-serif text-3xl text-white mb-2 group-hover:text-gold transition-colors">EDEN ARCHIVE</h2>
-                <p class="font-zh text-sm text-gray-400 font-light tracking-wide">
-                    光影的收藏室。瀏覽 EDEN 的攝影作品集，看見那些被凝結的靈魂瞬間。
+                <span class="meta-tag">Master Portfolio</span>
+                <h2 class="card-title text-4xl">EDEN ARCHIVE</h2>
+                <div class="w-12 h-[1px] bg-[#333] my-4 group-hover:bg-[#C5A059] transition-colors duration-500"></div>
+                <p class="card-desc text-lg">
+                    光影的收藏室。<br>
+                    瀏覽 EDEN 的攝影作品集，看見那些被凝結的靈魂瞬間。
                 </p>
+            </div>
+            <div class="text-right">
+                <span class="arrow-icon">VIEW COLLECTION ↗</span>
             </div>
         </a>
 
-        <a href="https://the-impression-audit.vercel.app/" target="_blank" class="glass-card p-8 rounded-xl flex flex-col justify-between group border-t-2 border-t-yellow-700/50">
-            <div class="mb-4">
-                <span class="font-mono text-[9px] text-gray-500 tracking-widest">FACADE ENGINEERING</span>
-            </div>
+        <a href="https://the-impression-audit.vercel.app/" target="_blank" class="editorial-card premium group">
             <div>
-                <h2 class="font-serif text-xl text-white mb-2">The Impression Audit</h2>
-                <p class="font-zh text-xs text-gray-400 font-light leading-relaxed">
-                    第一印象結構審計。<br>計算你的「權威感」與「親和力」，尋找領袖原型。
+                <div class="flex justify-between items-baseline">
+                    <span class="meta-tag">Facade Engineering</span>
+                    <span class="text-[9px] text-[#C5A059] border border-[#C5A059] px-1 pt-[1px] opacity-70">HOT</span>
+                </div>
+                <h2 class="card-title">Impression Audit</h2>
+                <p class="card-desc">
+                    第一印象結構審計。<br>運用視覺工程學計算你的「權威感」與「親和力」，尋找專屬於你的領袖原型。
                 </p>
             </div>
-            <div class="mt-6 text-right font-mono text-[10px] text-gold opacity-70 group-hover:opacity-100 transition-opacity">START AUDIT →</div>
+            <div class="text-right">
+                <span class="arrow-icon">START AUDIT ↗</span>
+            </div>
         </a>
 
-        <a href="aesthetic.html" class="glass-card p-8 rounded-xl flex flex-col justify-between group">
-            <div class="mb-4">
-                <span class="font-mono text-[9px] text-gray-500 tracking-widest">RITUAL</span>
-            </div>
+        <a href="aesthetic.html" class="editorial-card group">
             <div>
-                <h2 class="font-serif text-xl text-white mb-2">Visual Oracle</h2>
-                <p class="font-zh text-xs text-gray-400 font-light leading-relaxed">
-                    視覺神諭儀式。<br>抽取你的美學原型，領取專屬色票與數位護照。
+                <span class="meta-tag">Aesthetic Ritual</span>
+                <h2 class="card-title">Visual Oracle</h2>
+                <p class="card-desc">
+                    視覺神諭儀式。<br>這不是測驗，而是靈魂的顯化。抽取你的美學原型，領取專屬色票與數位護照。
                 </p>
             </div>
-            <div class="mt-6 text-right font-mono text-[10px] text-gray-500 group-hover:text-white transition-colors">ENTER RITUAL →</div>
+            <div class="text-right">
+                <span class="arrow-icon">ENTER ROOM ↗</span>
+            </div>
         </a>
 
-        <a href="palette.html" class="glass-card p-8 rounded-xl flex flex-col justify-between group">
-            <div class="mb-4">
-                <span class="font-mono text-[9px] text-gray-500 tracking-widest">UTILITY</span>
-            </div>
+        <a href="palette.html" class="editorial-card group">
             <div>
-                <h2 class="font-serif text-xl text-white mb-2">CHROMA</h2>
-                <p class="font-zh text-xs text-gray-400 font-light leading-relaxed">
-                    色彩提取器。<br>上傳照片，AI 自動分析並提取 5 組關鍵色碼。
+                <span class="meta-tag">Color Utility</span>
+                <h2 class="card-title">CHROMA</h2>
+                <p class="card-desc">
+                    色彩提取器。<br>上傳照片，AI 自動分析並提取 5 組關鍵色碼 (Hex Code)，解構影像氛圍。
                 </p>
             </div>
-            <div class="mt-6 text-right font-mono text-[10px] text-gray-500 group-hover:text-white transition-colors">EXTRACT →</div>
+            <div class="text-right">
+                <span class="arrow-icon">EXTRACT ↗</span>
+            </div>
         </a>
 
-        <a href="https://vibe-check-ih3e.vercel.app/" target="_blank" class="glass-card p-8 rounded-xl flex flex-col justify-between group">
-            <div class="mb-4">
-                <span class="font-mono text-[9px] text-gray-500 tracking-widest">WEB APP</span>
-            </div>
+        <a href="https://vibe-check-ih3e.vercel.app/" target="_blank" class="editorial-card group">
             <div>
-                <h2 class="font-serif text-xl text-white mb-2">Vibe Doctor</h2>
-                <p class="font-zh text-xs text-gray-400 font-light leading-relaxed">
-                    氣氛博士。<br>社交場域調節器，生成話題打破尷尬。
+                <span class="meta-tag">Social App</span>
+                <h2 class="card-title">Vibe Doctor</h2>
+                <p class="card-desc">
+                    氣氛博士。<br>社交場域調節器，生成話題打破尷尬，優化聚會流動。
                 </p>
             </div>
-            <div class="mt-6 text-right font-mono text-[10px] text-gray-500 group-hover:text-white transition-colors">OPEN APP →</div>
+            <div class="text-right">
+                <span class="arrow-icon">OPEN APP ↗</span>
+            </div>
         </a>
 
-        <div class="glass-card p-8 rounded-xl flex flex-col justify-between">
-            <div class="mb-4">
-                <span class="font-mono text-[9px] text-gray-500 tracking-widest">QUICK TOOL</span>
-            </div>
+        <div class="editorial-card">
             <div>
-                <h2 class="font-serif text-xl text-white mb-2">Golden Ratio</h2>
-                <p class="font-zh text-xs text-gray-400 font-light mb-4">
-                    黃金比例計算機。<br>輸入數值，獲取 1.618 分割點。
+                <span class="meta-tag">Quick Tool</span>
+                <h2 class="card-title">Golden Ratio</h2>
+                <p class="card-desc">
+                    黃金比例計算機。<br>輸入長度數值，自動計算 1.618 分割點。
                 </p>
-                <div class="bg-black/40 p-3 rounded border border-white/5">
-                    <input type="number" id="baseInput" placeholder="Input Value" class="input-dark w-full p-2 text-sm rounded mb-2">
-                    <div class="flex justify-between text-xs font-mono text-gray-400">
-                        <span>RESULT:</span>
-                        <span id="resultValue" class="text-gold font-bold">-</span>
-                    </div>
+                
+                <div class="mt-4 flex items-center gap-4 border-t border-[#111] pt-4">
+                    <input type="number" id="baseInput" placeholder="Input" class="input-minimal">
+                    <span class="font-mono text-[#444]">→</span>
+                    <span id="resultValue" class="font-mono text-[#C5A059] text-xl font-bold min-w-[60px] text-right">-</span>
                 </div>
             </div>
         </div>
 
     </main>
 
-    <footer class="relative z-10 mt-20 text-[9px] font-mono text-gray-600 tracking-widest">
-        &copy; 2026 EDEN ROOM. DIGITAL SANCTUARY.
+    <footer class="relative z-10 mt-32 text-center animate-fade-in" style="animation-delay: 0.2s;">
+        <div class="hairline" style="height: 60px;"></div>
+        
+        <div class="mb-8">
+            <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="footer-link font-serif text-lg tracking-widest text-[#888]">
+                INSTAGRAM
+            </a>
+        </div>
+
+        <p class="text-[9px] font-mono text-[#333] tracking-[0.3em] uppercase">
+            &copy; 2026 EDEN ROOM.<br>Taipei City.
+        </p>
     </footer>
 
     <script>
