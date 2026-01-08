@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EDEN ROOM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;1,400&family=Noto+Serif+TC:wght@300;400;600&display=swap" rel="stylesheet">
+    
     <style>
         /* --- 基礎設定 --- */
         body {
-            font-family: 'Cinzel', -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif;
             background-color: #f5f5f7;
             color: #1d1d1f;
             margin: 0;
@@ -16,9 +18,6 @@
             flex-direction: column;
             align-items: center;
         }
-
-        /* 引入襯線字體增強雜誌感 */
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&display=swap');
 
         /* --- 標題區域 --- */
         header {
@@ -31,14 +30,14 @@
             font-size: 3rem;
             font-weight: 400;
             letter-spacing: 0.2em;
-            margin: 0 0 15px 0;
+            margin: 0 0 10px 0;
             text-transform: uppercase;
             color: #000;
         }
         
         p.subtitle {
+            font-family: 'Space Mono', monospace;
             color: #86868b;
-            font-family: -apple-system, sans-serif;
             font-size: 0.8rem;
             letter-spacing: 0.15em;
             text-transform: uppercase;
@@ -49,7 +48,7 @@
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 25px;
-            max-width: 1000px;
+            max-width: 1100px; /*稍微加寬以容納更多內容*/
             width: 100%;
         }
 
@@ -59,12 +58,12 @@
             padding: 35px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.02);
-            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
             border: 1px solid rgba(0,0,0,0.05);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 240px;
+            min-height: 260px;
             text-decoration: none;
             color: inherit;
             position: relative;
@@ -74,61 +73,56 @@
         /* Hover 特效 */
         .card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            border-color: rgba(0,0,0,0.1);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+            border-color: rgba(191, 149, 63, 0.3);
         }
 
         .card h2 {
             font-family: 'Cinzel', serif;
-            margin: 0 0 10px 0;
+            margin: 0 0 5px 0;
             font-size: 1.4rem;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.02em;
             color: #111;
         }
 
-        .card p {
-            font-family: -apple-system, sans-serif;
-            color: #666;
+        .card-sub {
+            font-family: 'Noto Serif TC', serif;
             font-size: 0.9rem;
+            color: #888;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .card p.desc {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Serif TC", sans-serif;
+            color: #666;
+            font-size: 0.85rem;
             line-height: 1.6;
             margin: 0;
             font-weight: 300;
         }
 
-        .status-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
         .status {
-            font-family: -apple-system, sans-serif;
-            font-size: 0.7rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
             font-weight: 600;
+            margin-bottom: 0;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             display: block;
         }
 
-        .badge {
-            font-size: 0.6rem; 
-            padding: 3px 8px; 
-            border-radius: 4px; 
-            font-weight: 600; 
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
         /* 連結箭頭 */
         .link-arrow {
+            font-family: 'Space Mono', monospace;
             text-align: right;
-            margin-top: 20px;
-            font-size: 1.2rem;
-            opacity: 0.3;
+            margin-top: 25px;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            font-weight: bold;
+            opacity: 0.6;
             transition: 0.3s;
-            font-family: 'Cinzel', serif;
         }
         .card:hover .link-arrow {
             opacity: 1;
@@ -136,33 +130,60 @@
         }
 
         /* --- 特殊卡片樣式 --- */
-        
-        /* Premium - 金色 (主打業務) */
+        /* Premium 金色邊框 (給主打工具用) */
         .card.premium {
             border: 1px solid #BF953F;
             background: linear-gradient(to bottom right, #fff, #fffcf5);
         }
-        .card.premium .status { color: #BF953F; }
-        .card.premium .link-arrow { color: #BF953F; }
-        .card.premium .badge { background: #BF953F; color: #fff; }
-
-        /* Private - 深色/銀色 (邀請制工具) */
-        .card.private {
-            border: 1px solid #e0e0e0;
-            background: #fff;
+        .card.premium .status {
+            color: #BF953F;
         }
-        .card.private .status { color: #333; }
-        .card.private .badge { border: 1px solid #ddd; color: #888; }
-        .card.private:hover { border-color: #333; }
+        .card.premium .link-arrow {
+            color: #BF953F;
+        }
+
+        /* --- 計算機工具介面 --- */
+        .tool-interface {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-family: 'Space Mono', monospace;
+            outline: none;
+            background: #fff;
+            box-sizing: border-box;
+        }
+        input[type="number"]:focus {
+            border-color: #BF953F;
+        }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+        .result-val {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
 
         /* --- Footer --- */
         footer {
             margin-top: 80px;
             color: #aaa;
-            font-size: 0.75rem;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            font-family: -apple-system, sans-serif;
+            font-size: 0.7rem;
+            font-family: 'Space Mono', monospace;
+            letter-spacing: 0.1em;
         }
     </style>
 </head>
@@ -175,64 +196,106 @@
 
     <div class="grid-container">
 
-        <a href="aesthetic.html" class="card premium">
-            <div class="status-row">
-                <span class="status">● Signature</span>
-                <span class="badge">FREE REPORT</span>
+        <a href="https://the-impression-audit.vercel.app/" class="card premium" target="_blank">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <span class="status">● FACADE ENGINEERING</span>
+                <span style="font-size: 0.6rem; background: #BF953F; color: #000; padding: 2px 6px; border-radius: 2px; font-weight: bold; letter-spacing: 1px; font-family: 'Space Mono';">POPULAR</span>
             </div>
             
-            <div style="margin-top: 5px;">
-                <h2>Visual Oracle <br><span style="font-size: 0.9rem; color: #888; font-weight: 400; font-family: -apple-system;">視覺神諭</span></h2>
-                <p>
-                    這不是測驗，而是靈魂的顯化。<br>
-                    解析本質原型 ➔ 領取專屬色票 ➔ 生成拍攝指南
+            <div>
+                <h2>The Impression Audit</h2>
+                <div class="card-sub">第一印象結構審計</div>
+                <p class="desc">
+                    將面部情緒視為精密結構。<br>
+                    運用視覺工程學計算你的「權威感」與「親和力」配比，尋找專屬於你的領袖原型 (Archetype)。
                 </p>
             </div>
             
-            <div class="link-arrow">START RITUAL ↗</div>
+            <div class="link-arrow">
+                START AUDIT ↗
+            </div>
         </a>
 
-        <a href="https://eden-material-lab.vercel.app/" class="card private" target="_blank">
-            <div class="status-row">
-                <span class="status">● Facade Analysis</span>
-                <span class="badge">INVITE ONLY</span>
+        <a href="aesthetic.html" class="card premium">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                <span class="status">● FEATURED RITUAL</span>
+                <span style="font-size: 0.6rem; border: 1px solid #BF953F; color: #BF953F; padding: 1px 5px; border-radius: 2px; letter-spacing: 1px; font-family: 'Space Mono';">FREE REPORT</span>
             </div>
             
-            <div style="margin-top: 5px;">
-                <h2>THE FACADE REPORT <br><span style="font-size: 0.9rem; color: #888; font-weight: 400; font-family: -apple-system;">建築視角人像分析</span></h2>
-                <p>將面容視為建築立面 (Facade)。運用建模思維解構五官，尋找您的專屬建築人格。</p>
-                <p style="font-size: 0.75rem; color: #999; margin-top: 8px;">*需輸入 Access Code 啟動分析</p>
+            <div>
+                <h2>Visual Oracle</h2>
+                <div class="card-sub">視覺神諭</div>
+                <p class="desc">
+                    這不是測驗，而是靈魂的顯化。<br>
+                    解析本質原型 ➔ 領取專屬色票 ➔ 生成拍攝指南。
+                </p>
             </div>
             
-            <div class="link-arrow">GENERATE ↗</div>
+            <div class="link-arrow">
+                ENTER RITUAL ↗
+            </div>
+        </a>
+
+        <a href="palette.html" class="card" style="border: 1px solid #ddd;">
+            <span class="status" style="color: #666; margin-bottom: 15px;">● UTILITY TOOL</span>
+            <div>
+                <h2>CHROMA 色彩提取</h2>
+                <div class="card-sub">影像色票分析</div>
+                <p class="desc">看見喜歡的照片色調？上傳圖片，AI 自動分析並提取 5 組關鍵色碼 (Hex Code)。</p>
+            </div>
+            <div class="link-arrow" style="color: #333;">EXTRACT COLORS ↗</div>
         </a>
 
         <a href="https://vibe-check-ih3e.vercel.app/" class="card" target="_blank">
-            <div class="status-row">
-                <span class="status" style="color: #666;">● Social Tool</span>
-            </div>
+            <span class="status" style="color: #666; margin-bottom: 15px;">● WEB APP</span>
             <div>
-                <h2>Vibe Doctor <br><span style="font-size: 0.9rem; color: #888; font-weight: 400; font-family: -apple-system;">氣氛博士</span></h2>
-                <p>社交場域調節器。隨機生成話題與互動挑戰，優化聚會氛圍。</p>
+                <h2>Vibe Doctor</h2>
+                <div class="card-sub">氣氛博士</div>
+                <p class="desc">社交場域調節器。隨機生成話題與互動挑戰，優化聚會氛圍，打破尷尬沉默。</p>
             </div>
-            <div class="link-arrow">↗</div>
+            <div class="link-arrow" style="color: #333;">OPEN APP ↗</div>
         </a>
 
-        <div class="card" style="opacity: 0.6; cursor: default; background: #fafafa;">
-            <div class="status-row">
-                <span class="status">○ Concept</span>
-            </div>
+        <div class="card" style="cursor: default;">
+            <span class="status" style="color: #666; margin-bottom: 15px;">● QUICK TOOL</span>
             <div>
-                <h2>Project: E <br><span style="font-size: 0.9rem; color: #888; font-weight: 400; font-family: -apple-system;">未公開項目</span></h2>
-                <p>正在開發中的建築攝影自動化工作流與濾鏡庫。</p>
+                <h2>Golden Ratio</h2>
+                <div class="card-sub">黃金比例計算機 📐</div>
+                <p class="desc">建築與構圖輔助。輸入長度數值，自動計算 1.618 黃金分割點。</p>
+            </div>
+            
+            <div class="tool-interface">
+                <input type="number" id="baseInput" placeholder="輸入長度 (e.g., 100)">
+                <div class="result-row">
+                    <span>Golden Value:</span>
+                    <span id="resultValue" class="result-val">-</span>
+                </div>
             </div>
         </div>
 
     </div>
 
     <footer>
-        &copy; 2026 EDEN ROOM. EST. TAIPEI.
+        &copy; 2026 EDEN ROOM.
     </footer>
+
+    <script>
+        // 黃金比例計算邏輯
+        const input = document.getElementById('baseInput');
+        const output = document.getElementById('resultValue');
+
+        input.addEventListener('input', function(e) {
+            const val = parseFloat(e.target.value);
+            if (val) {
+                const golden = (val * 1.618).toFixed(2);
+                output.innerText = golden;
+                output.style.color = "#BF953F";
+            } else {
+                output.innerText = '-';
+                output.style.color = "#333";
+            }
+        });
+    </script>
 
 </body>
 </html>
