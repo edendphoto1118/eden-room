@@ -6,7 +6,8 @@
     <title>Aesthetic DNA Test | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;1,400&family=Noto+Serif+TC:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Serif+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -15,7 +16,7 @@
                     fontFamily: { 
                         serif: ['Cinzel', 'serif'], 
                         mono: ['Space Mono', 'monospace'],
-                        zh: ['Noto Serif TC', 'serif'] 
+                        zh: ['Noto Serif TC', 'Songti TC', 'serif'] // 增加系統宋體備援
                     },
                     colors: { eden: { dark: '#020202', gold: '#C5A059' } },
                     animation: { 'fade-in': 'fadeIn 0.8s ease-out' },
@@ -34,9 +35,13 @@
             overflow-x: hidden; 
             /* 靜態質感噪點 */
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            /* 字體平滑優化 (關鍵質感來源) */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
         
-        /* 玻璃面板 (更深邃) */
+        /* 玻璃面板 */
         .glass-panel { 
             background: #050505; 
             border: 1px solid #151515; 
@@ -55,7 +60,7 @@
             width: 100%; 
             padding: 12px; 
             font-size: 13px; 
-            border-radius: 0; /* 直角更俐落 */
+            border-radius: 0; 
         }
         .input-field:focus { border-color: #C5A059; outline: none; background: #0f0f0f; }
         
@@ -66,7 +71,9 @@
         /* 選項按鈕 */
         .option-btn { 
             background: #0a0a0a; border: 1px solid #222; padding: 20px; width: 100%; text-align: left; 
-            transition: all 0.3s; margin-bottom: 10px; font-size: 0.9rem; font-family: 'Noto Serif TC', serif; letter-spacing: 0.05em; line-height: 1.6; color: #888;
+            transition: all 0.3s; margin-bottom: 10px; font-size: 0.95rem; 
+            font-family: 'Noto Serif TC', serif; font-weight: 400; /* 加重字重 */
+            letter-spacing: 0.05em; line-height: 1.6; color: #999;
         }
         .option-btn:hover { border-color: #C5A059; background: #0f0f0f; transform: translateX(5px); color: #fff; }
 
@@ -91,11 +98,16 @@
 
         /* Disclaimer 區域 */
         .disclaimer-box {
-            border: 1px dashed #333;
-            background: rgba(197, 160, 89, 0.03);
-            padding: 12px;
-            margin-top: 20px;
+            border: 1px solid #222;
+            background: rgba(10, 10, 10, 0.5);
+            padding: 15px;
+            margin-top: 25px;
             margin-bottom: 15px;
+            position: relative;
+        }
+        /* 金色左側裝飾線 */
+        .disclaimer-box::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #C5A059;
         }
     </style>
 </head>
@@ -155,14 +167,16 @@
                 </div>
 
                 <div class="disclaimer-box text-left">
-                    <div class="flex items-start gap-2">
-                        <span class="text-[#C5A059] text-[10px] pt-1">🔒</span>
-                        <p class="font-mono text-[9px] text-gray-500 leading-relaxed text-justify">
-                            <span class="text-[#C5A059] font-bold">DATA PROTOCOL:</span> 
-                            Initiating this diagnosis grants EDEN permission to archive your profile for future casting & mutual collaboration opportunities.
-                            <br><span class="opacity-60 block mt-1">(啟動此診斷即同意將資料建檔，並列入 EDEN 互惠拍攝與選角優先名單。)</span>
-                        </p>
-                    </div>
+                    <p class="font-zh text-[#C5A059] text-[11px] font-medium tracking-wider mb-2">
+                        【 互惠選角機制啟動 】
+                    </p>
+                    <p class="font-zh text-gray-400 text-[10px] leading-relaxed opacity-90 font-normal">
+                        填寫正確資訊將列入每月互惠計劃名單。<br>
+                        入選者 將由官方私訊 IG 通知。
+                    </p>
+                    <p class="font-mono text-[9px] text-[#444] mt-2 tracking-wide uppercase">
+                        Protocol: Secure Casting Pool Initiated.
+                    </p>
                 </div>
 
                 <button onclick="startQuiz()" class="btn-gold w-full py-4 text-xs tracking-[0.2em] font-bold mt-2 hover:brightness-110">
@@ -178,7 +192,7 @@
                     <span class="text-gray-600 text-[9px] tracking-[0.2em]">SUBCONSCIOUS ANALYSIS</span>
                 </div>
                 
-                <h3 id="questionText" class="font-zh text-lg text-gray-200 mb-10 leading-relaxed font-light tracking-wide min-h-[60px]">Question...</h3>
+                <h3 id="questionText" class="font-zh text-lg text-gray-200 mb-10 leading-relaxed font-normal tracking-wide min-h-[60px]">Question...</h3>
                 
                 <div id="optionsContainer"></div>
             </div>
@@ -225,7 +239,7 @@
                 <div class="text-center py-4 mb-2">
                     <p class="text-[9px] text-gray-500 tracking-widest mb-2">AESTHETIC ARCHETYPE</p>
                     <h2 id="resTitleEn" class="font-serif text-2xl text-[#C5A059] leading-none mb-1">ARCHETYPE</h2>
-                    <h2 id="resTitleZh" class="font-zh text-lg text-white tracking-widest font-light opacity-90">原型中文</h2>
+                    <h2 id="resTitleZh" class="font-zh text-lg text-white tracking-widest font-normal opacity-90">原型中文</h2>
                     <p id="resKeywords" class="font-mono text-[8px] text-gray-600 tracking-widest mt-3">#KEYWORD</p>
                 </div>
 
@@ -234,19 +248,19 @@
                         <h4 class="font-serif text-[#444] text-[9px] mb-2 flex items-center gap-2 tracking-widest">
                             <span class="w-1 h-1 bg-[#C5A059]"></span> INNER REFLECTION
                         </h4>
-                        <p id="resDesc" class="font-zh text-[10px] text-gray-400 leading-relaxed text-justify font-light"></p>
+                        <p id="resDesc" class="font-zh text-[10px] text-gray-400 leading-relaxed text-justify font-normal"></p>
                     </div>
 
                     <div class="bg-[#0f0f0f] p-4 border-l-2 border-[#C5A059]">
                         <h4 class="font-serif text-[#C5A059] text-[9px] mb-2 tracking-widest">EDEN'S SUGGESTION</h4>
-                        <p id="resReason" class="font-zh text-[10px] text-gray-500 leading-relaxed italic"></p>
+                        <p id="resReason" class="font-zh text-[10px] text-gray-500 leading-relaxed font-normal"></p>
                     </div>
                     
                     <div>
                         <h4 class="font-serif text-[#444] text-[9px] mb-2 flex items-center gap-2 tracking-widest">
                             <span class="w-1 h-1 bg-[#C5A059]"></span> VISUAL MANIFESTATION
                         </h4>
-                        <p id="resVisual" class="font-zh text-[10px] text-gray-400 leading-relaxed text-justify font-light"></p>
+                        <p id="resVisual" class="font-zh text-[10px] text-gray-400 leading-relaxed text-justify font-normal"></p>
                     </div>
 
                     <div>
@@ -280,7 +294,7 @@
     </main>
 
     <script>
-        // --- 9大美學原型資料庫 (Master-level text) ---
+        // --- 9大美學原型資料庫 (保留完整內容) ---
         const archetypes = {
             1: {
                 title: "THE PIONEER (開創者)",
