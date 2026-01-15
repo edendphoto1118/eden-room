@@ -6,7 +6,6 @@
     <title>Light Sculptor | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Shippori+Mincho:wght@400;500;600&display=swap" rel="stylesheet">
     
     <script>
@@ -31,29 +30,23 @@
     <style>
         body { 
             background-color: #020202; color: #e2e8f0; overflow-x: hidden; 
-            /* 靜態質感噪點 */
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 模擬 Apple 風格的質感滑桿 */
-        input[type=range] {
-            -webkit-appearance: none; width: 100%; background: transparent;
-        }
+        /* 質感滑桿 */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
             background: #C5A059; cursor: pointer; margin-top: -6px;
             box-shadow: 0 0 10px rgba(197, 160, 89, 0.5);
         }
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 4px; cursor: pointer; background: #333; border-radius: 2px;
+            width: 100%; height: 2px; cursor: pointer; background: #333; border-radius: 2px;
         }
         
-        /* 玻璃面板 */
         .glass-panel { 
-            background: rgba(5, 5, 5, 0.8); 
-            border: 1px solid #151515; 
-            backdrop-filter: blur(10px);
+            background: rgba(5, 5, 5, 0.8); border: 1px solid #151515; backdrop-filter: blur(10px);
         }
 
         #canvas-container {
@@ -61,59 +54,75 @@
             background: radial-gradient(circle at center, #111 0%, #020202 70%);
             border-bottom: 1px solid #151515;
         }
+
+        /* 燈光開關按鈕 (Toggle) */
+        .light-btn {
+            border: 1px solid #333; background: #0a0a0a; color: #666;
+            font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
+            padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.3s;
+            user-select: none;
+        }
+        .light-btn.active {
+            border-color: #C5A059; background: rgba(197, 160, 89, 0.1); color: #C5A059;
+            box-shadow: 0 0 15px rgba(197, 160, 89, 0.1);
+        }
     </style>
 </head>
-<body class="flex flex-col items-center min-h-screen">
+<body class="flex flex-col items-center min-h-screen pb-12">
 
     <header class="w-full text-center py-6 border-b border-[#111] animate-fade-in relative z-20 bg-[#020202]">
         <a href="index.html" class="block text-[10px] tracking-[0.3em] text-gray-600 hover:text-[#C5A059] mb-2 transition-colors">← EDEN ROOM</a>
         <h1 class="font-serif text-[#C5A059] text-xl tracking-[0.2em]">THE LIGHT SCULPTOR</h1>
-        <p class="font-zh text-gray-500 text-[10px] tracking-widest mt-1">建築光學模擬系統</p>
+        <p class="font-zh text-gray-500 text-[10px] tracking-widest mt-1">三點佈光模擬系統</p>
     </header>
 
     <div id="canvas-container" class="animate-fade-in">
-        <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none">
+        <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none z-10">
             <p class="font-mono text-[9px] text-gray-600 tracking-[0.3em] uppercase">Interactive 3D Render</p>
         </div>
     </div>
 
     <main class="w-full max-w-lg px-8 py-8 space-y-8 animate-fade-in" style="animation-delay: 0.2s;">
         
-        <div class="glass-panel p-6 border-l-2 border-[#C5A059]">
-            <div class="flex justify-between items-center mb-2">
-                <h3 class="font-serif text-[#C5A059] text-xs tracking-widest">LIGHT DIAGNOSIS</h3>
-                <span id="angleDisplay" class="font-mono text-[9px] text-gray-500">0° / 0°</span>
+        <div>
+            <div class="flex justify-between items-end mb-3">
+                <h3 class="font-serif text-[#C5A059] text-xs tracking-widest">LIGHT MIXER</h3>
+                <span class="font-mono text-[9px] text-gray-500">STUDIO CONTROLS</span>
             </div>
-            <h2 id="lightName" class="font-zh text-lg text-white mb-2 tracking-wide font-medium">正面平光 (Flat Light)</h2>
-            <p id="lightDesc" class="font-zh text-xs text-gray-400 leading-relaxed text-justify font-light opacity-80">
-                光源位於正前方。這會消除面部陰影，雖然能隱藏瑕疵，但也讓五官變得扁平，缺乏立體感與戲劇張力。
-            </p>
+            <div class="grid grid-cols-3 gap-3">
+                <div id="btnKey" class="light-btn active" onclick="toggleLight('key')">KEY [主光]</div>
+                <div id="btnFill" class="light-btn active" onclick="toggleLight('fill')">FILL [補光]</div>
+                <div id="btnRim" class="light-btn active" onclick="toggleLight('rim')">RIM [輪廓]</div>
+            </div>
         </div>
 
-        <div class="space-y-6">
+        <div id="positionControls" class="space-y-6 transition-opacity duration-300">
             <div>
                 <div class="flex justify-between mb-2">
-                    <label class="font-mono text-[9px] text-gray-400 tracking-widest">HORIZONTAL (方位角)</label>
-                    <span class="font-mono text-[9px] text-[#C5A059]">X-AXIS</span>
+                    <label class="font-mono text-[9px] text-gray-400 tracking-widest">KEY POSITION (方位)</label>
+                    <span id="angleDisplay" class="font-mono text-[9px] text-[#C5A059]">0°</span>
                 </div>
                 <input type="range" id="azimuthSlider" min="-180" max="180" value="0" step="1">
             </div>
-            
             <div>
                 <div class="flex justify-between mb-2">
-                    <label class="font-mono text-[9px] text-gray-400 tracking-widest">VERTICAL (仰角)</label>
+                    <label class="font-mono text-[9px] text-gray-400 tracking-widest">KEY HEIGHT (高度)</label>
                     <span class="font-mono text-[9px] text-[#C5A059]">Y-AXIS</span>
                 </div>
-                <input type="range" id="polarSlider" min="-20" max="90" value="0" step="1">
+                <input type="range" id="polarSlider" min="-20" max="90" value="20" step="1">
             </div>
         </div>
 
-        <div class="text-center pt-4 border-t border-[#111]">
-            <p class="font-zh text-[10px] text-gray-500 mb-4 tracking-wide">
-                「光是建築的第四維度，也是面孔的雕刻刀。」
+        <div class="glass-panel p-6 border-l-2 border-[#C5A059]">
+            <h2 id="lightName" class="font-zh text-lg text-white mb-2 tracking-wide font-medium">初始化中...</h2>
+            <p id="lightDesc" class="font-zh text-xs text-gray-400 leading-relaxed text-justify font-light opacity-80">
+                正在計算光照角度與陰影結構...
             </p>
+        </div>
+
+        <div class="text-center pt-4 border-t border-[#111]">
             <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="block w-full py-4 bg-[#111] border border-[#222] text-[#C5A059] font-mono text-xs tracking-[0.2em] hover:bg-[#C5A059] hover:text-black transition-colors">
-                BOOK A LIGHTING SESSION ↗
+                BOOK A SESSION ↗
             </a>
         </div>
     </main>
@@ -122,110 +131,146 @@
         // --- Three.js Setup ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        // 增加一點環境霧氣，製造深邃感
         scene.fog = new THREE.FogExp2(0x020202, 0.02);
 
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-        camera.position.z = 5;
+        camera.position.z = 5.5;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.shadowMap.enabled = true; // 開啟陰影運算
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 柔和陰影
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         container.appendChild(renderer.domElement);
 
-        // --- Geometry (建築感抽象頭像) ---
-        // 使用 Icosahedron (正二十面體) 並增加細分，開啟 flatShading 呈現建築切面感
-        const geometry = new THREE.IcosahedronGeometry(1.5, 1);
+        // --- Geometry (Abstract Head) ---
+        const geometry = new THREE.IcosahedronGeometry(1.4, 1);
         const material = new THREE.MeshStandardMaterial({ 
-            color: 0xeeeeee, // 石膏白
-            roughness: 0.6,  // 粗糙度像石膏
-            metalness: 0.1,
-            flatShading: true // 關鍵：開啟平面著色，模擬多邊形風格
+            color: 0xffffff, roughness: 0.7, metalness: 0.1, flatShading: true 
         });
         const bust = new THREE.Mesh(geometry, material);
-        bust.castShadow = true;
-        bust.receiveShadow = true;
+        bust.castShadow = true; bust.receiveShadow = true;
         scene.add(bust);
 
-        // 底座 (增加空間感)
         const planeGeo = new THREE.PlaneGeometry(20, 20);
-        const planeMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.8 });
+        const planeMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.9 });
         const plane = new THREE.Mesh(planeGeo, planeMat);
         plane.rotation.x = -Math.PI / 2;
         plane.position.y = -2;
         plane.receiveShadow = true;
         scene.add(plane);
 
-        // --- Lights ---
-        // 1. 環境光 (微弱，避免全黑)
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
-        scene.add(ambientLight);
+        // --- Lighting System (Three-Point) ---
+        
+        // 1. Key Light (主光 - 可動)
+        const keyLight = new THREE.SpotLight(0xffffff, 1.2);
+        keyLight.castShadow = true;
+        keyLight.shadow.mapSize.width = 1024;
+        keyLight.shadow.mapSize.height = 1024;
+        keyLight.shadow.bias = -0.0001;
+        scene.add(keyLight);
 
-        // 2. 主光源 (模擬影棚燈)
-        const mainLight = new THREE.SpotLight(0xffffff, 1.5);
-        mainLight.position.set(0, 0, 5);
-        mainLight.castShadow = true;
-        mainLight.shadow.mapSize.width = 1024;
-        mainLight.shadow.mapSize.height = 1024;
-        scene.add(mainLight);
+        // 2. Fill Light (補光 - 固定左前柔光)
+        const fillLight = new THREE.DirectionalLight(0xffeedd, 0.4); // 暖色補光
+        fillLight.position.set(-3, 1, 4); 
+        scene.add(fillLight);
 
-        // 3. 輔助光源 (輪廓光，藍色調，增加科技感)
-        const rimLight = new THREE.PointLight(0x4455ff, 0.3);
-        rimLight.position.set(-5, 2, -5);
+        // 3. Rim Light (輪廓光 - 固定後方冷光)
+        const rimLight = new THREE.SpotLight(0x4466ff, 1.5); // 藍色輪廓
+        rimLight.position.set(3, 4, -4);
+        rimLight.lookAt(0,0,0);
         scene.add(rimLight);
 
-        // --- Interaction Logic ---
+        // Ambient (基礎環境光)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.05);
+        scene.add(ambientLight);
+
+        // --- State Management ---
+        const state = {
+            key: true,
+            fill: true,
+            rim: true
+        };
+
         const azSlider = document.getElementById('azimuthSlider');
         const polSlider = document.getElementById('polarSlider');
         const lightName = document.getElementById('lightName');
         const lightDesc = document.getElementById('lightDesc');
         const angleDisplay = document.getElementById('angleDisplay');
+        const posControls = document.getElementById('positionControls');
 
-        function updateLight() {
-            const az = parseInt(azSlider.value); // 水平角度
-            const pol = parseInt(polSlider.value); // 垂直角度
+        // Toggle Logic
+        function toggleLight(type) {
+            state[type] = !state[type];
+            const btn = document.getElementById(`btn${type.charAt(0).toUpperCase() + type.slice(1)}`);
             
-            // 將角度轉換為 3D 座標 (Spherical Coordinates)
-            const r = 5; // 半徑
+            // UI Update
+            if (state[type]) btn.classList.add('active');
+            else btn.classList.remove('active');
+
+            // Light Update
+            if (type === 'key') {
+                keyLight.visible = state[type];
+                // 如果關掉主光，禁用滑桿並變暗
+                if(!state[type]) posControls.style.opacity = '0.3';
+                else posControls.style.opacity = '1';
+                analyzeLighting(); // Update text
+            }
+            if (type === 'fill') fillLight.visible = state[type];
+            if (type === 'rim') rimLight.visible = state[type];
+        }
+
+        // Update Key Light Position
+        function updateKeyLight() {
+            if (!state.key) {
+                lightName.innerText = "主光已關閉 (Key Off)";
+                lightDesc.innerText = "目前僅依賴補光或輪廓光。畫面缺乏主導性的陰影結構，立體感較弱。請開啟 KEY Light 以進行佈光設計。";
+                return;
+            }
+
+            const az = parseInt(azSlider.value);
+            const pol = parseInt(polSlider.value);
+            const r = 5.5;
             const phi = (90 - pol) * (Math.PI / 180);
             const theta = (az + 90) * (Math.PI / 180);
 
-            mainLight.position.x = -(r * Math.sin(phi) * Math.cos(theta));
-            mainLight.position.z = r * Math.sin(phi) * Math.sin(theta);
-            mainLight.position.y = r * Math.cos(phi);
-            
-            // 燈光永遠指向物體中心
-            mainLight.lookAt(0, 0, 0);
+            keyLight.position.set(
+                -(r * Math.sin(phi) * Math.cos(theta)),
+                r * Math.cos(phi),
+                r * Math.sin(phi) * Math.sin(theta)
+            );
+            keyLight.lookAt(0, 0, 0);
 
             angleDisplay.innerText = `${az}° / ${pol}°`;
             analyzeLighting(az, pol);
         }
 
-        // --- 建築光學分析邏輯 ---
+        // Analysis Logic
         function analyzeLighting(az, pol) {
-            const absAz = Math.abs(az);
+            if (!state.key) return; // Handled in updateKeyLight
             
+            // Re-fetch slider values if not provided (for toggle update)
+            if (az === undefined) az = parseInt(azSlider.value);
+            if (pol === undefined) pol = parseInt(polSlider.value);
+
+            const absAz = Math.abs(az);
+
             if (pol > 60) {
-                setInfo("頂光 (Top Light / Skull)", "光源來自正上方。眼窩與顴骨下方會出現深邃陰影，形成類似骷髏的視覺效果。除了特殊戲劇需求，通常應避免此角度。");
-            } else if (pol < -10) {
-                setInfo("底光 (Under Light)", "光源來自下方（鬼光）。這是反自然的照明方向，會產生怪誕、恐怖的視覺感受。");
+                setInfo("頂光 (Top Light)", "來自正上方的光線，在眼窩形成深重陰影。這種光線極具壓迫感，常能在建築中創造神聖性，但在人像上容易顯得兇狠。");
+            } else if (pol < -5) {
+                setInfo("底光 (Under Light)", "俗稱鬼光。反自然的照明方向，破壞面部正常結構，產生詭異與不安的視覺感受。");
             } else {
                 if (absAz < 20) {
-                    if (pol > 30) {
-                        setInfo("蝴蝶光 (Butterfly / Paramount)", "光源位在高處正前方。在鼻下形成像蝴蝶般的陰影。這是好萊塢經典的「美顏光」，能修飾臉型，讓五官精緻。");
-                    } else {
-                        setInfo("正面平光 (Flat Light)", "光源位於正前方。消除了大部分結構陰影，雖然能讓皮膚看起來平滑，但也犧牲了立體感與質感。");
-                    }
+                    if (pol > 25) setInfo("蝴蝶光 (Butterfly)", "好萊塢經典佈光。在鼻下形成蝴蝶狀陰影，能強調顴骨結構，使臉型更加精緻、顯瘦。");
+                    else setInfo("正面平光 (Flat Light)", "光線直射面部，陰影最少。皮膚看起來最平滑，但建築結構感與立體度也隨之消失。");
                 } else if (absAz >= 30 && absAz <= 60 && pol > 20) {
-                    setInfo("倫勃朗光 (Rembrandt Lighting)", "EDEND 推薦。光源約在側上方 45 度。特色是暗面臉頰上有一個倒三角形的亮區。這最具油畫般的藝術質感與立體感。");
-                } else if (absAz >= 80 && absAz <= 100) {
-                    setInfo("分割光 (Split / Side Light)", "光源來自正側面。臉孔一分為二，一面光明一面黑暗。這是最具戲劇張力與陽剛氣息的佈光，極度強調膚質紋理。");
-                } else if (absAz > 100) {
-                    setInfo("輪廓光 (Rim / Kicker)", "光源來自側後方。此時面部大部分處於陰影中，光線僅勾勒出邊緣輪廓。適合展現神秘感或剪影效果。");
+                    setInfo("倫勃朗光 (Rembrandt)", "EDEND 推薦。暗面臉頰形成倒三角光區。這是繪畫與攝影中最具藝術性與故事感的佈光方式。");
+                } else if (absAz >= 80 && absAz <= 110) {
+                    setInfo("分割光 (Split)", "正側面光，將面孔一分為二。創造最強烈的明暗對比（Chiaroscuro），極具戲劇性與陽剛氣質。");
+                } else if (absAz > 110) {
+                    setInfo("邊緣光 (Kicker / Rim)", "光線滑過面部邊緣，正面幾乎全黑。適合強調輪廓線條，創造神秘與隱晦的氛圍。");
                 } else {
-                    setInfo("環形光 (Loop Lighting)", "光源稍偏向一側。鼻子的影子微微偏向臉頰，形成一個小圓圈。這是一種常見且自然的肖像佈光，適合大多數臉型。");
+                    setInfo("環形光 (Loop)", "鼻影微微偏向一側。這是最通用、最自然的佈光方式，保留了立體感且不過於戲劇化。");
                 }
             }
         }
@@ -235,19 +280,21 @@
             lightDesc.innerText = desc;
         }
 
-        // 監聽滑桿
-        azSlider.addEventListener('input', updateLight);
-        polSlider.addEventListener('input', updateLight);
+        azSlider.addEventListener('input', updateKeyLight);
+        polSlider.addEventListener('input', updateKeyLight);
 
-        // 讓雕像微微轉動，增加生動感
+        // Animation Loop
         function animate() {
             requestAnimationFrame(animate);
-            // bust.rotation.y += 0.002; 
-            // 還是保持不動比較好觀察光影，改為讓輔助光微微移動
-            rimLight.position.x = Math.sin(Date.now() * 0.001) * 5;
+            // 讓輪廓光微微移動，展示光澤感
+            if (state.rim) {
+                rimLight.position.x = 3 + Math.sin(Date.now() * 0.001) * 2;
+                rimLight.lookAt(0,0,0);
+            }
             renderer.render(scene, camera);
         }
         animate();
+        updateKeyLight(); // Init
 
         // RWD
         window.addEventListener('resize', () => {
@@ -255,10 +302,6 @@
             camera.updateProjectionMatrix();
             renderer.setSize(container.clientWidth, container.clientHeight);
         });
-
-        // Init
-        updateLight();
-
     </script>
 </body>
 </html>
