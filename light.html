@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Light Sculptor Pro | EDEN LAB</title>
+    <title>Light Sculptor Ultimate | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Shippori+Mincho:wght@400;500;600&display=swap" rel="stylesheet">
@@ -34,7 +34,6 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 質感滑桿 */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
@@ -55,31 +54,29 @@
             border-bottom: 1px solid #151515;
         }
 
-        /* 選擇器按鈕 */
         .selector-btn {
             border: 1px solid #222; background: #0a0a0a; color: #444;
-            font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.1em;
-            padding: 12px 0; text-align: center; cursor: pointer; transition: all 0.3s;
+            font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;
+            padding: 10px 0; text-align: center; cursor: pointer; transition: all 0.3s;
             position: relative; overflow: hidden;
         }
-        .selector-btn.active {
-            border-color: #C5A059; background: #111; color: #fff;
-        }
-        .selector-btn.active::after {
-            content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #C5A059;
-        }
+        .selector-btn.active { border-color: #C5A059; background: #111; color: #fff; }
         
+        .option-tag {
+            font-family: 'Space Mono'; font-size: 9px; border: 1px solid #333; color: #666;
+            padding: 4px 8px; cursor: pointer; transition: 0.3s; display: inline-block; margin-right: 4px; margin-bottom: 4px;
+        }
+        .option-tag:hover, .option-tag.active { border-color: #C5A059; color: #C5A059; }
+
         .power-dot {
             width: 4px; height: 4px; border-radius: 50%; background: #333; 
             display: inline-block; margin-right: 6px; vertical-align: middle;
-            box-shadow: 0 0 2px #000; transition: 0.3s;
+            box-shadow: 0 0 2px #000;
         }
         .power-dot.on { background: #00ff00; box-shadow: 0 0 5px #00ff00; }
         .power-dot.off { background: #ff0000; }
 
-        .toggle-switch {
-            position: relative; display: inline-block; width: 36px; height: 18px;
-        }
+        .toggle-switch { position: relative; display: inline-block; width: 36px; height: 18px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
@@ -98,21 +95,41 @@
     <header class="w-full text-center py-6 border-b border-[#111] animate-fade-in relative z-20 bg-[#020202]">
         <a href="index.html" class="block text-[10px] tracking-[0.3em] text-gray-600 hover:text-[#C5A059] mb-2 transition-colors">← EDEN ROOM</a>
         <h1 class="font-serif text-[#C5A059] text-xl tracking-[0.2em]">LIGHT SCULPTOR</h1>
-        <p class="font-zh text-gray-500 text-[10px] tracking-widest mt-1">全域佈光模擬系統</p>
+        <p class="font-zh text-gray-500 text-[10px] tracking-widest mt-1">全域佈光模擬系統 v5.0</p>
     </header>
 
     <div id="canvas-container" class="animate-fade-in">
         <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none z-10">
-            <p class="font-mono text-[9px] text-gray-600 tracking-[0.3em] uppercase">Interactive 3D Render</p>
+            <p class="font-mono text-[9px] text-gray-600 tracking-[0.3em] uppercase">Interactive Studio</p>
         </div>
     </div>
 
     <main class="w-full max-w-lg px-8 py-8 space-y-8 animate-fade-in" style="animation-delay: 0.2s;">
         
+        <div class="glass-panel p-4 border border-[#222]">
+            <div class="mb-4">
+                <span class="font-mono text-[9px] text-gray-500 block mb-2">SUBJECT (臉型模型)</span>
+                <div class="flex flex-wrap">
+                    <div class="option-tag active" onclick="setModel('round', this)">ROUND (圓)</div>
+                    <div class="option-tag" onclick="setModel('oval', this)">OVAL (長)</div>
+                    <div class="option-tag" onclick="setModel('chiseled', this)">CHISELED (稜角)</div>
+                </div>
+            </div>
+            <div>
+                <span class="font-mono text-[9px] text-gray-500 block mb-2">KEY LIGHT MODIFIER (主光配件)</span>
+                <div class="flex flex-wrap">
+                    <div class="option-tag active" onclick="setModifier('softbox', this)">SOFTBOX (柔光)</div>
+                    <div class="option-tag" onclick="setModifier('radar', this)">RADAR (雷達)</div>
+                    <div class="option-tag" onclick="setModifier('grid', this)">GRID (蜂巢)</div>
+                    <div class="option-tag" onclick="setModifier('bare', this)">BARE (裸燈)</div>
+                </div>
+            </div>
+        </div>
+
         <div>
             <div class="flex justify-between items-end mb-3">
                 <h3 class="font-serif text-[#C5A059] text-xs tracking-widest">CONTROL TARGET</h3>
-                <span class="font-mono text-[9px] text-gray-500">SELECT LIGHT TO EDIT</span>
+                <span class="font-mono text-[9px] text-gray-500">SELECT LIGHT</span>
             </div>
             <div class="grid grid-cols-3 gap-0 border border-[#222]">
                 <div id="selKey" class="selector-btn active" onclick="selectLight('key')">
@@ -181,23 +198,50 @@
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
         camera.position.z = 5.5;
 
+        // 開啟 ShadowMap 柔化功能
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 柔和陰影
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
         container.appendChild(renderer.domElement);
 
-        // --- Geometry (High-Fidelity Model) ---
-        const geometry = new THREE.SphereGeometry(1.4, 128, 128); 
+        // --- Model System (Face Shapes) ---
+        let currentMesh = null;
+        
+        // 幾何形狀庫
+        const geometries = {
+            round: new THREE.SphereGeometry(1.4, 64, 64),
+            // Icosahedron 低多邊形，模擬方臉/骨感
+            chiseled: new THREE.IcosahedronGeometry(1.4, 1), 
+            // 膠囊體，模擬鵝蛋/長臉 (用 Sphere 變形模擬)
+            oval: new THREE.SphereGeometry(1.3, 64, 64) 
+        };
+
         const material = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, 
-            roughness: 0.6, 
-            metalness: 0.05
+            color: 0xffffff, roughness: 0.5, metalness: 0.05, flatShading: false
         });
-        const bust = new THREE.Mesh(geometry, material);
-        bust.castShadow = true; bust.receiveShadow = true;
-        scene.add(bust);
+        const chiseledMat = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff, roughness: 0.4, metalness: 0.1, flatShading: true
+        });
+
+        function initModel(type) {
+            if (currentMesh) scene.remove(currentMesh);
+            
+            let geo = geometries[type];
+            let mat = (type === 'chiseled') ? chiseledMat : material;
+            
+            currentMesh = new THREE.Mesh(geo, mat);
+            
+            // 針對 Oval 臉型進行拉伸
+            if (type === 'oval') {
+                currentMesh.scale.set(0.9, 1.25, 1);
+            }
+
+            currentMesh.castShadow = true; 
+            currentMesh.receiveShadow = true;
+            scene.add(currentMesh);
+        }
 
         const planeGeo = new THREE.PlaneGeometry(20, 20);
         const planeMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.9 });
@@ -210,22 +254,20 @@
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.02);
         scene.add(ambientLight);
 
-        // --- Light Objects ---
+        // --- Lighting System ---
         const lights = {
             key: {
                 obj: createSpotLight(0xffffff, 1.2),
-                az: 45, pol: 30, on: true,
-                name: "KEY"
+                az: 45, pol: 30, on: true, name: "KEY",
+                modifier: 'softbox' // Default
             },
             fill: {
                 obj: createSpotLight(0xffeedd, 0.5), 
-                az: -45, pol: 10, on: true,
-                name: "FILL"
+                az: -45, pol: 10, on: true, name: "FILL"
             },
             rim: {
-                obj: createSpotLight(0xffc266, 1.5), // 改為金黃暖光 (Golden Warm)
-                az: 135, pol: 30, on: true,
-                name: "RIM"
+                obj: createSpotLight(0xffc266, 1.5), // Golden Warm
+                az: 135, pol: 30, on: true, name: "RIM"
             }
         };
 
@@ -235,14 +277,58 @@
             light.shadow.mapSize.width = 1024;
             light.shadow.mapSize.height = 1024;
             light.shadow.bias = -0.0001;
-            light.penumbra = 0.5; // 邊緣柔化
+            light.angle = 0.6;
+            light.penumbra = 0.5;
             scene.add(light);
             return light;
         }
 
-        // --- Logic & UI ---
-        let currentTarget = 'key';
+        // --- Modifiers Logic ---
+        function setModifier(type, el) {
+            // UI Update
+            el.parentElement.querySelectorAll('.option-tag').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
 
+            // Light Physics Update
+            const light = lights.key.obj;
+            lights.key.modifier = type;
+
+            switch(type) {
+                case 'softbox': // 柔光：大角度，超柔邊緣
+                    light.angle = 0.9;
+                    light.penumbra = 1.0;
+                    light.shadow.radius = 10; // 模糊陰影
+                    light.intensity = 1.0;
+                    break;
+                case 'radar': // 雷達：中角度，中柔邊緣
+                    light.angle = 0.6;
+                    light.penumbra = 0.4;
+                    light.shadow.radius = 2;
+                    light.intensity = 1.3;
+                    break;
+                case 'grid': // 蜂巢：小角度，硬邊緣
+                    light.angle = 0.35;
+                    light.penumbra = 0.1;
+                    light.shadow.radius = 1;
+                    light.intensity = 1.8; // 聚光更亮
+                    break;
+                case 'bare': // 裸燈：全開，硬光
+                    light.angle = 1.2;
+                    light.penumbra = 0.1;
+                    light.shadow.radius = 1;
+                    light.intensity = 1.5;
+                    break;
+            }
+        }
+
+        function setModel(type, el) {
+            el.parentElement.querySelectorAll('.option-tag').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            initModel(type);
+        }
+
+        // --- UI Controller ---
+        let currentTarget = 'key';
         const azSlider = document.getElementById('azSlider');
         const polSlider = document.getElementById('polSlider');
         const powerSwitch = document.getElementById('powerSwitch');
@@ -253,6 +339,8 @@
         const targetStatusLabel = document.getElementById('targetStatusLabel');
 
         function initLights() {
+            initModel('round'); // Default model
+            setModifier('softbox', document.querySelector("div[onclick=\"setModifier('softbox', this)\"]")); // Default mod
             for (const key in lights) updateLightTransform(key);
             updateUI();
         }
@@ -294,7 +382,6 @@
             sliderGroup.style.opacity = data.on ? '1' : '0.3';
             sliderGroup.style.pointerEvents = data.on ? 'auto' : 'none';
 
-            // 觸發全局分析
             analyzeGlobal();
         }
 
@@ -311,90 +398,65 @@
         function toggleCurrentLight() {
             const isOn = powerSwitch.checked;
             lights[currentTarget].on = isOn;
-            
             const dot = document.getElementById(`dot${currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1)}`);
             dot.className = isOn ? 'power-dot on' : 'power-dot off';
-
             updateUI();
             updateLightTransform(currentTarget);
         }
 
-        // --- 全局光影分析引擎 ---
+        // --- Analysis Engine ---
         function analyzeGlobal() {
             const key = lights.key;
             const fill = lights.fill;
             const rim = lights.rim;
-
             let baseStyle = "";
             let baseDesc = "";
 
             if (!key.on) {
-                if (!fill.on && !rim.on) {
-                    baseStyle = "全黑 (Total Darkness)";
-                    baseDesc = "沒有任何光源。這是一片虛無。";
-                } else if (rim.on && !fill.on) {
-                    baseStyle = "剪影風格 (Silhouette)";
-                    baseDesc = "僅保留溫暖的邊緣輪廓光，主體處於黑暗中。適合表現神秘感或日蝕般的剪影效果。";
-                } else {
-                    baseStyle = "暗調氛圍 (Low Key Ambient)";
-                    baseDesc = "缺乏主導光源，畫面偏暗且缺乏明確結構。";
-                }
+                if (!fill.on && !rim.on) { baseStyle = "全黑"; baseDesc = "虛無狀態。"; }
+                else if (rim.on && !fill.on) { baseStyle = "剪影"; baseDesc = "僅有邊緣光，神祕氛圍。"; }
+                else { baseStyle = "暗調"; baseDesc = "缺乏主光，層次不明。"; }
             } else {
                 const absAz = Math.abs(key.az);
-                if (key.pol > 60) {
-                    baseStyle = "頂光結構";
-                    baseDesc = "主光來自正上方，強調結構感但陰影深重。";
-                } else if (key.pol < -5) {
-                    baseStyle = "戲劇底光";
-                    baseDesc = "反自然光線，具有恐怖或怪誕的戲劇張力。";
-                } else if (absAz < 20) {
-                     if (key.pol > 25) { baseStyle = "蝴蝶光 (Butterfly)"; baseDesc = "經典美顏佈光，鼻下有小蝶形影。"; }
-                     else { baseStyle = "平光 (Flat)"; baseDesc = "正面直射，膚質平滑但立體感弱。"; }
+                if (key.pol > 60) { baseStyle = "頂光"; baseDesc = "來自正上方，眼窩陰影深重。"; }
+                else if (key.pol < -5) { baseStyle = "底光"; baseDesc = "反自然光線，戲劇張力。"; }
+                else if (absAz < 20) {
+                     if (key.pol > 25) { baseStyle = "蝴蝶光"; baseDesc = "經典美顏，修飾臉型。"; }
+                     else { baseStyle = "平光"; baseDesc = "膚質平滑，立體感弱。"; }
                 } else if (absAz >= 30 && absAz <= 70) {
-                    baseStyle = "倫勃朗光 (Rembrandt)";
-                    baseDesc = "經典油畫光，暗面臉頰形成倒三角光區，層次豐富。";
+                    baseStyle = "倫勃朗光"; baseDesc = "暗面臉頰形成光三角，藝術質感。";
                 } else if (absAz > 70 && absAz <= 110) {
-                    baseStyle = "分割光 (Split)";
-                    baseDesc = "半面光，創造強烈的明暗對比與陽剛氣息。";
+                    baseStyle = "分割光"; baseDesc = "正側面光，強烈明暗對比。";
                 } else {
-                    baseStyle = "側逆光 (Kicker)";
-                    baseDesc = "主光偏後，面部大部分在陰影中。";
+                    baseStyle = "側逆光"; baseDesc = "面部大部分在陰影中。";
                 }
             }
 
             let finalName = baseStyle;
             let finalDesc = baseDesc;
 
+            // 加入配件描述
+            let modDesc = "";
             if (key.on) {
-                if (rim.on && fill.on) {
-                    finalName = `三點式 ${baseStyle}`;
-                    finalDesc += " 搭配補光保留細節，以及暖調輪廓光 (Rim) 模擬夕陽逆光效果，這是極具電影感的商業佈光。";
-                } else if (rim.on && !fill.on) {
-                    finalName = `戲劇性 ${baseStyle}`;
-                    finalDesc += " 加上強烈的暖調輪廓光，創造出類似「黃金時刻」的逆光氛圍，增強了畫面的故事性。";
-                } else if (!rim.on && fill.on) {
-                    finalName = `柔和 ${baseStyle}`;
-                    finalDesc += " 補光 (Fill) 降低了反差，使畫面更柔和、自然，適合一般人像。";
-                } else {
-                    finalName = `單燈 ${baseStyle}`;
-                    finalDesc += " 僅使用單一主光，陰影深邃，對比度最高，風格強烈。";
-                }
-            } 
-            else if (!key.on && rim.on && fill.on) {
-                finalName = "雙邊緣光 (Double Rim)";
-                finalDesc = "利用兩側光線勾勒輪廓，中間保留神秘的陰影。常用於體育或充滿張力的宣傳照。";
+                if(key.modifier === 'softbox') modDesc = "使用柔光罩，光質柔和細膩。";
+                if(key.modifier === 'radar') modDesc = "使用雷達罩，中心光質硬朗，層次豐富。";
+                if(key.modifier === 'grid') modDesc = "使用蜂巢，光束集中，背景壓暗。";
+                if(key.modifier === 'bare') modDesc = "使用裸燈，光質硬，影子銳利。";
             }
 
-            if (finalName === "") {
-                finalName = "自定義混合光 (Custom Mix)";
-                finalDesc = "當前的光線組合較為特殊，形成了獨特的視覺實驗。";
+            if (key.on) {
+                if (rim.on && fill.on) { finalName = `三點式 ${baseStyle}`; finalDesc += ` 搭配補光與暖調輪廓光，電影級商業佈光。${modDesc}`; }
+                else if (rim.on && !fill.on) { finalName = `戲劇性 ${baseStyle}`; finalDesc += ` 加上強烈暖輪廓光，增強故事性。${modDesc}`; }
+                else if (!rim.on && fill.on) { finalName = `柔和 ${baseStyle}`; finalDesc += ` 補光降低反差，自然人像。${modDesc}`; }
+                else { finalName = `單燈 ${baseStyle}`; finalDesc += ` 單一主光，風格強烈。${modDesc}`; }
+            } else if (!key.on && rim.on && fill.on) {
+                finalName = "雙邊緣光"; finalDesc = "兩側勾勒輪廓，中間保留神祕陰影。";
             }
 
             lightName.innerText = finalName;
             lightDesc.innerText = finalDesc;
         }
 
-        // Animation Loop
         function animate() {
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
