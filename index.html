@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EDEN ROOM</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Space+Mono:ital,wght@0,300;0,400;1,300&family=Noto+Serif+TC:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500&family=Space+Mono:ital,wght@0,300;0,400;1,300&family=Shippori+Mincho:wght@400;500;600&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -14,13 +14,13 @@
                     fontFamily: { 
                         serif: ['Cinzel', 'serif'], 
                         mono: ['Space Mono', 'monospace'],
-                        zh: ['Noto Serif TC', 'serif'] 
+                        zh: ['Shippori Mincho', 'serif'] 
                     },
                     colors: { 
                         eden: { 
                             black: '#020202', 
                             gold: '#C5A059', 
-                            gray: '#1a1a1a',
+                            gray: '#1a1a1a', 
                             text: '#888888'
                         } 
                     },
@@ -34,112 +34,41 @@
     </script>
 
     <style>
-        /* --- MASTER-LEVEL AESTHETICS --- */
         body { 
-            background-color: #020202; 
-            color: #e2e8f0; 
-            overflow-x: hidden; 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            /* 靜態質感噪點 */
+            background-color: #020202; color: #e2e8f0; overflow-x: hidden; 
+            min-height: 100vh; display: flex; flex-direction: column; align-items: center;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
-
-        /* 裝飾線條 (Hairlines) */
-        .hairline {
-            width: 1px; height: 40px; background: #222; margin: 0 auto 20px auto;
-        }
-
-        /* 頂級卡片設計 (Editorial Card) */
+        .hairline { width: 1px; height: 40px; background: #222; margin: 0 auto 20px auto; }
         .editorial-card {
-            background-color: #050505; /* 極深灰 */
-            border: 1px solid #151515; /* 極低調邊框 */
-            padding: 40px;
+            background-color: #050505; border: 1px solid #151515; padding: 40px;
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            position: relative; display: flex; flex-direction: column; justify-content: space-between;
         }
-
-        /* Hover: 邊框亮起金色，背景微亮 */
-        .editorial-card:hover {
-            border-color: #444; 
-            background-color: #080808;
-            transform: translateY(-2px);
-        }
-        
-        /* 專屬金色 Hover */
-        .editorial-card.premium:hover {
-            border-color: #C5A059; /* EDEN Gold */
-        }
-
-        /* 文字排版細節 */
+        .editorial-card:hover { border-color: #444; background-color: #080808; transform: translateY(-2px); }
+        .editorial-card.premium:hover { border-color: #C5A059; }
         .meta-tag {
-            font-family: 'Space Mono', monospace;
-            font-size: 9px;
-            letter-spacing: 0.2em;
-            color: #444;
-            text-transform: uppercase;
-            margin-bottom: 15px;
-            display: block;
-            transition: color 0.3s;
+            font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.2em; color: #444;
+            text-transform: uppercase; margin-bottom: 15px; display: block; transition: color 0.3s;
         }
         .editorial-card:hover .meta-tag { color: #C5A059; }
-
-        .card-title {
-            font-family: 'Cinzel', serif;
-            font-size: 1.6rem;
-            color: #fff;
-            margin-bottom: 10px;
-            font-weight: 400;
-        }
-
+        .card-title { font-family: 'Cinzel', serif; font-size: 1.6rem; color: #fff; margin-bottom: 10px; font-weight: 400; }
         .card-desc {
-            font-family: 'Noto Serif TC', serif;
-            font-size: 0.85rem;
-            color: #666;
-            font-weight: 300;
-            line-height: 1.8;
-            margin-bottom: 30px;
-            max-width: 90%;
+            font-family: 'Shippori Mincho', serif; font-size: 0.9rem; color: #777; font-weight: 400;
+            line-height: 1.8; margin-bottom: 30px; max-width: 90%;
         }
-
-        /* 箭頭微動效 */
-        .arrow-icon {
-            font-family: 'Space Mono', monospace;
-            font-size: 14px;
-            color: #333;
-            transition: all 0.3s;
-        }
-        .editorial-card:hover .arrow-icon {
-            color: #fff;
-            transform: translateX(5px);
-        }
-
-        /* Footer IG Link */
+        .arrow-icon { font-family: 'Space Mono', monospace; font-size: 14px; color: #333; transition: all 0.3s; }
+        .editorial-card:hover .arrow-icon { color: #fff; transform: translateX(5px); }
         .footer-link {
-            position: relative;
-            display: inline-block;
-            color: #666;
-            text-decoration: none;
-            transition: color 0.3s;
+            position: relative; display: inline-block; color: #666; text-decoration: none; transition: color 0.3s;
         }
         .footer-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 1px;
-            bottom: -2px;
-            left: 0;
-            background-color: #C5A059;
-            transition: width 0.3s;
+            content: ''; position: absolute; width: 0; height: 1px; bottom: -2px; left: 0; background-color: #C5A059; transition: width 0.3s;
         }
         .footer-link:hover { color: #C5A059; }
         .footer-link:hover::after { width: 100%; }
-
     </style>
 </head>
 <body class="pt-24 pb-12 px-6">
@@ -158,8 +87,7 @@
                 <h2 class="card-title text-4xl">EDEN ARCHIVE</h2>
                 <div class="w-12 h-[1px] bg-[#333] my-4 group-hover:bg-[#C5A059] transition-colors duration-500"></div>
                 <p class="card-desc text-lg">
-                    光影的收藏室。<br>
-                    瀏覽 EDEN 的攝影作品集，看見那些被凝結的靈魂瞬間。
+                    光影的收藏室。<br>瀏覽 EDEN 的攝影作品集，看見那些被凝結的靈魂瞬間。
                 </p>
             </div>
             <div class="text-right">
@@ -226,13 +154,11 @@
 
     <footer class="relative z-10 mt-32 text-center animate-fade-in" style="animation-delay: 0.2s;">
         <div class="hairline" style="height: 60px;"></div>
-        
         <div class="mb-8">
             <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="footer-link font-serif text-lg tracking-widest text-[#888]">
                 INSTAGRAM
             </a>
         </div>
-
         <p class="text-[9px] font-mono text-[#333] tracking-[0.3em] uppercase">
             &copy; 2026 EDEN ROOM.<br>Taipei City.
         </p>
