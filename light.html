@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Light Sculptor Ultimate | EDEN LAB</title>
+    <title>Light Sculptor Editorial | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Shippori+Mincho:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Space+Mono:ital,wght@0,300;0,400;1,300&family=Shippori+Mincho:wght@400;500;700&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -17,7 +17,14 @@
                         mono: ['Space Mono', 'monospace'],
                         zh: ['Shippori Mincho', 'serif'] 
                     },
-                    colors: { eden: { dark: '#020202', gold: '#C5A059' } },
+                    colors: { 
+                        eden: { 
+                            black: '#050505', 
+                            silver: '#C0C0C0',
+                            gold: '#D4AF37', // 香檳金
+                            dark: '#020202'
+                        } 
+                    },
                     animation: { 'fade-in': 'fadeIn 1.2s ease-out forwards' },
                     keyframes: {
                         fadeIn: { '0%': { opacity: '0', transform: 'translateY(10px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } }
@@ -29,161 +36,157 @@
 
     <style>
         body { 
-            background-color: #020202; color: #e2e8f0; overflow-x: hidden; 
+            background-color: #020202; color: #C0C0C0; overflow-x: hidden; 
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
             -webkit-font-smoothing: antialiased;
         }
 
+        /* 香檳金滑桿 */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
-            background: #C5A059; cursor: pointer; margin-top: -6px;
-            box-shadow: 0 0 10px rgba(197, 160, 89, 0.5);
+            -webkit-appearance: none; height: 12px; width: 12px; 
+            background: #D4AF37; cursor: pointer; margin-top: -5px;
+            border: 1px solid #000;
         }
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 2px; cursor: pointer; background: #333; border-radius: 2px;
+            width: 100%; height: 1px; cursor: pointer; background: #333;
         }
         
-        .glass-panel { 
-            background: rgba(5, 5, 5, 0.8); border: 1px solid #151515; backdrop-filter: blur(10px);
-        }
-
         #canvas-container {
-            width: 100%; height: 50vh; position: relative;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #020202 70%);
-            border-bottom: 1px solid #151515;
+            width: 100%; height: 45vh; position: relative;
+            background: radial-gradient(circle at center, #151515 0%, #000000 80%);
+            border-bottom: 1px solid #222;
         }
 
-        .selector-btn {
-            border: 1px solid #222; background: #0a0a0a; color: #444;
-            font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em;
-            padding: 10px 0; text-align: center; cursor: pointer; transition: all 0.3s;
-            position: relative; overflow: hidden;
+        /* 雜誌風格標籤 */
+        .tab-btn {
+            font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.2em; color: #555;
+            padding-bottom: 8px; cursor: pointer; transition: 0.4s; border-bottom: 1px solid transparent;
         }
-        .selector-btn.active { border-color: #C5A059; background: #111; color: #fff; }
+        .tab-btn.active { color: #D4AF37; border-bottom: 1px solid #D4AF37; }
         
-        .option-tag {
-            font-family: 'Space Mono'; font-size: 9px; border: 1px solid #333; color: #666;
-            padding: 4px 8px; cursor: pointer; transition: 0.3s; display: inline-block; margin-right: 4px; margin-bottom: 4px;
+        /* 配件按鈕 */
+        .mod-btn {
+            border: 1px solid #222; color: #666; font-family: 'Space Mono'; font-size: 9px;
+            padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.3s;
+            letter-spacing: 0.05em;
         }
-        .option-tag:hover, .option-tag.active { border-color: #C5A059; color: #C5A059; }
-
-        .power-dot {
-            width: 4px; height: 4px; border-radius: 50%; background: #333; 
-            display: inline-block; margin-right: 6px; vertical-align: middle;
-            box-shadow: 0 0 2px #000;
+        .mod-btn:hover { border-color: #444; color: #aaa; }
+        .mod-btn.active { 
+            border-color: #D4AF37; background: rgba(212, 175, 55, 0.05); color: #D4AF37; 
         }
-        .power-dot.on { background: #00ff00; box-shadow: 0 0 5px #00ff00; }
-        .power-dot.off { background: #ff0000; }
 
-        .toggle-switch { position: relative; display: inline-block; width: 36px; height: 18px; }
+        /* 臉型切換小按鈕 */
+        .face-btn {
+            width: 6px; height: 6px; background: #333; border-radius: 50%; display: inline-block;
+            margin: 0 4px; cursor: pointer; transition: 0.3s;
+        }
+        .face-btn.active { background: #D4AF37; box-shadow: 0 0 5px #D4AF37; }
+
+        /* 開關 */
+        .toggle-switch { position: relative; display: inline-block; width: 28px; height: 14px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
+        .slider-tg {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #333; transition: .4s; border-radius: 18px;
+            background-color: #222; transition: .4s; border: 1px solid #333;
         }
-        .slider:before {
-            position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px;
-            background-color: white; transition: .4s; border-radius: 50%;
+        .slider-tg:before {
+            position: absolute; content: ""; height: 8px; width: 8px; left: 2px; bottom: 2px;
+            background-color: #555; transition: .4s;
         }
-        input:checked + .slider { background-color: #C5A059; }
-        input:checked + .slider:before { transform: translateX(18px); }
+        input:checked + .slider-tg { border-color: #D4AF37; background-color: #111; }
+        input:checked + .slider-tg:before { transform: translateX(14px); background-color: #D4AF37; }
     </style>
 </head>
-<body class="flex flex-col items-center min-h-screen pb-12">
+<body class="flex flex-col min-h-screen pb-12">
 
-    <header class="w-full text-center py-6 border-b border-[#111] animate-fade-in relative z-20 bg-[#020202]">
-        <a href="index.html" class="block text-[10px] tracking-[0.3em] text-gray-600 hover:text-[#C5A059] mb-2 transition-colors">← EDEN ROOM</a>
-        <h1 class="font-serif text-[#C5A059] text-xl tracking-[0.2em]">LIGHT SCULPTOR</h1>
-        <p class="font-zh text-gray-500 text-[10px] tracking-widest mt-1">結構化人像佈光系統</p>
-    </header>
+    <nav class="w-full flex justify-between items-center px-6 py-5 border-b border-[#111] bg-[#020202] z-20">
+        <a href="index.html" class="text-[9px] tracking-[0.2em] text-[#666] hover:text-[#fff] transition-colors font-mono">EDEN ROOM</a>
+        <div class="text-center">
+            <h1 class="font-serif text-[#D4AF37] text-sm tracking-[0.3em]">LIGHT SCULPTOR</h1>
+        </div>
+        <div class="text-[9px] tracking-[0.2em] text-[#666] font-mono">V5.0</div>
+    </nav>
 
     <div id="canvas-container" class="animate-fade-in">
+        <div class="absolute top-4 right-4 z-10 flex items-center gap-2 bg-black/50 px-3 py-1 border border-[#222] backdrop-blur-sm">
+            <span class="font-mono text-[8px] text-gray-500 tracking-widest mr-2">MODEL</span>
+            <div class="face-btn active" onclick="setModel('male', this)" title="Structure"></div>
+            <div class="face-btn" onclick="setModel('smooth', this)" title="Smooth"></div>
+        </div>
+        
         <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none z-10">
-            <p class="font-mono text-[9px] text-gray-600 tracking-[0.3em] uppercase">Interactive Studio</p>
+            <p class="font-serif text-[8px] text-[#444] tracking-[0.4em]">INTERACTIVE STUDIO RENDER</p>
         </div>
     </div>
 
-    <main class="w-full max-w-lg px-8 py-8 space-y-8 animate-fade-in" style="animation-delay: 0.2s;">
+    <main class="w-full max-w-2xl mx-auto px-6 mt-8 space-y-10 animate-fade-in" style="animation-delay: 0.1s;">
         
-        <div class="glass-panel p-4 border border-[#222]">
-            <div class="mb-4">
-                <span class="font-mono text-[9px] text-gray-500 block mb-2">HEAD STRUCTURE (人檯類型)</span>
-                <div class="flex flex-wrap">
-                    <div class="option-tag active" onclick="setModel('male', this)">STRUCTURE (結構)</div>
-                    <div class="option-tag" onclick="setModel('smooth', this)">SMOOTH (圓潤)</div>
-                </div>
-            </div>
-            <div>
-                <span class="font-mono text-[9px] text-gray-500 block mb-2">LIGHT MODIFIER (主光配件)</span>
-                <div class="flex flex-wrap">
-                    <div class="option-tag active" onclick="setModifier('softbox', this)">SOFTBOX (柔光)</div>
-                    <div class="option-tag" onclick="setModifier('radar', this)">RADAR (雷達)</div>
-                    <div class="option-tag" onclick="setModifier('grid', this)">GRID (蜂巢)</div>
-                    <div class="option-tag" onclick="setModifier('bare', this)">BARE (裸燈)</div>
-                </div>
-            </div>
+        <div class="flex justify-center gap-12 border-b border-[#111]">
+            <div id="tabKey" class="tab-btn active" onclick="selectLight('key')">KEY LIGHT</div>
+            <div id="tabFill" class="tab-btn" onclick="selectLight('fill')">FILL LIGHT</div>
+            <div id="tabRim" class="tab-btn" onclick="selectLight('rim')">RIM LIGHT</div>
         </div>
 
-        <div>
-            <div class="flex justify-between items-end mb-3">
-                <h3 class="font-serif text-[#C5A059] text-xs tracking-widest">CONTROL TARGET</h3>
-                <span class="font-mono text-[9px] text-gray-500">SELECT LIGHT</span>
-            </div>
-            <div class="grid grid-cols-3 gap-0 border border-[#222]">
-                <div id="selKey" class="selector-btn active" onclick="selectLight('key')">
-                    <span id="dotKey" class="power-dot on"></span>KEY
+        <div id="controlPanel" class="space-y-8 transition-opacity duration-300">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="flex items-center justify-between border-b border-[#111] pb-2">
+                    <span class="font-serif text-[10px] text-gray-500 tracking-widest">POWER STATUS</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="powerSwitch" checked onchange="toggleCurrentLight()">
+                        <span class="slider-tg"></span>
+                    </label>
                 </div>
-                <div id="selFill" class="selector-btn" onclick="selectLight('fill')">
-                    <span id="dotFill" class="power-dot on"></span>FILL
-                </div>
-                <div id="selRim" class="selector-btn" onclick="selectLight('rim')">
-                    <span id="dotRim" class="power-dot on"></span>RIM
-                </div>
-            </div>
-        </div>
 
-        <div id="activeControls" class="space-y-6 transition-all duration-300">
-            <div class="flex justify-between items-center bg-[#0a0a0a] p-3 border border-[#222]">
-                <span id="targetStatusLabel" class="font-mono text-[10px] text-gray-400 tracking-widest">KEY LIGHT STATUS</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="powerSwitch" checked onchange="toggleCurrentLight()">
-                    <span class="slider"></span>
-                </label>
-            </div>
-
-            <div id="sliderGroup" class="space-y-6">
                 <div>
                     <div class="flex justify-between mb-2">
-                        <label class="font-mono text-[9px] text-gray-400 tracking-widest">AZIMUTH (水平)</label>
-                        <span id="azVal" class="font-mono text-[9px] text-[#C5A059]">0°</span>
+                        <span class="font-serif text-[10px] text-gray-500 tracking-widest">LIGHT MODIFIER</span>
+                        <span id="currentModName" class="font-mono text-[9px] text-[#D4AF37]">SOFTBOX</span>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div id="modSoftbox" class="mod-btn" onclick="setModifier('softbox')">SOFT</div>
+                        <div id="modRadar" class="mod-btn" onclick="setModifier('radar')">RADAR</div>
+                        <div id="modGrid" class="mod-btn" onclick="setModifier('grid')">GRID</div>
+                        <div id="modBare" class="mod-btn" onclick="setModifier('bare')">BARE</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-6 pt-2">
+                <div>
+                    <div class="flex justify-between mb-2">
+                        <span class="font-serif text-[10px] text-gray-500 tracking-widest">AZIMUTH (水平)</span>
+                        <span id="azVal" class="font-mono text-[10px] text-[#C0C0C0]">0°</span>
                     </div>
                     <input type="range" id="azSlider" min="-180" max="180" step="1" oninput="updatePosition()">
                 </div>
                 <div>
                     <div class="flex justify-between mb-2">
-                        <label class="font-mono text-[9px] text-gray-400 tracking-widest">ALTITUDE (垂直)</label>
-                        <span id="polVal" class="font-mono text-[9px] text-[#C5A059]">0°</span>
+                        <span class="font-serif text-[10px] text-gray-500 tracking-widest">ALTITUDE (垂直)</span>
+                        <span id="polVal" class="font-mono text-[10px] text-[#C0C0C0]">0°</span>
                     </div>
                     <input type="range" id="polSlider" min="-40" max="90" step="1" oninput="updatePosition()">
                 </div>
             </div>
         </div>
 
-        <div class="glass-panel p-6 border-l-2 border-[#C5A059]">
-            <div class="flex justify-between mb-1">
-                <h3 class="font-mono text-[9px] text-[#C5A059] tracking-widest">GLOBAL ANALYSIS</h3>
-                <span class="font-mono text-[9px] text-gray-500 uppercase">FINAL RENDER</span>
+        <div class="border-t border-[#222] pt-6 mt-8 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div class="col-span-1">
+                <h3 class="font-serif text-[#D4AF37] text-xs tracking-[0.2em] mb-2">DIAGNOSIS</h3>
+                <p class="font-mono text-[9px] text-gray-600">AI LIGHTING<br>ANALYSIS</p>
             </div>
-            <h2 id="lightName" class="font-zh text-lg text-white mb-2 tracking-wide font-medium">--</h2>
-            <p id="lightDesc" class="font-zh text-xs text-gray-400 leading-relaxed text-justify font-light opacity-80">
-                --
-            </p>
+            <div class="col-span-3">
+                <h2 id="lightName" class="font-zh text-lg text-[#E0E0E0] mb-3 tracking-wider font-medium">--</h2>
+                <p id="lightDesc" class="font-zh text-xs text-[#888] leading-7 text-justify font-light">
+                    --
+                </p>
+            </div>
         </div>
 
-        <div class="text-center pt-4 border-t border-[#111]">
-            <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="block w-full py-4 bg-[#111] border border-[#222] text-[#C5A059] font-mono text-xs tracking-[0.2em] hover:bg-[#C5A059] hover:text-black transition-colors">
-                BOOK A SESSION ↗
+        <div class="text-center pt-10 pb-4">
+            <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="inline-block border-b border-[#D4AF37] text-[#D4AF37] font-serif text-[10px] tracking-[0.3em] pb-1 hover:text-white hover:border-white transition-colors">
+                BOOK EDEN FOR SHOOT ↗
             </a>
         </div>
     </main>
@@ -192,123 +195,116 @@
         // --- Three.js Setup ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x020202, 0.02);
+        scene.fog = new THREE.FogExp2(0x000000, 0.02); // 純黑霧氣
 
-        const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-        camera.position.z = 5.5;
+        const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
+        camera.position.z = 6;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping; // 電影級色調
+        renderer.toneMappingExposure = 1.0;
         container.appendChild(renderer.domElement);
 
-        // --- MANNEQUIN GENERATOR (結構人檯生成器) ---
-        // 這是一個不依賴外部檔案，用程式碼堆疊出來的「結構化面孔」
-        function createMannequin(isStructure = true) {
+        // --- Mannequin System (Structure) ---
+        let currentModelGroup = new THREE.Group();
+        scene.add(currentModelGroup);
+
+        const skinMat = new THREE.MeshStandardMaterial({ 
+            color: 0xeeeeee, roughness: 0.5, metalness: 0.1 
+        });
+
+        function createMannequin(isStructure) {
             const group = new THREE.Group();
-
-            const skinMat = new THREE.MeshStandardMaterial({ 
-                color: 0xffffff, roughness: 0.5, metalness: 0.1 
-            });
-
-            // 1. 頭部基底 (Capsule/Sphere)
+            
+            // Head Base
             const headGeo = new THREE.SphereGeometry(1.4, 64, 64);
             const head = new THREE.Mesh(headGeo, skinMat);
-            head.scale.set(0.85, 1.15, 0.95); // 拉長成鵝蛋臉
+            head.scale.set(0.88, 1.18, 0.95);
             group.add(head);
 
             if (isStructure) {
-                // 2. 鼻子 (Nose) - 關鍵陰影來源
-                // 使用四角錐體模擬挺拔鼻樑
+                // Nose (Structure)
                 const noseGeo = new THREE.ConeGeometry(0.25, 0.9, 4);
                 const nose = new THREE.Mesh(noseGeo, skinMat);
-                nose.position.set(0, 0, 1.3); // 突出表面
-                nose.rotation.x = -Math.PI / 8; // 微微翹起
-                nose.rotation.y = Math.PI / 4; // 轉45度讓邊緣朝前，形成鼻樑
-                nose.scale.z = 0.6; // 壓扁一點
-                nose.castShadow = true;
-                nose.receiveShadow = true;
+                nose.position.set(0, 0, 1.3);
+                nose.rotation.x = -Math.PI / 8;
+                nose.rotation.y = Math.PI / 4;
+                nose.scale.z = 0.6;
+                nose.castShadow = true; nose.receiveShadow = true;
                 group.add(nose);
 
-                // 3. 眉骨 (Brow Ridge) - 模擬眼窩陰影
+                // Brow
                 const browGeo = new THREE.TorusGeometry(0.6, 0.12, 16, 100, Math.PI);
                 const brow = new THREE.Mesh(browGeo, skinMat);
                 brow.position.set(0, 0.3, 1.05);
-                brow.rotation.x = 0.5; // 傾斜貼合額頭
-                brow.castShadow = true;
-                brow.receiveShadow = true;
+                brow.rotation.x = 0.5;
+                brow.castShadow = true; brow.receiveShadow = true;
                 group.add(brow);
 
-                // 4. 嘴唇 (Lips) - 模擬人中與下唇陰影
+                // Lips
                 const lipGeo = new THREE.CapsuleGeometry(0.2, 0.4, 4, 8);
                 const lip = new THREE.Mesh(lipGeo, skinMat);
                 lip.rotation.z = Math.PI / 2;
                 lip.position.set(0, -0.6, 1.25);
                 lip.scale.set(1, 0.3, 0.3);
-                lip.castShadow = true;
-                lip.receiveShadow = true;
+                lip.castShadow = true; lip.receiveShadow = true;
                 group.add(lip);
-
-                // 5. 耳朵 (Ears) - 幫助判斷輪廓光
-                const earGeo = new THREE.BoxGeometry(0.3, 0.6, 0.2);
-                const earL = new THREE.Mesh(earGeo, skinMat);
-                earL.position.set(-1.1, 0, 0.2);
-                earL.rotation.y = -0.3;
-                
-                const earR = new THREE.Mesh(earGeo, skinMat);
-                earR.position.set(1.1, 0, 0.2);
-                earR.rotation.y = 0.3;
-                
-                group.add(earL);
-                group.add(earR);
             }
-
-            // 頸部
+            
+            // Neck
             const neckGeo = new THREE.CylinderGeometry(0.6, 0.8, 2, 32);
             const neck = new THREE.Mesh(neckGeo, skinMat);
             neck.position.y = -1.8;
-            neck.castShadow = true;
-            neck.receiveShadow = true;
+            neck.castShadow = true; neck.receiveShadow = true;
             group.add(neck);
 
             return group;
         }
 
-        let currentModelGroup = new THREE.Group();
-        scene.add(currentModelGroup);
-
         function initModel(type) {
             scene.remove(currentModelGroup);
-            if (type === 'male') {
-                currentModelGroup = createMannequin(true);
-            } else {
-                currentModelGroup = createMannequin(false); // 僅有頭型，適合觀察整體柔光
-            }
-            // 確保所有子物件都開啟陰影
+            currentModelGroup = createMannequin(type === 'male');
+            // Ensure shadows
             currentModelGroup.traverse((node) => {
                 if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; }
             });
             scene.add(currentModelGroup);
         }
 
-        const planeGeo = new THREE.PlaneGeometry(20, 20);
-        const planeMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.9 });
+        // Floor
+        const planeGeo = new THREE.PlaneGeometry(30, 30);
+        const planeMat = new THREE.MeshStandardMaterial({ color: 0x020202, roughness: 0.8 });
         const plane = new THREE.Mesh(planeGeo, planeMat);
         plane.rotation.x = -Math.PI / 2;
-        plane.position.y = -2;
+        plane.position.y = -2.5;
         plane.receiveShadow = true;
         scene.add(plane);
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.02);
         scene.add(ambientLight);
 
-        // --- Lights ---
+        // --- Lights Data Structure ---
+        // 每個燈都有自己的 modifier 屬性
         const lights = {
-            key: { obj: createSpotLight(0xffffff, 1.2), az: 45, pol: 30, on: true, name: "KEY", modifier: 'softbox' },
-            fill: { obj: createSpotLight(0xffeedd, 0.4), az: -45, pol: 10, on: true, name: "FILL" },
-            rim: { obj: createSpotLight(0xffc266, 1.5), az: 135, pol: 30, on: true, name: "RIM" }
+            key: { 
+                obj: createSpotLight(0xffffff, 1.2), 
+                az: 45, pol: 30, on: true, name: "KEY", 
+                modifier: 'softbox' 
+            },
+            fill: { 
+                obj: createSpotLight(0xffeedd, 0.4), 
+                az: -45, pol: 10, on: true, name: "FILL", 
+                modifier: 'softbox' // 預設補光也是柔光
+            },
+            rim: { 
+                obj: createSpotLight(0xffc266, 1.5), 
+                az: 135, pol: 30, on: true, name: "RIM", 
+                modifier: 'bare' // 預設輪廓是硬光
+            }
         };
 
         function createSpotLight(color, intensity) {
@@ -321,137 +317,181 @@
             return light;
         }
 
-        function setModifier(type, el) {
-            el.parentElement.querySelectorAll('.option-tag').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-            lights.key.modifier = type;
-            const light = lights.key.obj;
-
-            switch(type) {
-                case 'softbox': light.angle = 0.9; light.penumbra = 1.0; light.shadow.radius = 8; light.intensity = 1.0; break;
-                case 'radar': light.angle = 0.6; light.penumbra = 0.4; light.shadow.radius = 2; light.intensity = 1.3; break;
-                case 'grid': light.angle = 0.35; light.penumbra = 0.1; light.shadow.radius = 1; light.intensity = 1.8; break;
-                case 'bare': light.angle = 1.2; light.penumbra = 0.05; light.shadow.radius = 0; light.intensity = 1.5; break;
-            }
-        }
-
-        function setModel(type, el) {
-            el.parentElement.querySelectorAll('.option-tag').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-            initModel(type);
-        }
-
-        // --- Logic ---
+        // --- Core Logic ---
         let currentTarget = 'key';
+
+        // UI Elements
         const azSlider = document.getElementById('azSlider');
         const polSlider = document.getElementById('polSlider');
         const powerSwitch = document.getElementById('powerSwitch');
         const azVal = document.getElementById('azVal');
         const polVal = document.getElementById('polVal');
+        const controlPanel = document.getElementById('controlPanel');
         const lightName = document.getElementById('lightName');
         const lightDesc = document.getElementById('lightDesc');
-        const targetStatusLabel = document.getElementById('targetStatusLabel');
+        const currentModName = document.getElementById('currentModName');
 
-        function initLights() {
-            initModel('male'); 
-            setModifier('softbox', document.querySelector("div[onclick=\"setModifier('softbox', this)\"]"));
-            for (const key in lights) updateLightTransform(key);
+        function initApp() {
+            initModel('male');
+            
+            // 初始化物理屬性
+            for (const key in lights) {
+                applyLightPhysics(lights[key]);
+                updateLightTransform(key);
+            }
             updateUI();
+        }
+
+        // 1. 設定模型
+        function setModel(type, el) {
+            document.querySelectorAll('.face-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+            initModel(type);
+        }
+
+        // 2. 選擇燈光 (Tab Switching)
+        function selectLight(type) {
+            currentTarget = type;
+            
+            // Tab Style
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('active');
+
+            updateUI();
+        }
+
+        // 3. 設定配件 (Per Light)
+        function setModifier(modType) {
+            const data = lights[currentTarget];
+            data.modifier = modType;
+            
+            // Apply Physics
+            applyLightPhysics(data);
+            
+            // Update UI
+            updateUI();
+        }
+
+        // Helper: 將 modifier 參數應用到 Three.js 燈光物件
+        function applyLightPhysics(data) {
+            const light = data.obj;
+            const type = data.modifier;
+
+            switch(type) {
+                case 'softbox':
+                    light.angle = 0.9; light.penumbra = 1.0; 
+                    light.shadow.radius = 8; light.intensity = (data.name === 'RIM') ? 1.5 : 1.0;
+                    break;
+                case 'radar':
+                    light.angle = 0.6; light.penumbra = 0.4; 
+                    light.shadow.radius = 2; light.intensity = (data.name === 'RIM') ? 1.8 : 1.3;
+                    break;
+                case 'grid':
+                    light.angle = 0.35; light.penumbra = 0.1; 
+                    light.shadow.radius = 1; light.intensity = (data.name === 'RIM') ? 2.0 : 1.8;
+                    break;
+                case 'bare':
+                    light.angle = 1.1; light.penumbra = 0.05; 
+                    light.shadow.radius = 0; light.intensity = (data.name === 'RIM') ? 1.8 : 1.5;
+                    break;
+            }
+        }
+
+        // 4. 更新 UI 顯示 (Sync)
+        function updateUI() {
+            const data = lights[currentTarget];
+            
+            // Sync Sliders
+            azSlider.value = data.az;
+            polSlider.value = data.pol;
+            azVal.innerText = `${data.az}°`;
+            polVal.innerText = `${data.pol}°`;
+            
+            // Sync Power
+            powerSwitch.checked = data.on;
+            
+            // Sync Modifiers Buttons
+            currentModName.innerText = data.modifier.toUpperCase();
+            document.querySelectorAll('.mod-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`mod${data.modifier.charAt(0).toUpperCase() + data.modifier.slice(1)}`).classList.add('active');
+
+            // Panel State
+            if (data.on) {
+                controlPanel.style.opacity = '1';
+                controlPanel.style.pointerEvents = 'auto';
+            } else {
+                controlPanel.style.opacity = '0.3';
+                controlPanel.style.pointerEvents = 'none';
+                // 保留開關可點擊
+                document.querySelector('.toggle-switch').style.pointerEvents = 'auto';
+            }
+
+            analyzeGlobal();
+        }
+
+        // 5. 更新位置
+        function updatePosition() {
+            const data = lights[currentTarget];
+            data.az = parseInt(azSlider.value);
+            data.pol = parseInt(polSlider.value);
+            azVal.innerText = `${data.az}°`;
+            polVal.innerText = `${data.pol}°`;
+            updateLightTransform(currentTarget);
+            analyzeGlobal();
         }
 
         function updateLightTransform(type) {
             const data = lights[type];
             data.obj.visible = data.on;
             if (!data.on) return;
+
             const r = 5.5;
             const phi = (90 - data.pol) * (Math.PI / 180);
             const theta = (data.az + 90) * (Math.PI / 180);
-            data.obj.position.set(-(r * Math.sin(phi) * Math.cos(theta)), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
+
+            data.obj.position.set(
+                -(r * Math.sin(phi) * Math.cos(theta)),
+                r * Math.cos(phi),
+                r * Math.sin(phi) * Math.sin(theta)
+            );
             data.obj.lookAt(0, 0, 0);
         }
 
-        function selectLight(type) {
-            document.querySelectorAll('.selector-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(`sel${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('active');
-            currentTarget = type;
-            updateUI();
-        }
-
-        function updateUI() {
-            const data = lights[currentTarget];
-            azSlider.value = data.az;
-            polSlider.value = data.pol;
-            azVal.innerText = `${data.az}°`;
-            polVal.innerText = `${data.pol}°`;
-            powerSwitch.checked = data.on;
-            targetStatusLabel.innerText = `${data.name} LIGHT STATUS`;
-            document.getElementById('sliderGroup').style.opacity = data.on ? '1' : '0.3';
-            document.getElementById('sliderGroup').style.pointerEvents = data.on ? 'auto' : 'none';
-            analyzeGlobal();
-        }
-
-        function updatePosition() {
-            const data = lights[currentTarget];
-            data.az = parseInt(azSlider.value);
-            data.pol = parseInt(polSlider.value);
-            updateUI();
-            updateLightTransform(currentTarget);
-        }
-
+        // 6. 開關電源
         function toggleCurrentLight() {
             const isOn = powerSwitch.checked;
             lights[currentTarget].on = isOn;
-            const dot = document.getElementById(`dot${currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1)}`);
-            dot.className = isOn ? 'power-dot on' : 'power-dot off';
-            updateUI();
             updateLightTransform(currentTarget);
+            updateUI();
         }
 
+        // 7. Analysis
         function analyzeGlobal() {
             const key = lights.key;
             const fill = lights.fill;
             const rim = lights.rim;
-            let baseStyle = "", baseDesc = "";
+            
+            let title = "", desc = "";
 
             if (!key.on) {
-                if (!fill.on && !rim.on) { baseStyle = "全黑"; baseDesc = "無光源狀態。"; }
-                else if (rim.on && !fill.on) { baseStyle = "剪影 (Silhouette)"; baseDesc = "僅見輪廓邊緣，神祕感強烈。"; }
-                else { baseStyle = "暗調 (Low Key)"; baseDesc = "缺乏主光，結構不明顯。"; }
+                 if (rim.on) { title = "SILHOUETTE (剪影)"; desc = "主光缺席。僅由輪廓光勾勒邊緣，強調神秘感與形態美。"; }
+                 else { title = "LOW KEY (暗調)"; desc = "缺乏主導光源，畫面層次不明。"; }
             } else {
                 const absAz = Math.abs(key.az);
-                if (key.pol > 60) { baseStyle = "頂光 (Top)"; baseDesc = "眉骨與鼻下產生深重陰影 (Skull Effect)。"; }
-                else if (key.pol < -5) { baseStyle = "底光 (Under)"; baseDesc = "恐怖感的反自然光線。"; }
-                else if (absAz < 20) {
-                     if (key.pol > 25) { baseStyle = "蝴蝶光 (Butterfly)"; baseDesc = "鼻下形成蝶形影，強調顴骨。"; }
-                     else { baseStyle = "平光 (Flat)"; baseDesc = "陰影最少，修飾膚質但缺乏立體感。"; }
-                } else if (absAz >= 30 && absAz <= 70) {
-                    baseStyle = "倫勃朗光 (Rembrandt)"; baseDesc = "暗面臉頰形成光三角，藝術性高。";
-                } else if (absAz > 70 && absAz <= 110) {
-                    baseStyle = "分割光 (Split)"; baseDesc = "正側面光，半明半暗，陽剛氣息。";
-                } else {
-                    baseStyle = "側逆光 (Kicker)"; baseDesc = "面部大部分在陰影中，強調輪廓。";
-                }
+                if (key.pol > 60) { title = "TOP LIGHT (頂光)"; desc = "來自正上方，強調面部結構，適合硬派風格。"; }
+                else if (absAz < 25 && key.pol > 20) { title = "BUTTERFLY (蝴蝶光)"; desc = "經典美顏佈光，鼻下碟形影，修飾臉型。"; }
+                else if (absAz >= 30 && absAz <= 70) { title = "REMBRANDT (倫勃朗)"; desc = "暗面臉頰形成光三角，藝術與電影感之首選。"; }
+                else if (absAz > 70) { title = "SPLIT / SIDE (分割光)"; desc = "正側面光，半明半暗，極具戲劇張力。"; }
+                else { title = "LOOP (環形光)"; desc = "鼻影微偏，最自然的通用佈光。"; }
             }
-
-            let finalName = baseStyle;
-            let finalDesc = baseDesc;
             
-            // 根據配件修改描述
-            let modNote = "";
-            if (key.on) {
-                if (key.modifier === 'softbox') modNote = " (柔光罩：陰影過渡自然)";
-                if (key.modifier === 'grid') modNote = " (蜂巢：光束集中，背景壓暗)";
-            }
+            // Append Modifier Info
+            let modInfo = "";
+            if (key.on && key.modifier === 'grid') modInfo = " 搭配蜂巢限制光區，背景壓暗。";
+            if (rim.on && rim.modifier === 'bare') modInfo += " 裸燈輪廓光帶來銳利的邊緣切割。";
 
-            if (key.on) {
-                if (rim.on && fill.on) { finalName = `三點式 ${baseStyle}`; finalDesc += ` 商業標準佈光，層次豐富完整。${modNote}`; }
-                else if (rim.on && !fill.on) { finalName = `戲劇性 ${baseStyle}`; finalDesc += ` 搭配強烈輪廓光，電影質感。${modNote}`; }
-                else if (!rim.on && fill.on) { finalName = `柔和 ${baseStyle}`; finalDesc += ` 補光保留了暗部細節。${modNote}`; }
-                else { finalName = `單燈 ${baseStyle}`; finalDesc += ` 強烈對比風格。${modNote}`; }
-            }
-
-            lightName.innerText = finalName;
-            lightDesc.innerText = finalDesc;
+            lightName.innerText = title;
+            lightDesc.innerText = `${desc}${modInfo}`;
         }
 
         function animate() {
@@ -459,7 +499,7 @@
             renderer.render(scene, camera);
         }
         
-        initLights();
+        initApp();
         animate();
 
         window.addEventListener('resize', () => {
