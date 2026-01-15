@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Noto+Serif+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Shippori+Mincho:wght@400;500;600&display=swap" rel="stylesheet">
     
     <script>
         tailwind.config = {
@@ -16,7 +16,7 @@
                     fontFamily: { 
                         serif: ['Cinzel', 'serif'], 
                         mono: ['Space Mono', 'monospace'],
-                        zh: ['Noto Serif TC', 'Songti TC', 'serif'] // 增加系統宋體備援
+                        zh: ['Shippori Mincho', 'serif'] // 改用質感更好的明朝體
                     },
                     colors: { eden: { dark: '#020202', gold: '#C5A059' } },
                     animation: { 'fade-in': 'fadeIn 0.8s ease-out' },
@@ -33,51 +33,40 @@
             background-color: #020202; 
             color: #e2e8f0; 
             overflow-x: hidden; 
-            /* 靜態質感噪點 */
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-            /* 字體平滑優化 (關鍵質感來源) */
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
         }
         
-        /* 玻璃面板 */
         .glass-panel { 
-            background: #050505; 
-            border: 1px solid #151515; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8); 
+            background: #050505; border: 1px solid #151515; box-shadow: 0 20px 40px rgba(0,0,0,0.8); 
         }
         
-        /* 輸入框樣式 */
-        .input-group label { display: block; font-size: 9px; color: #666; letter-spacing: 0.15em; margin-bottom: 6px; font-family: 'Space Mono'; text-transform: uppercase; }
+        /* 輸入框 Label 優化：中文為主 */
+        .input-group label { 
+            display: block; font-size: 13px; color: #aaa; margin-bottom: 6px; 
+            font-family: 'Shippori Mincho', serif; letter-spacing: 0.1em;
+        }
+        .input-group label span {
+            font-size: 9px; color: #555; font-family: 'Space Mono'; margin-left: 4px; text-transform: uppercase;
+        }
+
         .input-field { 
-            background: #0a0a0a; 
-            border: 1px solid #222; 
-            color: #fff; 
-            transition: 0.3s; 
-            text-align: center; 
-            font-family: 'Space Mono', monospace; 
-            width: 100%; 
-            padding: 12px; 
-            font-size: 13px; 
-            border-radius: 0; 
+            background: #0a0a0a; border: 1px solid #222; color: #fff; transition: 0.3s; 
+            text-align: center; font-family: 'Space Mono', monospace; width: 100%; padding: 12px; font-size: 13px; border-radius: 0; 
         }
         .input-field:focus { border-color: #C5A059; outline: none; background: #0f0f0f; }
-        
-        /* 下拉選單修復 */
-        select.input-field { appearance: none; -webkit-appearance: none; cursor: pointer; }
+        select.input-field { appearance: none; -webkit-appearance: none; cursor: pointer; font-family: 'Shippori Mincho', serif; }
         select.input-field option { background-color: #0a0a0a; color: #fff; padding: 10px; }
 
-        /* 選項按鈕 */
         .option-btn { 
             background: #0a0a0a; border: 1px solid #222; padding: 20px; width: 100%; text-align: left; 
             transition: all 0.3s; margin-bottom: 10px; font-size: 0.95rem; 
-            font-family: 'Noto Serif TC', serif; font-weight: 400; /* 加重字重 */
+            font-family: 'Shippori Mincho', serif; font-weight: 500;
             letter-spacing: 0.05em; line-height: 1.6; color: #999;
         }
         .option-btn:hover { border-color: #C5A059; background: #0f0f0f; transform: translateX(5px); color: #fff; }
 
-        /* 金色按鈕 */
         .btn-gold { 
             background: #C5A059; color: #000; transition: 0.3s; 
             box-shadow: 0 4px 15px rgba(197, 160, 89, 0.1); display: flex; flex-direction: column; 
@@ -86,26 +75,17 @@
         }
         .btn-gold:hover { background: #d4b06a; box-shadow: 0 6px 20px rgba(197, 160, 89, 0.3); }
 
-        /* 結果卡片 */
         .result-card {
             background: #050505; border: 1px solid #333; padding: 30px; width: 100%; max-width: 380px; 
             margin: 0 auto; position: relative;
         }
-
-        /* 雙色票 */
         .duo-swatch { height: 100%; border: 1px solid rgba(255,255,255,0.1); position: relative; }
         .color-label { position: absolute; bottom: 5px; left: 5px; font-size: 9px; font-family: 'Space Mono'; color: rgba(255,255,255,0.6); background: rgba(0,0,0,0.5); padding: 2px 4px;}
 
-        /* Disclaimer 區域 */
         .disclaimer-box {
-            border: 1px solid #222;
-            background: rgba(10, 10, 10, 0.5);
-            padding: 15px;
-            margin-top: 25px;
-            margin-bottom: 15px;
-            position: relative;
+            border: 1px solid #222; background: rgba(10, 10, 10, 0.5); padding: 15px; 
+            margin-top: 25px; margin-bottom: 15px; position: relative;
         }
-        /* 金色左側裝飾線 */
         .disclaimer-box::before {
             content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: #C5A059;
         }
@@ -128,49 +108,49 @@
             
             <div class="glass-panel p-8 space-y-5">
                 <div class="input-group text-left">
-                    <label>NAME / ALIAS</label>
-                    <input type="text" id="userName" class="input-field" placeholder="INPUT NAME">
+                    <label>姓名 <span>NAME / ALIAS</span></label>
+                    <input type="text" id="userName" class="input-field" placeholder="輸入你的名字">
                 </div>
                 
                 <div class="flex gap-4">
                     <div class="input-group text-left w-1/2">
-                        <label>BIRTH DATE</label>
+                        <label>生日 <span>BIRTH DATE</span></label>
                         <input type="date" id="userDate" class="input-field uppercase">
                     </div>
                     <div class="input-group text-left w-1/2">
-                        <label>GENDER</label>
+                        <label>性別 <span>GENDER</span></label>
                         <select id="userGender" class="input-field">
-                            <option value="Female">FEMALE</option>
-                            <option value="Male">MALE</option>
-                            <option value="Non-Binary">NON-BINARY</option>
+                            <option value="Female">女 (Female)</option>
+                            <option value="Male">男 (Male)</option>
+                            <option value="Non-Binary">其他 (Non-Binary)</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
                     <div class="input-group text-left w-1/2">
-                        <label>INSTAGRAM</label>
-                        <input type="text" id="userIG" class="input-field" placeholder="@ID">
+                        <label>IG 帳號 <span>INSTAGRAM</span></label>
+                        <input type="text" id="userIG" class="input-field" placeholder="@你的ID">
                     </div>
                     <div class="input-group text-left w-1/2">
-                        <label>CITY</label>
+                        <label>居住城市 <span>CITY</span></label>
                         <select id="userCity" class="input-field">
-                            <option value="Taipei">TAIPEI</option>
-                            <option value="New Taipei">NEW TAIPEI</option>
-                            <option value="Taoyuan">TAOYUAN</option>
-                            <option value="Taichung">TAICHUNG</option>
-                            <option value="Tainan">TAINAN</option>
-                            <option value="Kaohsiung">KAOHSIUNG</option>
-                            <option value="Other">OTHER</option>
+                            <option value="Taipei">台北 (Taipei)</option>
+                            <option value="New Taipei">新北 (New Taipei)</option>
+                            <option value="Taoyuan">桃園 (Taoyuan)</option>
+                            <option value="Taichung">台中 (Taichung)</option>
+                            <option value="Tainan">台南 (Tainan)</option>
+                            <option value="Kaohsiung">高雄 (Kaohsiung)</option>
+                            <option value="Other">其他 (Other)</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="disclaimer-box text-left">
-                    <p class="font-zh text-[#C5A059] text-[11px] font-medium tracking-wider mb-2">
+                    <p class="font-zh text-[#C5A059] text-[12px] font-medium tracking-wider mb-2">
                         【 互惠選角機制啟動 】
                     </p>
-                    <p class="font-zh text-gray-400 text-[10px] leading-relaxed opacity-90 font-normal">
+                    <p class="font-zh text-gray-400 text-[11px] leading-relaxed opacity-90">
                         填寫正確資訊將列入每月互惠計劃名單。<br>
                         入選者 將由官方私訊 IG 通知。
                     </p>
@@ -180,7 +160,7 @@
                 </div>
 
                 <button onclick="startQuiz()" class="btn-gold w-full py-4 text-xs tracking-[0.2em] font-bold mt-2 hover:brightness-110">
-                    INITIALIZE DIAGNOSIS
+                    開始診斷 (INITIALIZE)
                 </button>
             </div>
         </div>
@@ -204,7 +184,6 @@
         </div>
 
         <div id="phase-result" class="hidden flex flex-col items-center w-full">
-            
             <p class="text-gray-600 text-[9px] mb-4 tracking-[0.3em]">ANALYSIS COMPLETE</p>
 
             <div id="captureArea" class="result-card shadow-2xl">
@@ -256,7 +235,7 @@
                         <p id="resReason" class="font-zh text-[10px] text-gray-500 leading-relaxed font-normal"></p>
                     </div>
                     
-                    <div>
+                     <div>
                         <h4 class="font-serif text-[#444] text-[9px] mb-2 flex items-center gap-2 tracking-widest">
                             <span class="w-1 h-1 bg-[#C5A059]"></span> VISUAL MANIFESTATION
                         </h4>
@@ -294,131 +273,24 @@
     </main>
 
     <script>
-        // --- 9大美學原型資料庫 (保留完整內容) ---
+        // --- 9大美學原型資料庫 (同前，省略以節省長度，內容不變) ---
         const archetypes = {
-            1: {
-                title: "THE PIONEER (開創者)",
-                keywords: "#MINIMAL #BOLD",
-                desc: "你擁有強大的內在驅動力，習慣在混亂中迅速找到秩序。你討厭拖泥帶水，也不喜歡過度包裝。你的魅力來自於那種『我知道我要什麼』的堅定。",
-                reason: "這是一個轉折點。現在的你，比以往任何時候都更需要一張能夠『定義自己』的照片。不需要討好任何人，只要純粹地宣告你的存在。",
-                visual: "高反差黑白肖像。背景是極致的純淨，一道硬光 (Hard Light) 俐落地勾勒出你的輪廓。你穿著剪裁合身的高領黑衣，眼神直視鏡頭。",
-                colors: ["#1A1A1A", "#C5A059"] 
-            },
-            2: {
-                title: "THE DIPLOMAT (協調者)",
-                keywords: "#SOFT #FLOW",
-                desc: "你對周遭的情緒流動有著極高的敏銳度。你內心有一片寧靜的湖泊，雖然不常大聲喧嘩，但那份安定的力量卻能深深感染身邊的人。",
-                reason: "你總是習慣照顧別人，卻鮮少花時間好好看自己。這組照片是給你的禮物，記錄下你此刻溫柔而堅定的模樣。",
-                visual: "自然光下的莫蘭迪色調。穿著亞麻或絲質的柔軟衣物，光影透過窗簾在你的臉龐上形成溫柔的漫射。",
-                colors: ["#E0D8D1", "#A89F91"] 
-            },
-            3: {
-                title: "THE ARTIST (藝術家)",
-                keywords: "#DRAMA #VIBRANT",
-                desc: "你的靈魂拒絕平庸，對世界有著獨特的濾鏡。你感受到的情緒比常人更強烈。你渴望表達，渴望被看見那些無法用言語形容的內在風景。",
-                reason: "此刻你內心澎湃的情感需要一個出口。你需要透過影像的張力，將內在的火焰具象化，讓這份能量被永久封存。",
-                visual: "王家衛式的電影氛圍。霓虹光感與大膽的撞色，或許是在雨後的街道，動態模糊捕捉你回眸的瞬間。",
-                colors: ["#2D2424", "#7D3C3C"] 
-            },
-            4: {
-                title: "THE BUILDER (建構者)",
-                keywords: "#ORDER #STRUCTURE",
-                desc: "你是一個值得信賴的人，像一座穩固的建築。你在秩序與結構中找到安寧，對專業與細節有著不妥協的堅持。",
-                reason: "你的專業形象需要一次升級。你需要一組能夠匹配你當前高度的影像，展現那種『不怒自威』的專業感。",
-                visual: "古典主義建築或幾何線條背景。構圖絕對水平垂直，展現秩序美。你穿著剪裁完美的成套西裝。",
-                colors: ["#1F2937", "#5D4037"] 
-            },
-            5: {
-                title: "THE EXPLORER (探索者)",
-                keywords: "#WILD #FREE",
-                desc: "你不受框架拘束，靈魂裡住著一陣風。你對未知充滿好奇，討厭一成不變的生活。你的生命力在流動中最強大。",
-                reason: "記錄下你此刻不被馴服的樣子吧。這組照片不是為了展示給誰看，而是為了提醒未來的你：永遠不要失去這份自由的靈魂。",
-                visual: "廣角鏡頭下的街頭抓拍。背景是流動的城市或粗獷的廢墟。你不看鏡頭，髮絲在風中飛揚。",
-                colors: ["#A0522D", "#6B7280"] 
-            },
-            6: {
-                title: "THE HEALER (療癒者)",
-                keywords: "#WARM #GLOW",
-                desc: "你自帶溫暖的治癒氣場，就像冬日的暖陽。人們喜歡靠近你，因為在你身邊能感到被接納。你懂得欣賞不完美中的美。",
-                reason: "你的溫暖總是給了別人，現在該輪到你被溫柔以待。透過鏡頭，我們將捕捉你最放鬆、最沒有防備的時刻。",
-                visual: "逆光下的居家感。午後四點的金黃色陽光灑落，手捧熱咖啡。髮絲染上金邊，你的眼神溫柔而清澈。",
-                colors: ["#D4A373", "#FAEDCD"] 
-            },
-            7: {
-                title: "THE ANALYST (哲學家)",
-                keywords: "#COOL #DEEP",
-                desc: "你習慣透過思考來理解世界。你擁有一種高智感的冷靜，不隨波逐流。你追求的是深度的對話與獨處的品質。",
-                reason: "這是一個向內探索的階段。透過影像，我們不只要拍你的外表，更要拍出你那種『正在解析世界』的智性氛圍。",
-                visual: "冷色調的極簡構圖。利用玻璃反射或鏡像，創造出一種抽離的視角。聚焦在你沉思時的側臉。",
-                colors: ["#2C3E50", "#B0C4DE"] 
-            },
-            8: {
-                title: "THE EXECUTIVE (權威者)",
-                keywords: "#LUXURY #POWER",
-                desc: "你天生屬於舞台中央，擁有掌控全局的氣場。你追求卓越，享受挑戰。你的自信不是傲慢，而是源於對自身實力的絕對掌控。",
-                reason: "你需要一張能夠鎮得住場子的『王牌』。這組照片要讓人一眼就感受到你的價值感與不可忽視的地位。",
-                visual: "倫勃朗光 (Rembrandt Lighting) 的商業大片質感。深色背景，強調服裝的質感。坐姿霸氣，眼神銳利。",
-                colors: ["#121212", "#B8860B"] 
-            },
-            9: {
-                title: "THE HUMANITARIAN (博愛者)",
-                keywords: "#ZEN #VAST",
-                desc: "你的視野宏大，關注本質與真理。狹窄的空間無法容納你的靈魂。你有一種超脫世俗的空靈氣質。",
-                reason: "讓身心回歸自然的懷抱。這組照片是一場儀式，讓你暫時脫離世俗的紛擾，在廣闊的天地間找回內心的平靜。",
-                visual: "超廣角大景。將人物縮小置於大自然中，大量留白。強調人與環境的和諧共存，畫面充滿了禪意。",
-                colors: ["#4A5D46", "#DCDCDC"] 
-            }
+            1: { title: "THE PIONEER (開創者)", keywords: "#MINIMAL #BOLD", desc: "你擁有強大的內在驅動力，習慣在混亂中迅速找到秩序。你討厭拖泥帶水，也不喜歡過度包裝。你的魅力來自於那種『我知道我要什麼』的堅定。", reason: "這是一個轉折點。現在的你，比以往任何時候都更需要一張能夠『定義自己』的照片。不需要討好任何人，只要純粹地宣告你的存在。", visual: "高反差黑白肖像。背景是極致的純淨，一道硬光 (Hard Light) 俐落地勾勒出你的輪廓。你穿著剪裁合身的高領黑衣，眼神直視鏡頭。", colors: ["#1A1A1A", "#C5A059"] },
+            2: { title: "THE DIPLOMAT (協調者)", keywords: "#SOFT #FLOW", desc: "你對周遭的情緒流動有著極高的敏銳度。你內心有一片寧靜的湖泊，雖然不常大聲喧嘩，但那份安定的力量卻能深深感染身邊的人。", reason: "你總是習慣照顧別人，卻鮮少花時間好好看自己。這組照片是給你的禮物，記錄下你此刻溫柔而堅定的模樣。", visual: "自然光下的莫蘭迪色調。穿著亞麻或絲質的柔軟衣物，光影透過窗簾在你的臉龐上形成溫柔的漫射。", colors: ["#E0D8D1", "#A89F91"] },
+            3: { title: "THE ARTIST (藝術家)", keywords: "#DRAMA #VIBRANT", desc: "你的靈魂拒絕平庸，對世界有著獨特的濾鏡。你感受到的情緒比常人更強烈。你渴望表達，渴望被看見那些無法用言語形容的內在風景。", reason: "此刻你內心澎湃的情感需要一個出口。你需要透過影像的張力，將內在的火焰具象化，讓這份能量被永久封存。", visual: "王家衛式的電影氛圍。霓虹光感與大膽的撞色，或許是在雨後的街道，動態模糊捕捉你回眸的瞬間。", colors: ["#2D2424", "#7D3C3C"] },
+            4: { title: "THE BUILDER (建構者)", keywords: "#ORDER #STRUCTURE", desc: "你是一個值得信賴的人，像一座穩固的建築。你在秩序與結構中找到安寧，對專業與細節有著不妥協的堅持。", reason: "你的專業形象需要一次升級。你需要一組能夠匹配你當前高度的影像，展現那種『不怒自威』的專業感。", visual: "古典主義建築或幾何線條背景。構圖絕對水平垂直，展現秩序美。你穿著剪裁完美的成套西裝。", colors: ["#1F2937", "#5D4037"] },
+            5: { title: "THE EXPLORER (探索者)", keywords: "#WILD #FREE", desc: "你不受框架拘束，靈魂裡住著一陣風。你對未知充滿好奇，討厭一成不變的生活。你的生命力在流動中最強大。", reason: "記錄下你此刻不被馴服的樣子吧。這組照片不是為了展示給誰看，而是為了提醒未來的你：永遠不要失去這份自由的靈魂。", visual: "廣角鏡頭下的街頭抓拍。背景是流動的城市或粗獷的廢墟。你不看鏡頭，髮絲在風中飛揚。", colors: ["#A0522D", "#6B7280"] },
+            6: { title: "THE HEALER (療癒者)", keywords: "#WARM #GLOW", desc: "你自帶溫暖的治癒氣場，就像冬日的暖陽。人們喜歡靠近你，因為在你身邊能感到被接納。你懂得欣賞不完美中的美。", reason: "你的溫暖總是給了別人，現在該輪到你被溫柔以待。透過鏡頭，我們將捕捉你最放鬆、最沒有防備的時刻。", visual: "逆光下的居家感。午後四點的金黃色陽光灑落，手捧熱咖啡。髮絲染上金邊，你的眼神溫柔而清澈。", colors: ["#D4A373", "#FAEDCD"] },
+            7: { title: "THE ANALYST (哲學家)", keywords: "#COOL #DEEP", desc: "你習慣透過思考來理解世界。你擁有一種高智感的冷靜，不隨波逐流。你追求的是深度的對話與獨處的品質。", reason: "這是一個向內探索的階段。透過影像，我們不只要拍你的外表，更要拍出你那種『正在解析世界』的智性氛圍。", visual: "冷色調的極簡構圖。利用玻璃反射或鏡像，創造出一種抽離的視角。聚焦在你沉思時的側臉。", colors: ["#2C3E50", "#B0C4DE"] },
+            8: { title: "THE EXECUTIVE (權威者)", keywords: "#LUXURY #POWER", desc: "你天生屬於舞台中央，擁有掌控全局的氣場。你追求卓越，享受挑戰。你的自信不是傲慢，而是源於對自身實力的絕對掌控。", reason: "你需要一張能夠鎮得住場子的『王牌』。這組照片要讓人一眼就感受到你的價值感與不可忽視的地位。", visual: "倫勃朗光 (Rembrandt Lighting) 的商業大片質感。深色背景，強調服裝的質感。坐姿霸氣，眼神銳利。", colors: ["#121212", "#B8860B"] },
+            9: { title: "THE HUMANITARIAN (博愛者)", keywords: "#ZEN #VAST", desc: "你的視野宏大，關注本質與真理。狹窄的空間無法容納你的靈魂。你有一種超脫世俗的空靈氣質。", reason: "讓身心回歸自然的懷抱。這組照片是一場儀式，讓你暫時脫離世俗的紛擾，在廣闊的天地間找回內心的平靜。", visual: "超廣角大景。將人物縮小置於大自然中，大量留白。強調人與環境的和諧共存，畫面充滿了禪意。", colors: ["#4A5D46", "#DCDCDC"] }
         };
-
         const questions = [
-            {
-                text: "在一個完全沒有行程的週末，你會如何為自己充電？",
-                options: [
-                    { text: "遠離人群，去海邊或山上看著風景發呆，感受渺小。", scores: [9] },
-                    { text: "窩在沙發上，點個香氛，讀一本好書或看部老電影。", scores: [6, 2] },
-                    { text: "去最熱鬧的街區或展覽，尋找視覺刺激與靈感。", scores: [3, 5] },
-                    { text: "整理房間，規劃下週目標，在秩序中獲得平靜。", scores: [4, 1, 8] },
-                    { text: "找個安靜的咖啡廳，觀察路人，思考人生的哲學問題。", scores: [7] }
-                ]
-            },
-            {
-                text: "如果你要選一套服裝來代表今天的狀態，你會選？",
-                options: [
-                    { text: "剪裁極簡的黑色系，不囉唆，有質感。", scores: [1, 7] },
-                    { text: "亞麻、棉質等大地色系，舒服最重要。", scores: [2, 6, 9] },
-                    { text: "色彩鮮豔或有獨特印花的單品，我想被看見。", scores: [3, 5] },
-                    { text: "剪裁合宜的西裝或套裝，展現專業與氣勢。", scores: [4, 8] }
-                ]
-            },
-            {
-                text: "朋友通常怎麼形容你給人的第一印象？",
-                options: [
-                    { text: "很有氣場、自信，甚至有點距離感。", scores: [1, 8] },
-                    { text: "溫柔、好相處，是很棒的傾聽者。", scores: [2, 6] },
-                    { text: "很特別、捉摸不定，很有藝術家氣息。", scores: [3, 5] },
-                    { text: "很理性、冷靜，講話很有邏輯。", scores: [7, 4] },
-                    { text: "很佛系、隨和，好像什麼都不計較。", scores: [9] }
-                ]
-            },
-            {
-                text: "你心中理想的「美」，最接近下列哪種畫面？",
-                options: [
-                    { text: "對稱的幾何線條，完美的光影結構。", scores: [4, 1] },
-                    { text: "流動的瞬間，模糊卻充滿情緒張力。", scores: [3, 5] },
-                    { text: "溫暖的陽光灑在木地板上，歲月靜好。", scores: [6, 2] },
-                    { text: "宏偉壯闊的大自然，人類顯得很渺小。", scores: [9] },
-                    { text: "精緻奢華的細節，金碧輝煌的質感。", scores: [8] }
-                ]
-            },
-            {
-                text: "如果要拍一組照片，你內心深處最渴望展現的是？",
-                options: [
-                    { text: "我的專業與成功，我想看起來很強。", scores: [8, 4] },
-                    { text: "我真實的情緒，快樂或憂傷都不掩飾。", scores: [3, 5] },
-                    { text: "我最放鬆、最自然的樣子，不要擺拍。", scores: [6, 2, 9] },
-                    { text: "我獨特的思想與靈魂，那種神祕的氛圍。", scores: [7, 1] }
-                ]
-            }
+            { text: "在一個完全沒有行程的週末，你會如何為自己充電？", options: [{ text: "遠離人群，去海邊或山上看著風景發呆，感受渺小。", scores: [9] }, { text: "窩在沙發上，點個香氛，讀一本好書或看部老電影。", scores: [6, 2] }, { text: "去最熱鬧的街區或展覽，尋找視覺刺激與靈感。", scores: [3, 5] }, { text: "整理房間，規劃下週目標，在秩序中獲得平靜。", scores: [4, 1, 8] }, { text: "找個安靜的咖啡廳，觀察路人，思考人生的哲學問題。", scores: [7] }] },
+            { text: "如果你要選一套服裝來代表今天的狀態，你會選？", options: [{ text: "剪裁極簡的黑色系，不囉唆，有質感。", scores: [1, 7] }, { text: "亞麻、棉質等大地色系，舒服最重要。", scores: [2, 6, 9] }, { text: "色彩鮮豔或有獨特印花的單品，我想被看見。", scores: [3, 5] }, { text: "剪裁合宜的西裝或套裝，展現專業與氣勢。", scores: [4, 8] }] },
+            { text: "朋友通常怎麼形容你給人的第一印象？", options: [{ text: "很有氣場、自信，甚至有點距離感。", scores: [1, 8] }, { text: "溫柔、好相處，是很棒的傾聽者。", scores: [2, 6] }, { text: "很特別、捉摸不定，很有藝術家氣息。", scores: [3, 5] }, { text: "很理性、冷靜，講話很有邏輯。", scores: [7, 4] }, { text: "很佛系、隨和，好像什麼都不計較。", scores: [9] }] },
+            { text: "你心中理想的「美」，最接近下列哪種畫面？", options: [{ text: "對稱的幾何線條，完美的光影結構。", scores: [4, 1] }, { text: "流動的瞬間，模糊卻充滿情緒張力。", scores: [3, 5] }, { text: "溫暖的陽光灑在木地板上，歲月靜好。", scores: [6, 2] }, { text: "宏偉壯闊的大自然，人類顯得很渺小。", scores: [9] }, { text: "精緻奢華的細節，金碧輝煌的質感。", scores: [8] }] },
+            { text: "如果要拍一組照片，你內心深處最渴望展現的是？", options: [{ text: "我的專業與成功，我想看起來很強。", scores: [8, 4] }, { text: "我真實的情緒，快樂或憂傷都不掩飾。", scores: [3, 5] }, { text: "我最放鬆、最自然的樣子，不要擺拍。", scores: [6, 2, 9] }, { text: "我獨特的思想與靈魂，那種神祕的氛圍。", scores: [7, 1] }] }
         ];
 
         let currentQuestion = 0;
@@ -433,12 +305,11 @@
             const gender = document.getElementById('userGender').value;
             
             if(!name || !date || !ig) {
-                alert("請填寫姓名、生日與 IG (必填) 以建立檔案。");
+                alert("請完整填寫資料以建立檔案。");
                 return;
             }
             userData = { name, date, ig, city, gender };
 
-            // Formspree Integration (Data Collection)
             fetch("https://formspree.io/f/mjgkllab", {
                 method: "POST",
                 headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -453,6 +324,7 @@
             renderQuestion();
         }
 
+        // ... (其餘渲染與截圖邏輯保持不變) ...
         function renderQuestion() {
             const q = questions[currentQuestion];
             document.getElementById('questionNumber').innerText = `0${currentQuestion + 1}`;
@@ -469,88 +341,46 @@
                 container.appendChild(btn);
             });
         }
-
         function selectOption(points) {
             points.forEach(id => { scores[id] += 1; });
-            if (currentQuestion < questions.length - 1) {
-                currentQuestion++;
-                renderQuestion();
-            } else {
-                finishQuiz();
-            }
+            if (currentQuestion < questions.length - 1) { currentQuestion++; renderQuestion(); } else { finishQuiz(); }
         }
-
         function finishQuiz() {
             document.getElementById('phase-quiz').classList.add('hidden');
             document.getElementById('phase-loading').classList.remove('hidden');
-
-            let maxScore = -1;
-            let winningId = 1;
+            let maxScore = -1; let winningId = 1;
             for (const [id, score] of Object.entries(scores)) {
-                if (score > maxScore) {
-                    maxScore = score;
-                    winningId = id;
-                } else if (score === maxScore) {
-                    if (Math.random() > 0.5) winningId = id;
-                }
+                if (score > maxScore) { maxScore = score; winningId = id; } 
+                else if (score === maxScore) { if (Math.random() > 0.5) winningId = id; }
             }
-
             setTimeout(() => { showResult(winningId); }, 2000);
         }
-
         function showResult(id) {
             const data = archetypes[id];
             const parts = data.title.split(' (');
-            
             document.getElementById('resName').innerText = userData.name;
             document.getElementById('resDate').innerText = new Date().toISOString().split('T')[0].replace(/-/g, '.');
             document.getElementById('resNum').innerText = `00${id}`;
             document.getElementById('resIG').innerText = userData.ig;
             document.getElementById('resCity').innerText = userData.city.toUpperCase();
             document.getElementById('resGender').innerText = userData.gender === 'Female' ? 'F' : (userData.gender === 'Male' ? 'M' : 'X');
-
             document.getElementById('resTitleEn').innerText = parts[0];
             document.getElementById('resTitleZh').innerText = parts[1].replace(')', '');
             document.getElementById('resKeywords').innerText = data.keywords;
             document.getElementById('resDesc').innerText = data.desc;
             document.getElementById('resReason').innerText = data.reason;
             document.getElementById('resVisual').innerText = data.visual;
-
-            const colorBox = document.getElementById('resColors');
-            colorBox.innerHTML = '';
-            
-            const color1 = document.createElement('div');
-            color1.className = 'duo-swatch';
-            color1.style.width = '65%';
-            color1.style.backgroundColor = data.colors[0];
-            color1.innerHTML = `<span class="color-label">${data.colors[0]}</span>`;
-            colorBox.appendChild(color1);
-
-            const color2 = document.createElement('div');
-            color2.className = 'duo-swatch';
-            color2.style.width = '35%';
-            color2.style.backgroundColor = data.colors[1];
-            color2.innerHTML = `<span class="color-label">${data.colors[1]}</span>`;
-            colorBox.appendChild(color2);
-
+            const colorBox = document.getElementById('resColors'); colorBox.innerHTML = '';
+            const color1 = document.createElement('div'); color1.className = 'duo-swatch'; color1.style.width = '65%'; color1.style.backgroundColor = data.colors[0]; color1.innerHTML = `<span class="color-label">${data.colors[0]}</span>`; colorBox.appendChild(color1);
+            const color2 = document.createElement('div'); color2.className = 'duo-swatch'; color2.style.width = '35%'; color2.style.backgroundColor = data.colors[1]; color2.innerHTML = `<span class="color-label">${data.colors[1]}</span>`; colorBox.appendChild(color2);
             document.getElementById('phase-loading').classList.add('hidden');
             document.getElementById('phase-result').classList.remove('hidden');
         }
-
         function downloadCard() {
             const card = document.getElementById('captureArea');
             card.classList.remove('shadow-2xl');
-            
-            html2canvas(card, {
-                backgroundColor: "#050505",
-                scale: 2,
-                useCORS: true
-            }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `EDEN_DNA_${userData.name}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
-                
+            html2canvas(card, { backgroundColor: "#050505", scale: 2, useCORS: true }).then(canvas => {
+                const link = document.createElement('a'); link.download = `EDEN_DNA_${userData.name}.png`; link.href = canvas.toDataURL(); link.click();
                 card.classList.add('shadow-2xl');
                 alert("檔案已保存。請私訊 EDEN 官方帳號以完成互惠備取確認。");
                 window.open('https://www.instagram.com/eden_d_photo/', '_blank');
