@@ -51,7 +51,7 @@
 
         #canvas-container {
             width: 100%; height: 50vh; position: relative;
-            background: radial-gradient(circle at center, #1a1a1a 0%, #020202 70%); /* 稍微調亮中心以展示細節 */
+            background: radial-gradient(circle at center, #1a1a1a 0%, #020202 70%);
             border-bottom: 1px solid #151515;
         }
 
@@ -189,13 +189,11 @@
         container.appendChild(renderer.domElement);
 
         // --- Geometry (High-Fidelity Model) ---
-        // 使用高精度球體 (128x128) 取代原本的低面數模型
-        // MeshStandardMaterial 配合粗糙度，模擬「石膏/細黏土」質感，最適合觀察光影
         const geometry = new THREE.SphereGeometry(1.4, 128, 128); 
         const material = new THREE.MeshStandardMaterial({ 
             color: 0xffffff, 
-            roughness: 0.6, // 微粗糙，避免過度反光
-            metalness: 0.05 // 幾乎非金屬
+            roughness: 0.6, 
+            metalness: 0.05
         });
         const bust = new THREE.Mesh(geometry, material);
         bust.castShadow = true; bust.receiveShadow = true;
@@ -216,7 +214,7 @@
         const lights = {
             key: {
                 obj: createSpotLight(0xffffff, 1.2),
-                az: 45, pol: 30, on: true, // 預設：倫勃朗
+                az: 45, pol: 30, on: true,
                 name: "KEY"
             },
             fill: {
@@ -225,7 +223,7 @@
                 name: "FILL"
             },
             rim: {
-                obj: createSpotLight(0x4466ff, 1.5), 
+                obj: createSpotLight(0xffc266, 1.5), // 改為金黃暖光 (Golden Warm)
                 az: 135, pol: 30, on: true,
                 name: "RIM"
             }
@@ -296,7 +294,7 @@
             sliderGroup.style.opacity = data.on ? '1' : '0.3';
             sliderGroup.style.pointerEvents = data.on ? 'auto' : 'none';
 
-            // 觸發全局分析 (而不是單燈分析)
+            // 觸發全局分析
             analyzeGlobal();
         }
 
@@ -321,30 +319,27 @@
             updateLightTransform(currentTarget);
         }
 
-        // --- 全局光影分析引擎 (Global Analysis Engine) ---
+        // --- 全局光影分析引擎 ---
         function analyzeGlobal() {
             const key = lights.key;
             const fill = lights.fill;
             const rim = lights.rim;
 
-            // 1. 判斷基本風格 (基於主光)
             let baseStyle = "";
             let baseDesc = "";
 
             if (!key.on) {
-                // 如果沒主光
                 if (!fill.on && !rim.on) {
                     baseStyle = "全黑 (Total Darkness)";
                     baseDesc = "沒有任何光源。這是一片虛無。";
                 } else if (rim.on && !fill.on) {
                     baseStyle = "剪影風格 (Silhouette)";
-                    baseDesc = "僅保留邊緣光，主體處於黑暗中。適合表現神秘感或形狀輪廓。";
+                    baseDesc = "僅保留溫暖的邊緣輪廓光，主體處於黑暗中。適合表現神秘感或日蝕般的剪影效果。";
                 } else {
                     baseStyle = "暗調氛圍 (Low Key Ambient)";
                     baseDesc = "缺乏主導光源，畫面偏暗且缺乏明確結構。";
                 }
             } else {
-                // 有主光，判斷主光類型
                 const absAz = Math.abs(key.az);
                 if (key.pol > 60) {
                     baseStyle = "頂光結構";
@@ -367,18 +362,16 @@
                 }
             }
 
-            // 2. 判斷混合效果 (Mix Logic)
             let finalName = baseStyle;
             let finalDesc = baseDesc;
 
-            // 如果主光開啟，且有其他光
             if (key.on) {
                 if (rim.on && fill.on) {
                     finalName = `三點式 ${baseStyle}`;
-                    finalDesc += " 搭配補光保留細節，以及輪廓光分離背景，這是最標準的商業與電影佈光結構。";
+                    finalDesc += " 搭配補光保留細節，以及暖調輪廓光 (Rim) 模擬夕陽逆光效果，這是極具電影感的商業佈光。";
                 } else if (rim.on && !fill.on) {
                     finalName = `戲劇性 ${baseStyle}`;
-                    finalDesc += " 加上強烈輪廓光 (Rim)，增強了立體感與電影氛圍，但暗部對比強烈。";
+                    finalDesc += " 加上強烈的暖調輪廓光，創造出類似「黃金時刻」的逆光氛圍，增強了畫面的故事性。";
                 } else if (!rim.on && fill.on) {
                     finalName = `柔和 ${baseStyle}`;
                     finalDesc += " 補光 (Fill) 降低了反差，使畫面更柔和、自然，適合一般人像。";
@@ -387,19 +380,16 @@
                     finalDesc += " 僅使用單一主光，陰影深邃，對比度最高，風格強烈。";
                 }
             } 
-            // 如果主光關閉，但有 Rim + Fill
             else if (!key.on && rim.on && fill.on) {
                 finalName = "雙邊緣光 (Double Rim)";
                 finalDesc = "利用兩側光線勾勒輪廓，中間保留神秘的陰影。常用於體育或充滿張力的宣傳照。";
             }
 
-            // 如果沒有匹配到標準，顯示自定義
             if (finalName === "") {
                 finalName = "自定義混合光 (Custom Mix)";
                 finalDesc = "當前的光線組合較為特殊，形成了獨特的視覺實驗。";
             }
 
-            // 輸出結果
             lightName.innerText = finalName;
             lightDesc.innerText = finalDesc;
         }
