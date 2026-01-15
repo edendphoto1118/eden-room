@@ -95,7 +95,7 @@
     <header class="w-full text-center py-6 border-b border-[#111] animate-fade-in relative z-20 bg-[#020202]">
         <a href="index.html" class="block text-[10px] tracking-[0.3em] text-gray-600 hover:text-[#C5A059] mb-2 transition-colors">← EDEN ROOM</a>
         <h1 class="font-serif text-[#C5A059] text-xl tracking-[0.2em]">LIGHT SCULPTOR</h1>
-        <p class="font-zh text-gray-500 text-[10px] tracking-widest mt-1">全域佈光模擬系統 v5.0</p>
+        <p class="font-zh text-gray-500 text-[10px] tracking-widest mt-1">結構化人像佈光系統</p>
     </header>
 
     <div id="canvas-container" class="animate-fade-in">
@@ -108,15 +108,14 @@
         
         <div class="glass-panel p-4 border border-[#222]">
             <div class="mb-4">
-                <span class="font-mono text-[9px] text-gray-500 block mb-2">SUBJECT (臉型模型)</span>
+                <span class="font-mono text-[9px] text-gray-500 block mb-2">HEAD STRUCTURE (人檯類型)</span>
                 <div class="flex flex-wrap">
-                    <div class="option-tag active" onclick="setModel('round', this)">ROUND (圓)</div>
-                    <div class="option-tag" onclick="setModel('oval', this)">OVAL (長)</div>
-                    <div class="option-tag" onclick="setModel('chiseled', this)">CHISELED (稜角)</div>
+                    <div class="option-tag active" onclick="setModel('male', this)">STRUCTURE (結構)</div>
+                    <div class="option-tag" onclick="setModel('smooth', this)">SMOOTH (圓潤)</div>
                 </div>
             </div>
             <div>
-                <span class="font-mono text-[9px] text-gray-500 block mb-2">KEY LIGHT MODIFIER (主光配件)</span>
+                <span class="font-mono text-[9px] text-gray-500 block mb-2">LIGHT MODIFIER (主光配件)</span>
                 <div class="flex flex-wrap">
                     <div class="option-tag active" onclick="setModifier('softbox', this)">SOFTBOX (柔光)</div>
                     <div class="option-tag" onclick="setModifier('radar', this)">RADAR (雷達)</div>
@@ -198,7 +197,6 @@
         const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
         camera.position.z = 5.5;
 
-        // 開啟 ShadowMap 柔化功能
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
@@ -206,41 +204,93 @@
         renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
         container.appendChild(renderer.domElement);
 
-        // --- Model System (Face Shapes) ---
-        let currentMesh = null;
-        
-        // 幾何形狀庫
-        const geometries = {
-            round: new THREE.SphereGeometry(1.4, 64, 64),
-            // Icosahedron 低多邊形，模擬方臉/骨感
-            chiseled: new THREE.IcosahedronGeometry(1.4, 1), 
-            // 膠囊體，模擬鵝蛋/長臉 (用 Sphere 變形模擬)
-            oval: new THREE.SphereGeometry(1.3, 64, 64) 
-        };
+        // --- MANNEQUIN GENERATOR (結構人檯生成器) ---
+        // 這是一個不依賴外部檔案，用程式碼堆疊出來的「結構化面孔」
+        function createMannequin(isStructure = true) {
+            const group = new THREE.Group();
 
-        const material = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, roughness: 0.5, metalness: 0.05, flatShading: false
-        });
-        const chiseledMat = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, roughness: 0.4, metalness: 0.1, flatShading: true
-        });
+            const skinMat = new THREE.MeshStandardMaterial({ 
+                color: 0xffffff, roughness: 0.5, metalness: 0.1 
+            });
 
-        function initModel(type) {
-            if (currentMesh) scene.remove(currentMesh);
-            
-            let geo = geometries[type];
-            let mat = (type === 'chiseled') ? chiseledMat : material;
-            
-            currentMesh = new THREE.Mesh(geo, mat);
-            
-            // 針對 Oval 臉型進行拉伸
-            if (type === 'oval') {
-                currentMesh.scale.set(0.9, 1.25, 1);
+            // 1. 頭部基底 (Capsule/Sphere)
+            const headGeo = new THREE.SphereGeometry(1.4, 64, 64);
+            const head = new THREE.Mesh(headGeo, skinMat);
+            head.scale.set(0.85, 1.15, 0.95); // 拉長成鵝蛋臉
+            group.add(head);
+
+            if (isStructure) {
+                // 2. 鼻子 (Nose) - 關鍵陰影來源
+                // 使用四角錐體模擬挺拔鼻樑
+                const noseGeo = new THREE.ConeGeometry(0.25, 0.9, 4);
+                const nose = new THREE.Mesh(noseGeo, skinMat);
+                nose.position.set(0, 0, 1.3); // 突出表面
+                nose.rotation.x = -Math.PI / 8; // 微微翹起
+                nose.rotation.y = Math.PI / 4; // 轉45度讓邊緣朝前，形成鼻樑
+                nose.scale.z = 0.6; // 壓扁一點
+                nose.castShadow = true;
+                nose.receiveShadow = true;
+                group.add(nose);
+
+                // 3. 眉骨 (Brow Ridge) - 模擬眼窩陰影
+                const browGeo = new THREE.TorusGeometry(0.6, 0.12, 16, 100, Math.PI);
+                const brow = new THREE.Mesh(browGeo, skinMat);
+                brow.position.set(0, 0.3, 1.05);
+                brow.rotation.x = 0.5; // 傾斜貼合額頭
+                brow.castShadow = true;
+                brow.receiveShadow = true;
+                group.add(brow);
+
+                // 4. 嘴唇 (Lips) - 模擬人中與下唇陰影
+                const lipGeo = new THREE.CapsuleGeometry(0.2, 0.4, 4, 8);
+                const lip = new THREE.Mesh(lipGeo, skinMat);
+                lip.rotation.z = Math.PI / 2;
+                lip.position.set(0, -0.6, 1.25);
+                lip.scale.set(1, 0.3, 0.3);
+                lip.castShadow = true;
+                lip.receiveShadow = true;
+                group.add(lip);
+
+                // 5. 耳朵 (Ears) - 幫助判斷輪廓光
+                const earGeo = new THREE.BoxGeometry(0.3, 0.6, 0.2);
+                const earL = new THREE.Mesh(earGeo, skinMat);
+                earL.position.set(-1.1, 0, 0.2);
+                earL.rotation.y = -0.3;
+                
+                const earR = new THREE.Mesh(earGeo, skinMat);
+                earR.position.set(1.1, 0, 0.2);
+                earR.rotation.y = 0.3;
+                
+                group.add(earL);
+                group.add(earR);
             }
 
-            currentMesh.castShadow = true; 
-            currentMesh.receiveShadow = true;
-            scene.add(currentMesh);
+            // 頸部
+            const neckGeo = new THREE.CylinderGeometry(0.6, 0.8, 2, 32);
+            const neck = new THREE.Mesh(neckGeo, skinMat);
+            neck.position.y = -1.8;
+            neck.castShadow = true;
+            neck.receiveShadow = true;
+            group.add(neck);
+
+            return group;
+        }
+
+        let currentModelGroup = new THREE.Group();
+        scene.add(currentModelGroup);
+
+        function initModel(type) {
+            scene.remove(currentModelGroup);
+            if (type === 'male') {
+                currentModelGroup = createMannequin(true);
+            } else {
+                currentModelGroup = createMannequin(false); // 僅有頭型，適合觀察整體柔光
+            }
+            // 確保所有子物件都開啟陰影
+            currentModelGroup.traverse((node) => {
+                if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; }
+            });
+            scene.add(currentModelGroup);
         }
 
         const planeGeo = new THREE.PlaneGeometry(20, 20);
@@ -254,21 +304,11 @@
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.02);
         scene.add(ambientLight);
 
-        // --- Lighting System ---
+        // --- Lights ---
         const lights = {
-            key: {
-                obj: createSpotLight(0xffffff, 1.2),
-                az: 45, pol: 30, on: true, name: "KEY",
-                modifier: 'softbox' // Default
-            },
-            fill: {
-                obj: createSpotLight(0xffeedd, 0.5), 
-                az: -45, pol: 10, on: true, name: "FILL"
-            },
-            rim: {
-                obj: createSpotLight(0xffc266, 1.5), // Golden Warm
-                az: 135, pol: 30, on: true, name: "RIM"
-            }
+            key: { obj: createSpotLight(0xffffff, 1.2), az: 45, pol: 30, on: true, name: "KEY", modifier: 'softbox' },
+            fill: { obj: createSpotLight(0xffeedd, 0.4), az: -45, pol: 10, on: true, name: "FILL" },
+            rim: { obj: createSpotLight(0xffc266, 1.5), az: 135, pol: 30, on: true, name: "RIM" }
         };
 
         function createSpotLight(color, intensity) {
@@ -277,47 +317,21 @@
             light.shadow.mapSize.width = 1024;
             light.shadow.mapSize.height = 1024;
             light.shadow.bias = -0.0001;
-            light.angle = 0.6;
-            light.penumbra = 0.5;
             scene.add(light);
             return light;
         }
 
-        // --- Modifiers Logic ---
         function setModifier(type, el) {
-            // UI Update
             el.parentElement.querySelectorAll('.option-tag').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
-
-            // Light Physics Update
-            const light = lights.key.obj;
             lights.key.modifier = type;
+            const light = lights.key.obj;
 
             switch(type) {
-                case 'softbox': // 柔光：大角度，超柔邊緣
-                    light.angle = 0.9;
-                    light.penumbra = 1.0;
-                    light.shadow.radius = 10; // 模糊陰影
-                    light.intensity = 1.0;
-                    break;
-                case 'radar': // 雷達：中角度，中柔邊緣
-                    light.angle = 0.6;
-                    light.penumbra = 0.4;
-                    light.shadow.radius = 2;
-                    light.intensity = 1.3;
-                    break;
-                case 'grid': // 蜂巢：小角度，硬邊緣
-                    light.angle = 0.35;
-                    light.penumbra = 0.1;
-                    light.shadow.radius = 1;
-                    light.intensity = 1.8; // 聚光更亮
-                    break;
-                case 'bare': // 裸燈：全開，硬光
-                    light.angle = 1.2;
-                    light.penumbra = 0.1;
-                    light.shadow.radius = 1;
-                    light.intensity = 1.5;
-                    break;
+                case 'softbox': light.angle = 0.9; light.penumbra = 1.0; light.shadow.radius = 8; light.intensity = 1.0; break;
+                case 'radar': light.angle = 0.6; light.penumbra = 0.4; light.shadow.radius = 2; light.intensity = 1.3; break;
+                case 'grid': light.angle = 0.35; light.penumbra = 0.1; light.shadow.radius = 1; light.intensity = 1.8; break;
+                case 'bare': light.angle = 1.2; light.penumbra = 0.05; light.shadow.radius = 0; light.intensity = 1.5; break;
             }
         }
 
@@ -327,7 +341,7 @@
             initModel(type);
         }
 
-        // --- UI Controller ---
+        // --- Logic ---
         let currentTarget = 'key';
         const azSlider = document.getElementById('azSlider');
         const polSlider = document.getElementById('polSlider');
@@ -339,8 +353,8 @@
         const targetStatusLabel = document.getElementById('targetStatusLabel');
 
         function initLights() {
-            initModel('round'); // Default model
-            setModifier('softbox', document.querySelector("div[onclick=\"setModifier('softbox', this)\"]")); // Default mod
+            initModel('male'); 
+            setModifier('softbox', document.querySelector("div[onclick=\"setModifier('softbox', this)\"]"));
             for (const key in lights) updateLightTransform(key);
             updateUI();
         }
@@ -349,16 +363,10 @@
             const data = lights[type];
             data.obj.visible = data.on;
             if (!data.on) return;
-
             const r = 5.5;
             const phi = (90 - data.pol) * (Math.PI / 180);
             const theta = (data.az + 90) * (Math.PI / 180);
-
-            data.obj.position.set(
-                -(r * Math.sin(phi) * Math.cos(theta)),
-                r * Math.cos(phi),
-                r * Math.sin(phi) * Math.sin(theta)
-            );
+            data.obj.position.set(-(r * Math.sin(phi) * Math.cos(theta)), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
             data.obj.lookAt(0, 0, 0);
         }
 
@@ -377,11 +385,8 @@
             polVal.innerText = `${data.pol}°`;
             powerSwitch.checked = data.on;
             targetStatusLabel.innerText = `${data.name} LIGHT STATUS`;
-
-            const sliderGroup = document.getElementById('sliderGroup');
-            sliderGroup.style.opacity = data.on ? '1' : '0.3';
-            sliderGroup.style.pointerEvents = data.on ? 'auto' : 'none';
-
+            document.getElementById('sliderGroup').style.opacity = data.on ? '1' : '0.3';
+            document.getElementById('sliderGroup').style.pointerEvents = data.on ? 'auto' : 'none';
             analyzeGlobal();
         }
 
@@ -389,10 +394,8 @@
             const data = lights[currentTarget];
             data.az = parseInt(azSlider.value);
             data.pol = parseInt(polSlider.value);
-            azVal.innerText = `${data.az}°`;
-            polVal.innerText = `${data.pol}°`;
+            updateUI();
             updateLightTransform(currentTarget);
-            analyzeGlobal();
         }
 
         function toggleCurrentLight() {
@@ -404,53 +407,47 @@
             updateLightTransform(currentTarget);
         }
 
-        // --- Analysis Engine ---
         function analyzeGlobal() {
             const key = lights.key;
             const fill = lights.fill;
             const rim = lights.rim;
-            let baseStyle = "";
-            let baseDesc = "";
+            let baseStyle = "", baseDesc = "";
 
             if (!key.on) {
-                if (!fill.on && !rim.on) { baseStyle = "全黑"; baseDesc = "虛無狀態。"; }
-                else if (rim.on && !fill.on) { baseStyle = "剪影"; baseDesc = "僅有邊緣光，神祕氛圍。"; }
-                else { baseStyle = "暗調"; baseDesc = "缺乏主光，層次不明。"; }
+                if (!fill.on && !rim.on) { baseStyle = "全黑"; baseDesc = "無光源狀態。"; }
+                else if (rim.on && !fill.on) { baseStyle = "剪影 (Silhouette)"; baseDesc = "僅見輪廓邊緣，神祕感強烈。"; }
+                else { baseStyle = "暗調 (Low Key)"; baseDesc = "缺乏主光，結構不明顯。"; }
             } else {
                 const absAz = Math.abs(key.az);
-                if (key.pol > 60) { baseStyle = "頂光"; baseDesc = "來自正上方，眼窩陰影深重。"; }
-                else if (key.pol < -5) { baseStyle = "底光"; baseDesc = "反自然光線，戲劇張力。"; }
+                if (key.pol > 60) { baseStyle = "頂光 (Top)"; baseDesc = "眉骨與鼻下產生深重陰影 (Skull Effect)。"; }
+                else if (key.pol < -5) { baseStyle = "底光 (Under)"; baseDesc = "恐怖感的反自然光線。"; }
                 else if (absAz < 20) {
-                     if (key.pol > 25) { baseStyle = "蝴蝶光"; baseDesc = "經典美顏，修飾臉型。"; }
-                     else { baseStyle = "平光"; baseDesc = "膚質平滑，立體感弱。"; }
+                     if (key.pol > 25) { baseStyle = "蝴蝶光 (Butterfly)"; baseDesc = "鼻下形成蝶形影，強調顴骨。"; }
+                     else { baseStyle = "平光 (Flat)"; baseDesc = "陰影最少，修飾膚質但缺乏立體感。"; }
                 } else if (absAz >= 30 && absAz <= 70) {
-                    baseStyle = "倫勃朗光"; baseDesc = "暗面臉頰形成光三角，藝術質感。";
+                    baseStyle = "倫勃朗光 (Rembrandt)"; baseDesc = "暗面臉頰形成光三角，藝術性高。";
                 } else if (absAz > 70 && absAz <= 110) {
-                    baseStyle = "分割光"; baseDesc = "正側面光，強烈明暗對比。";
+                    baseStyle = "分割光 (Split)"; baseDesc = "正側面光，半明半暗，陽剛氣息。";
                 } else {
-                    baseStyle = "側逆光"; baseDesc = "面部大部分在陰影中。";
+                    baseStyle = "側逆光 (Kicker)"; baseDesc = "面部大部分在陰影中，強調輪廓。";
                 }
             }
 
             let finalName = baseStyle;
             let finalDesc = baseDesc;
-
-            // 加入配件描述
-            let modDesc = "";
+            
+            // 根據配件修改描述
+            let modNote = "";
             if (key.on) {
-                if(key.modifier === 'softbox') modDesc = "使用柔光罩，光質柔和細膩。";
-                if(key.modifier === 'radar') modDesc = "使用雷達罩，中心光質硬朗，層次豐富。";
-                if(key.modifier === 'grid') modDesc = "使用蜂巢，光束集中，背景壓暗。";
-                if(key.modifier === 'bare') modDesc = "使用裸燈，光質硬，影子銳利。";
+                if (key.modifier === 'softbox') modNote = " (柔光罩：陰影過渡自然)";
+                if (key.modifier === 'grid') modNote = " (蜂巢：光束集中，背景壓暗)";
             }
 
             if (key.on) {
-                if (rim.on && fill.on) { finalName = `三點式 ${baseStyle}`; finalDesc += ` 搭配補光與暖調輪廓光，電影級商業佈光。${modDesc}`; }
-                else if (rim.on && !fill.on) { finalName = `戲劇性 ${baseStyle}`; finalDesc += ` 加上強烈暖輪廓光，增強故事性。${modDesc}`; }
-                else if (!rim.on && fill.on) { finalName = `柔和 ${baseStyle}`; finalDesc += ` 補光降低反差，自然人像。${modDesc}`; }
-                else { finalName = `單燈 ${baseStyle}`; finalDesc += ` 單一主光，風格強烈。${modDesc}`; }
-            } else if (!key.on && rim.on && fill.on) {
-                finalName = "雙邊緣光"; finalDesc = "兩側勾勒輪廓，中間保留神祕陰影。";
+                if (rim.on && fill.on) { finalName = `三點式 ${baseStyle}`; finalDesc += ` 商業標準佈光，層次豐富完整。${modNote}`; }
+                else if (rim.on && !fill.on) { finalName = `戲劇性 ${baseStyle}`; finalDesc += ` 搭配強烈輪廓光，電影質感。${modNote}`; }
+                else if (!rim.on && fill.on) { finalName = `柔和 ${baseStyle}`; finalDesc += ` 補光保留了暗部細節。${modNote}`; }
+                else { finalName = `單燈 ${baseStyle}`; finalDesc += ` 強烈對比風格。${modNote}`; }
             }
 
             lightName.innerText = finalName;
