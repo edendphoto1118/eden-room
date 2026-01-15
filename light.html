@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Light Sculptor Editorial | EDEN LAB</title>
+    <title>Light Sculptor Ultimate | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Shippori+Mincho:wght@400;500;700&display=swap" rel="stylesheet">
@@ -36,75 +36,68 @@
 
     <style>
         body { 
-            background-color: #080808; /*稍微提亮背景以免全黑*/
+            background-color: #050505; 
             color: #C0C0C0; 
             overflow-x: hidden; 
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
-            -webkit-font-smoothing: antialiased;
+            /* 移除噪點背景，改用純色確保乾淨 */
+            background: #050505;
         }
 
-        /* 閱讀性優化：加大滑桿觸控區 */
+        /* 優化滑桿 */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; padding: 10px 0; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 16px; width: 16px; 
-            background: #D4AF37; cursor: pointer; margin-top: -7px;
-            border: 2px solid #000; box-shadow: 0 0 5px rgba(212, 175, 55, 0.5);
+            -webkit-appearance: none; height: 14px; width: 14px; 
+            background: #D4AF37; cursor: pointer; margin-top: -6px;
+            border: 1px solid #000; box-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
             border-radius: 50%;
         }
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 2px; cursor: pointer; background: #444;
+            width: 100%; height: 2px; cursor: pointer; background: #333;
         }
         
         #canvas-container {
             width: 100%; height: 50vh; position: relative;
-            /* 調整漸層中心，讓頭像背景有微光，解決「看不到臉」的問題 */
-            background: radial-gradient(circle at center, #1a1a1a 0%, #050505 80%);
-            border-bottom: 1px solid #333;
+            /* 稍微提亮背景中心，形成聚光燈效果 */
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 85%);
+            border-bottom: 1px solid #222;
         }
 
-        /* 標籤按鈕優化：字體加大 */
+        /* 標籤按鈕 */
         .tab-btn {
-            font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; letter-spacing: 0.1em; color: #666;
+            font-family: 'Cinzel', serif; font-size: 11px; font-weight: 600; letter-spacing: 0.15em; color: #555;
             padding-bottom: 10px; cursor: pointer; transition: 0.3s; border-bottom: 2px solid transparent;
         }
-        .tab-btn.active { color: #D4AF37; border-bottom: 2px solid #D4AF37; }
+        .tab-btn.active { color: #D4AF37; border-bottom: 2px solid #D4AF37; text-shadow: 0 0 10px rgba(212,175,55,0.3); }
         
-        /* 配件按鈕優化 */
+        /* 配件按鈕 */
         .mod-btn {
-            border: 1px solid #333; color: #888; font-family: 'Space Mono'; font-size: 11px;
+            border: 1px solid #333; color: #777; font-family: 'Space Mono'; font-size: 10px;
             padding: 10px 0; text-align: center; cursor: pointer; transition: all 0.3s;
-            background: #0f0f0f;
+            background: #0a0a0a;
         }
-        .mod-btn:hover { border-color: #666; color: #ddd; }
+        .mod-btn:hover { border-color: #666; color: #fff; }
         .mod-btn.active { 
             border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); color: #D4AF37; font-weight: bold;
         }
 
-        /* 臉型切換按鈕優化 */
-        .face-btn {
-            width: 8px; height: 8px; background: #444; border-radius: 50%; display: inline-block;
-            margin: 0 6px; cursor: pointer; transition: 0.3s; border: 1px solid #000;
-        }
-        .face-btn.active { background: #D4AF37; box-shadow: 0 0 8px #D4AF37; border-color: #fff; }
-
-        /* 語言切換中顯示邏輯 */
+        /* 語言切換邏輯 */
         body.lang-en .text-zh { display: none; }
         body.lang-zh .text-en { display: none; }
-        body.lang-zh { font-family: 'Shippori Mincho', serif; }
+        body.lang-zh { font-family: 'Shippori Mincho', serif; letter-spacing: 0.05em; }
 
-        /* 開關優化 */
-        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        /* 開關 */
+        .toggle-switch { position: relative; display: inline-block; width: 36px; height: 18px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider-tg {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
             background-color: #333; transition: .4s; border-radius: 20px;
         }
         .slider-tg:before {
-            position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px;
+            position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px;
             background-color: #888; transition: .4s; border-radius: 50%;
         }
         input:checked + .slider-tg { background-color: #222; border: 1px solid #D4AF37; }
-        input:checked + .slider-tg:before { transform: translateX(20px); background-color: #D4AF37; }
+        input:checked + .slider-tg:before { transform: translateX(18px); background-color: #D4AF37; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen pb-12 lang-en transition-colors duration-500">
@@ -121,14 +114,6 @@
     </nav>
 
     <div id="canvas-container" class="animate-fade-in">
-        <div class="absolute top-4 right-4 z-10 flex items-center gap-3 bg-black/60 px-4 py-2 border border-[#333] backdrop-blur-md rounded-full">
-            <span class="font-mono text-[10px] text-gray-400 tracking-widest mr-1">
-                <span class="text-en">FACE</span><span class="text-zh">臉型</span>
-            </span>
-            <div class="face-btn active" onclick="setModel('male', this)" title="Structure"></div>
-            <div class="face-btn" onclick="setModel('smooth', this)" title="Smooth"></div>
-        </div>
-        
         <div class="absolute bottom-4 left-0 w-full text-center pointer-events-none z-10">
             <p class="font-serif text-[10px] text-[#555] tracking-[0.3em]">
                 <span class="text-en">INTERACTIVE STUDIO RENDER</span>
@@ -197,7 +182,7 @@
                             <span class="text-en">AZIMUTH (HORIZONTAL)</span>
                             <span class="text-zh">水平位置 (方位角)</span>
                         </span>
-                        <span id="azVal" class="font-mono text-[11px] text-[#E0E0E0]">0°</span>
+                        <span id="azVal" class="font-mono text-[11px] text-[#E0E0E0]">45°</span>
                     </div>
                     <input type="range" id="azSlider" min="-180" max="180" step="1" oninput="updatePosition()">
                 </div>
@@ -207,7 +192,7 @@
                             <span class="text-en">ALTITUDE (VERTICAL)</span>
                             <span class="text-zh">垂直高度 (仰角)</span>
                         </span>
-                        <span id="polVal" class="font-mono text-[11px] text-[#E0E0E0]">0°</span>
+                        <span id="polVal" class="font-mono text-[11px] text-[#E0E0E0]">30°</span>
                     </div>
                     <input type="range" id="polSlider" min="-40" max="90" step="1" oninput="updatePosition()">
                 </div>
@@ -223,9 +208,9 @@
                 </p>
             </div>
             <div class="col-span-3">
-                <h2 id="lightName" class="font-zh text-xl text-[#FFFFFF] mb-3 tracking-wider font-bold">--</h2>
+                <h2 id="lightName" class="font-zh text-xl text-[#FFFFFF] mb-3 tracking-wider font-bold">REMBRANDT</h2>
                 <p id="lightDesc" class="font-zh text-sm text-[#AAAAAA] leading-relaxed text-justify font-light">
-                    --
+                    經典倫勃朗光。
                 </p>
             </div>
         </div>
@@ -239,25 +224,23 @@
     </main>
 
     <script>
-        // --- 語言切換邏輯 ---
-        let currentLang = 'en'; // 預設英文
+        let currentLang = 'en';
         function toggleLang() {
             currentLang = currentLang === 'en' ? 'zh' : 'en';
             document.body.className = document.body.className.replace(/lang-\w+/, `lang-${currentLang}`);
-            // 更新目前 modifier 的顯示文字
             const data = lights[currentTarget];
             updateUI(); 
         }
 
-        // --- Three.js Setup (可見度修復版) ---
+        // --- Three.js Setup ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        // 降低霧的密度，避免把模型吃掉
-        scene.fog = new THREE.FogExp2(0x050505, 0.015); 
+        // 移除霧氣，確保絕對清晰
+        // scene.fog = new THREE.FogExp2(0x050505, 0.01); 
 
-        const camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 100);
-        camera.position.z = 6;
-        camera.position.y = 0.5; // 稍微抬高視角
+        const camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 100);
+        camera.position.z = 7;
+        camera.position.y = 0.2;
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -266,104 +249,96 @@
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.2; // 提高整體曝光度
+        renderer.toneMappingExposure = 1.3; // 曝光拉高
         container.appendChild(renderer.domElement);
 
-        // --- Mannequin System (Structure) ---
-        let currentModelGroup = new THREE.Group();
-        scene.add(currentModelGroup);
+        // --- Mannequin Construction (石膏白模) ---
+        // 使用 Group 包裹
+        const mannequin = new THREE.Group();
+        scene.add(mannequin);
 
-        // 提亮材質顏色，增加漫反射，確保在微光下可見
-        const skinMat = new THREE.MeshStandardMaterial({ 
-            color: 0xdddddd,  // 從灰色提亮到接近白
-            roughness: 0.5, 
-            metalness: 0.05 
+        // 使用 MeshPhongMaterial，這種材質對光反應更自然，比較像石膏
+        const plasterMat = new THREE.MeshPhongMaterial({ 
+            color: 0xffffff, // 純白
+            shininess: 10,   // 低光澤 (像石膏)
+            flatShading: false
         });
 
-        function createMannequin(isStructure) {
-            const group = new THREE.Group();
-            
-            // Head Base
+        function buildHead() {
+            // 1. 頭部本體
             const headGeo = new THREE.SphereGeometry(1.4, 64, 64);
-            const head = new THREE.Mesh(headGeo, skinMat);
-            head.scale.set(0.88, 1.18, 0.95);
-            group.add(head);
+            const head = new THREE.Mesh(headGeo, plasterMat);
+            head.scale.set(0.85, 1.15, 0.95);
+            head.castShadow = true; head.receiveShadow = true;
+            mannequin.add(head);
 
-            if (isStructure) {
-                // Nose (Structure)
-                const noseGeo = new THREE.ConeGeometry(0.25, 0.9, 4);
-                const nose = new THREE.Mesh(noseGeo, skinMat);
-                nose.position.set(0, 0, 1.3);
-                nose.rotation.x = -Math.PI / 8;
-                nose.rotation.y = Math.PI / 4;
-                nose.scale.z = 0.6;
-                nose.castShadow = true; nose.receiveShadow = true;
-                group.add(nose);
-
-                // Brow
-                const browGeo = new THREE.TorusGeometry(0.6, 0.12, 16, 100, Math.PI);
-                const brow = new THREE.Mesh(browGeo, skinMat);
-                brow.position.set(0, 0.3, 1.05);
-                brow.rotation.x = 0.5;
-                brow.castShadow = true; brow.receiveShadow = true;
-                group.add(brow);
-
-                // Lips
-                const lipGeo = new THREE.CapsuleGeometry(0.2, 0.4, 4, 8);
-                const lip = new THREE.Mesh(lipGeo, skinMat);
-                lip.rotation.z = Math.PI / 2;
-                lip.position.set(0, -0.6, 1.25);
-                lip.scale.set(1, 0.3, 0.3);
-                lip.castShadow = true; lip.receiveShadow = true;
-                group.add(lip);
-            }
-            
-            // Neck
-            const neckGeo = new THREE.CylinderGeometry(0.6, 0.8, 2, 32);
-            const neck = new THREE.Mesh(neckGeo, skinMat);
-            neck.position.y = -1.8;
+            // 2. 脖子
+            const neckGeo = new THREE.CylinderGeometry(0.65, 0.85, 2.5, 32);
+            const neck = new THREE.Mesh(neckGeo, plasterMat);
+            neck.position.y = -2;
             neck.castShadow = true; neck.receiveShadow = true;
-            group.add(neck);
+            mannequin.add(neck);
 
-            return group;
+            // 3. 鼻子 (關鍵陰影來源) - 放大並突出
+            const noseGeo = new THREE.ConeGeometry(0.25, 1.2, 4); 
+            const nose = new THREE.Mesh(noseGeo, plasterMat);
+            nose.rotation.y = Math.PI / 4; // 轉45度讓棱角朝前
+            nose.rotation.x = -0.1; // 微翹
+            nose.position.set(0, 0, 1.3);
+            nose.scale.z = 0.5; // 壓扁
+            nose.castShadow = true; nose.receiveShadow = true;
+            mannequin.add(nose);
+
+            // 4. 眉骨 (加強眼窩陰影)
+            const browGeo = new THREE.TorusGeometry(0.55, 0.15, 8, 20, 2.5);
+            const brow = new THREE.Mesh(browGeo, plasterMat);
+            brow.rotation.z = -Math.PI / 2 + 1.25; // 調整弧度朝下
+            brow.rotation.x = 0.5;
+            brow.position.set(0, 0.35, 1.05);
+            brow.castShadow = true; brow.receiveShadow = true;
+            mannequin.add(brow);
+
+            // 5. 耳朵
+            const earGeo = new THREE.CapsuleGeometry(0.2, 0.5, 4, 8);
+            const earL = new THREE.Mesh(earGeo, plasterMat);
+            earL.position.set(-1.1, 0, 0);
+            earL.castShadow = true; earL.receiveShadow = true;
+            mannequin.add(earL);
+            
+            const earR = new THREE.Mesh(earGeo, plasterMat);
+            earR.position.set(1.1, 0, 0);
+            earR.castShadow = true; earR.receiveShadow = true;
+            mannequin.add(earR);
         }
+        buildHead();
 
-        function initModel(type) {
-            scene.remove(currentModelGroup);
-            currentModelGroup = createMannequin(type === 'male');
-            currentModelGroup.traverse((node) => {
-                if (node.isMesh) { node.castShadow = true; node.receiveShadow = true; }
-            });
-            scene.add(currentModelGroup);
-        }
-
-        // Floor (稍微反光，增加空間感)
-        const planeGeo = new THREE.PlaneGeometry(30, 30);
-        const planeMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.7, metalness: 0.2 });
+        // 地板 (稍微反光)
+        const planeGeo = new THREE.PlaneGeometry(50, 50);
+        const planeMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.5, metalness: 0.2 });
         const plane = new THREE.Mesh(planeGeo, planeMat);
         plane.rotation.x = -Math.PI / 2;
-        plane.position.y = -2.5;
+        plane.position.y = -3;
         plane.receiveShadow = true;
         scene.add(plane);
 
-        // 🚑 關鍵修復：增強環境光，確保模型不會隱形
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.15); 
+        // 🚑 關鍵：高強度環境光，確保絕對可見
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4); 
         scene.add(ambientLight);
 
-        // --- Lights Data Structure ---
+        // --- Lights Setup (預設倫勃朗) ---
         const lights = {
             key: { 
-                obj: createSpotLight(0xffffff, 1.2), 
-                az: 45, pol: 30, on: true, name: "KEY", 
+                obj: createSpotLight(0xffffff, 1.5), 
+                az: 45, pol: 30, on: true, name: "KEY", // 預設 45/30
                 modifier: 'softbox' 
             },
             fill: { 
-                obj: createSpotLight(0xffeedd, 0.4), 
+                obj: createSpotLight(0xffeedd, 0.6), 
                 az: -45, pol: 10, on: true, name: "FILL", 
                 modifier: 'softbox'
             },
             rim: { 
-                obj: createSpotLight(0xffc266, 1.5), 
+                obj: createSpotLight(0xffc266, 1.2), 
                 az: 135, pol: 30, on: true, name: "RIM", 
                 modifier: 'bare'
             }
@@ -372,17 +347,16 @@
         function createSpotLight(color, intensity) {
             const light = new THREE.SpotLight(color, intensity);
             light.castShadow = true;
-            light.shadow.mapSize.width = 1024;
-            light.shadow.mapSize.height = 1024;
+            light.shadow.mapSize.width = 2048; // 提高陰影解析度
+            light.shadow.mapSize.height = 2048;
             light.shadow.bias = -0.0001;
             scene.add(light);
             return light;
         }
 
-        // --- Core Logic ---
+        // --- Logic ---
         let currentTarget = 'key';
 
-        // UI Elements
         const azSlider = document.getElementById('azSlider');
         const polSlider = document.getElementById('polSlider');
         const powerSwitch = document.getElementById('powerSwitch');
@@ -394,18 +368,12 @@
         const currentModName = document.getElementById('currentModName');
 
         function initApp() {
-            initModel('male');
+            // 初始化物理屬性
             for (const key in lights) {
                 applyLightPhysics(lights[key]);
                 updateLightTransform(key);
             }
             updateUI();
-        }
-
-        function setModel(type, el) {
-            document.querySelectorAll('.face-btn').forEach(btn => btn.classList.remove('active'));
-            el.classList.add('active');
-            initModel(type);
         }
 
         function selectLight(type) {
@@ -425,23 +393,23 @@
         function applyLightPhysics(data) {
             const light = data.obj;
             const type = data.modifier;
-
+            // 根據配件調整光質
             switch(type) {
                 case 'softbox':
                     light.angle = 0.9; light.penumbra = 1.0; 
-                    light.shadow.radius = 8; light.intensity = (data.name === 'RIM') ? 1.5 : 1.0;
+                    light.shadow.radius = 10; 
                     break;
                 case 'radar':
                     light.angle = 0.6; light.penumbra = 0.4; 
-                    light.shadow.radius = 2; light.intensity = (data.name === 'RIM') ? 1.8 : 1.3;
+                    light.shadow.radius = 2; 
                     break;
                 case 'grid':
                     light.angle = 0.35; light.penumbra = 0.1; 
-                    light.shadow.radius = 1; light.intensity = (data.name === 'RIM') ? 2.0 : 1.8;
+                    light.shadow.radius = 1; 
                     break;
                 case 'bare':
                     light.angle = 1.1; light.penumbra = 0.05; 
-                    light.shadow.radius = 0; light.intensity = (data.name === 'RIM') ? 1.8 : 1.5;
+                    light.shadow.radius = 0; 
                     break;
             }
         }
@@ -455,7 +423,6 @@
             polVal.innerText = `${data.pol}°`;
             powerSwitch.checked = data.on;
             
-            // Modifier Name Display (Bilingual)
             const modMap = {
                 'softbox': '柔光 (SOFT)',
                 'radar': '雷達 (RADAR)',
@@ -494,7 +461,7 @@
             data.obj.visible = data.on;
             if (!data.on) return;
 
-            const r = 5.5;
+            const r = 6;
             const phi = (90 - data.pol) * (Math.PI / 180);
             const theta = (data.az + 90) * (Math.PI / 180);
 
@@ -513,32 +480,56 @@
             updateUI();
         }
 
-        // --- Analysis ---
         function analyzeGlobal() {
             const key = lights.key;
             const fill = lights.fill;
             const rim = lights.rim;
-            
-            let title = "", desc = "";
+            let titleEn = "", titleZh = "", descEn = "", descZh = "";
 
+            // 判斷主光狀態
+            const absAz = Math.abs(key.az);
+            
             if (!key.on) {
-                 if (rim.on) { title = "SILHOUETTE (剪影)"; desc = "主光缺席。僅由輪廓光勾勒邊緣，強調神秘感與形態美。"; }
-                 else { title = "LOW KEY (暗調)"; desc = "缺乏主導光源，畫面層次不明。"; }
+                if(rim.on) {
+                    titleEn = "SILHOUETTE"; titleZh = "剪影光";
+                    descEn = "Mysterious outline defined only by backlighting.";
+                    descZh = "主光缺席，僅由輪廓光勾勒邊緣，強調神秘感與形態美。";
+                } else {
+                    titleEn = "LOW KEY"; titleZh = "暗調";
+                    descEn = "Lack of main light source.";
+                    descZh = "缺乏主導光源，畫面層次不明。";
+                }
             } else {
-                const absAz = Math.abs(key.az);
-                if (key.pol > 60) { title = "TOP LIGHT (頂光)"; desc = "來自正上方，強調面部結構，適合硬派風格。"; }
-                else if (absAz < 25 && key.pol > 20) { title = "BUTTERFLY (蝴蝶光)"; desc = "經典美顏佈光，鼻下碟形影，修飾臉型。"; }
-                else if (absAz >= 30 && absAz <= 70) { title = "REMBRANDT (倫勃朗)"; desc = "暗面臉頰形成光三角，藝術與電影感之首選。"; }
-                else if (absAz > 70) { title = "SPLIT / SIDE (分割光)"; desc = "正側面光，半明半暗，極具戲劇張力。"; }
-                else { title = "LOOP (環形光)"; desc = "鼻影微偏，最自然的通用佈光。"; }
+                if (key.pol > 60) {
+                    titleEn = "TOP LIGHT"; titleZh = "頂光";
+                    descEn = "High drama, skull-like shadows.";
+                    descZh = "來自正上方，強調面部結構，但眼窩陰影深重。";
+                } else if (absAz < 25 && key.pol > 20) {
+                    titleEn = "BUTTERFLY"; titleZh = "蝴蝶光";
+                    descEn = "Classic beauty lighting. Shadow under nose resembles a butterfly.";
+                    descZh = "經典美顏佈光，鼻下形成碟形影，修飾臉型。";
+                } else if (absAz >= 30 && absAz <= 70) {
+                    titleEn = "REMBRANDT"; titleZh = "倫勃朗光";
+                    descEn = "The triangle of light on the shadowed cheek. Artistic and cinematic.";
+                    descZh = "暗面臉頰形成光三角，藝術與電影感之首選。";
+                } else if (absAz > 70) {
+                    titleEn = "SPLIT LIGHT"; titleZh = "分割光";
+                    descEn = "Half light, half shadow. High contrast.";
+                    descZh = "正側面光，半明半暗，極具戲劇張力。";
+                } else {
+                    titleEn = "LOOP LIGHT"; titleZh = "環形光";
+                    descEn = "Shadow of nose loops slightly to the side.";
+                    descZh = "鼻影微偏，最自然的通用佈光。";
+                }
             }
-            
-            let modInfo = "";
-            if (key.on && key.modifier === 'grid') modInfo = " 搭配蜂巢限制光區，背景壓暗。";
-            if (rim.on && rim.modifier === 'bare') modInfo += " 裸燈輪廓光帶來銳利的邊緣切割。";
 
-            lightName.innerText = title;
-            lightDesc.innerText = `${desc}${modInfo}`;
+            if (currentLang === 'en') {
+                lightName.innerText = titleEn;
+                lightDesc.innerText = descEn;
+            } else {
+                lightName.innerText = titleZh;
+                lightDesc.innerText = descZh;
+            }
         }
 
         function animate() {
