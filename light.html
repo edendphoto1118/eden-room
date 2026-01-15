@@ -51,7 +51,7 @@
 
         #canvas-container {
             width: 100%; height: 50vh; position: relative;
-            background: radial-gradient(circle at center, #111 0%, #020202 70%);
+            background: radial-gradient(circle at center, #1a1a1a 0%, #020202 70%); /* 稍微調亮中心以展示細節 */
             border-bottom: 1px solid #151515;
         }
 
@@ -69,7 +69,6 @@
             content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #C5A059;
         }
         
-        /* 電源指示燈 */
         .power-dot {
             width: 4px; height: 4px; border-radius: 50%; background: #333; 
             display: inline-block; margin-right: 6px; vertical-align: middle;
@@ -78,7 +77,6 @@
         .power-dot.on { background: #00ff00; box-shadow: 0 0 5px #00ff00; }
         .power-dot.off { background: #ff0000; }
 
-        /* 開關 Toggle */
         .toggle-switch {
             position: relative; display: inline-block; width: 36px; height: 18px;
         }
@@ -130,9 +128,8 @@
         </div>
 
         <div id="activeControls" class="space-y-6 transition-all duration-300">
-            
             <div class="flex justify-between items-center bg-[#0a0a0a] p-3 border border-[#222]">
-                <span class="font-mono text-[10px] text-gray-400 tracking-widest">LIGHT SOURCE STATUS</span>
+                <span id="targetStatusLabel" class="font-mono text-[10px] text-gray-400 tracking-widest">KEY LIGHT STATUS</span>
                 <label class="toggle-switch">
                     <input type="checkbox" id="powerSwitch" checked onchange="toggleCurrentLight()">
                     <span class="slider"></span>
@@ -142,14 +139,14 @@
             <div id="sliderGroup" class="space-y-6">
                 <div>
                     <div class="flex justify-between mb-2">
-                        <label class="font-mono text-[9px] text-gray-400 tracking-widest">AZIMUTH (水平方位)</label>
+                        <label class="font-mono text-[9px] text-gray-400 tracking-widest">AZIMUTH (水平)</label>
                         <span id="azVal" class="font-mono text-[9px] text-[#C5A059]">0°</span>
                     </div>
                     <input type="range" id="azSlider" min="-180" max="180" step="1" oninput="updatePosition()">
                 </div>
                 <div>
                     <div class="flex justify-between mb-2">
-                        <label class="font-mono text-[9px] text-gray-400 tracking-widest">ALTITUDE (垂直高度)</label>
+                        <label class="font-mono text-[9px] text-gray-400 tracking-widest">ALTITUDE (垂直)</label>
                         <span id="polVal" class="font-mono text-[9px] text-[#C5A059]">0°</span>
                     </div>
                     <input type="range" id="polSlider" min="-40" max="90" step="1" oninput="updatePosition()">
@@ -159,8 +156,8 @@
 
         <div class="glass-panel p-6 border-l-2 border-[#C5A059]">
             <div class="flex justify-between mb-1">
-                <h3 class="font-mono text-[9px] text-[#C5A059] tracking-widest">CURRENT ANALYSIS</h3>
-                <span id="targetLabel" class="font-mono text-[9px] text-gray-500 uppercase">KEY LIGHT</span>
+                <h3 class="font-mono text-[9px] text-[#C5A059] tracking-widest">GLOBAL ANALYSIS</h3>
+                <span class="font-mono text-[9px] text-gray-500 uppercase">FINAL RENDER</span>
             </div>
             <h2 id="lightName" class="font-zh text-lg text-white mb-2 tracking-wide font-medium">--</h2>
             <p id="lightDesc" class="font-zh text-xs text-gray-400 leading-relaxed text-justify font-light opacity-80">
@@ -188,13 +185,17 @@
         renderer.setSize(container.clientWidth, container.clientHeight);
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 柔和陰影
         container.appendChild(renderer.domElement);
 
-        // --- Geometry ---
-        const geometry = new THREE.IcosahedronGeometry(1.4, 1);
+        // --- Geometry (High-Fidelity Model) ---
+        // 使用高精度球體 (128x128) 取代原本的低面數模型
+        // MeshStandardMaterial 配合粗糙度，模擬「石膏/細黏土」質感，最適合觀察光影
+        const geometry = new THREE.SphereGeometry(1.4, 128, 128); 
         const material = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, roughness: 0.7, metalness: 0.1, flatShading: true 
+            color: 0xffffff, 
+            roughness: 0.6, // 微粗糙，避免過度反光
+            metalness: 0.05 // 幾乎非金屬
         });
         const bust = new THREE.Mesh(geometry, material);
         bust.castShadow = true; bust.receiveShadow = true;
@@ -211,26 +212,22 @@
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.02);
         scene.add(ambientLight);
 
-        // --- Light Objects Store ---
-        // 我們建立一個物件來管理三顆燈的實體與數據
+        // --- Light Objects ---
         const lights = {
             key: {
                 obj: createSpotLight(0xffffff, 1.2),
-                az: 0, pol: 20, on: true,
-                label: "KEY LIGHT (主光)",
-                descBase: "負責塑造主體結構與立體感。"
+                az: 45, pol: 30, on: true, // 預設：倫勃朗
+                name: "KEY"
             },
             fill: {
-                obj: createSpotLight(0xffeedd, 0.5), // 暖色
+                obj: createSpotLight(0xffeedd, 0.5), 
                 az: -45, pol: 10, on: true,
-                label: "FILL LIGHT (補光)",
-                descBase: "負責柔化陰影，保留暗部細節。"
+                name: "FILL"
             },
             rim: {
-                obj: createSpotLight(0x4466ff, 1.5), // 冷色
+                obj: createSpotLight(0x4466ff, 1.5), 
                 az: 135, pol: 30, on: true,
-                label: "RIM LIGHT (輪廓)",
-                descBase: "負責勾勒邊緣，分離主體與背景。"
+                name: "RIM"
             }
         };
 
@@ -240,42 +237,32 @@
             light.shadow.mapSize.width = 1024;
             light.shadow.mapSize.height = 1024;
             light.shadow.bias = -0.0001;
+            light.penumbra = 0.5; // 邊緣柔化
             scene.add(light);
             return light;
         }
 
-        // --- Controller State ---
-        let currentTarget = 'key'; // 當前正在編輯哪顆燈
+        // --- Logic & UI ---
+        let currentTarget = 'key';
 
         const azSlider = document.getElementById('azSlider');
         const polSlider = document.getElementById('polSlider');
         const powerSwitch = document.getElementById('powerSwitch');
-        
         const azVal = document.getElementById('azVal');
         const polVal = document.getElementById('polVal');
-        
         const lightName = document.getElementById('lightName');
         const lightDesc = document.getElementById('lightDesc');
-        const targetLabel = document.getElementById('targetLabel');
+        const targetStatusLabel = document.getElementById('targetStatusLabel');
 
-        // --- Core Functions ---
-
-        // 1. 初始化燈光位置
         function initLights() {
-            for (const key in lights) {
-                updateLightTransform(key);
-            }
-            updateUI(); // Sync UI to default Key light
+            for (const key in lights) updateLightTransform(key);
+            updateUI();
         }
 
-        // 2. 更新 3D 燈光位置 (Spherical Coordinates)
         function updateLightTransform(type) {
             const data = lights[type];
-            if (!data.on) {
-                data.obj.visible = false;
-                return;
-            }
-            data.obj.visible = true;
+            data.obj.visible = data.on;
+            if (!data.on) return;
 
             const r = 5.5;
             const phi = (90 - data.pol) * (Math.PI / 180);
@@ -289,111 +276,132 @@
             data.obj.lookAt(0, 0, 0);
         }
 
-        // 3. 切換選取目標
         function selectLight(type) {
-            // UI Highlight Update
             document.querySelectorAll('.selector-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`sel${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('active');
-            
             currentTarget = type;
             updateUI();
         }
 
-        // 4. 更新 UI 數值 (當切換目標時)
         function updateUI() {
             const data = lights[currentTarget];
-            
-            // Sync Sliders
             azSlider.value = data.az;
             polSlider.value = data.pol;
             azVal.innerText = `${data.az}°`;
             polVal.innerText = `${data.pol}°`;
-            
-            // Sync Switch
             powerSwitch.checked = data.on;
-            
-            // Enable/Disable Sliders
+            targetStatusLabel.innerText = `${data.name} LIGHT STATUS`;
+
             const sliderGroup = document.getElementById('sliderGroup');
             sliderGroup.style.opacity = data.on ? '1' : '0.3';
             sliderGroup.style.pointerEvents = data.on ? 'auto' : 'none';
 
-            targetLabel.innerText = data.label.split(" (")[0]; // 只顯示英文
-            analyzeLighting(data.az, data.pol, currentTarget);
+            // 觸發全局分析 (而不是單燈分析)
+            analyzeGlobal();
         }
 
-        // 5. 滑桿拖曳事件
         function updatePosition() {
             const data = lights[currentTarget];
             data.az = parseInt(azSlider.value);
             data.pol = parseInt(polSlider.value);
-            
             azVal.innerText = `${data.az}°`;
             polVal.innerText = `${data.pol}°`;
-
             updateLightTransform(currentTarget);
-            analyzeLighting(data.az, data.pol, currentTarget);
+            analyzeGlobal();
         }
 
-        // 6. 開關燈
         function toggleCurrentLight() {
             const isOn = powerSwitch.checked;
             lights[currentTarget].on = isOn;
             
-            // Update visual indicator dot
             const dot = document.getElementById(`dot${currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1)}`);
-            if (isOn) {
-                dot.classList.remove('off'); dot.classList.add('on');
-            } else {
-                dot.classList.remove('on'); dot.classList.add('off');
-            }
+            dot.className = isOn ? 'power-dot on' : 'power-dot off';
 
-            updateUI(); // Refreshes sliders opacity
+            updateUI();
             updateLightTransform(currentTarget);
         }
 
-        // 7. 智能分析邏輯 (通用版)
-        function analyzeLighting(az, pol, type) {
-            const data = lights[type];
-            
-            if (!data.on) {
-                lightName.innerText = "光源已關閉 (OFF)";
-                lightDesc.innerText = `目前 ${data.label} 處於關閉狀態。`;
-                return;
-            }
+        // --- 全局光影分析引擎 (Global Analysis Engine) ---
+        function analyzeGlobal() {
+            const key = lights.key;
+            const fill = lights.fill;
+            const rim = lights.rim;
 
-            const absAz = Math.abs(az);
-            let role = "";
-            let detail = "";
+            // 1. 判斷基本風格 (基於主光)
+            let baseStyle = "";
+            let baseDesc = "";
 
-            if (pol > 60) {
-                role = "頂光 (Top Light)";
-                detail = "光源來自頭頂。會在眼窩與顴骨下方投下深重陰影，增加結構感但可能顯得嚴肅。";
-            } else if (pol < -10) {
-                role = "底光 (Under Light)";
-                detail = "光源來自下方。這是一種反自然的照明，通常用於創造戲劇性或恐怖氛圍。";
-            } else {
-                // 根據水平角度判斷
-                if (absAz < 20) {
-                    if (pol > 25) { role = "蝴蝶光 (Butterfly)"; detail = "經典美顏光。在鼻下形成小蝶形陰影，修飾臉型。"; }
-                    else { role = "正面平光 (Flat)"; detail = "消除陰影，平滑肌膚，但會減弱立體感。"; }
-                } else if (absAz >= 30 && absAz <= 60 && pol > 20) {
-                    role = "倫勃朗光 (Rembrandt)";
-                    detail = "側上光。暗面臉頰形成三角形光區，最具藝術感的佈光角度。";
-                } else if (absAz >= 80 && absAz <= 110) {
-                    role = "分割光 (Side Light)";
-                    detail = "正側面光。強調膚質紋理，創造強烈的明暗對比。";
-                } else if (absAz > 110) {
-                    role = "輪廓光 (Kicker/Rim)";
-                    detail = "後側光。僅勾勒邊緣輪廓，將主體從背景中分離出來。";
+            if (!key.on) {
+                // 如果沒主光
+                if (!fill.on && !rim.on) {
+                    baseStyle = "全黑 (Total Darkness)";
+                    baseDesc = "沒有任何光源。這是一片虛無。";
+                } else if (rim.on && !fill.on) {
+                    baseStyle = "剪影風格 (Silhouette)";
+                    baseDesc = "僅保留邊緣光，主體處於黑暗中。適合表現神秘感或形狀輪廓。";
                 } else {
-                    role = "環形光 (Loop)";
-                    detail = "常見的肖像佈光，鼻影微微偏向一側，自然且立體。";
+                    baseStyle = "暗調氛圍 (Low Key Ambient)";
+                    baseDesc = "缺乏主導光源，畫面偏暗且缺乏明確結構。";
+                }
+            } else {
+                // 有主光，判斷主光類型
+                const absAz = Math.abs(key.az);
+                if (key.pol > 60) {
+                    baseStyle = "頂光結構";
+                    baseDesc = "主光來自正上方，強調結構感但陰影深重。";
+                } else if (key.pol < -5) {
+                    baseStyle = "戲劇底光";
+                    baseDesc = "反自然光線，具有恐怖或怪誕的戲劇張力。";
+                } else if (absAz < 20) {
+                     if (key.pol > 25) { baseStyle = "蝴蝶光 (Butterfly)"; baseDesc = "經典美顏佈光，鼻下有小蝶形影。"; }
+                     else { baseStyle = "平光 (Flat)"; baseDesc = "正面直射，膚質平滑但立體感弱。"; }
+                } else if (absAz >= 30 && absAz <= 70) {
+                    baseStyle = "倫勃朗光 (Rembrandt)";
+                    baseDesc = "經典油畫光，暗面臉頰形成倒三角光區，層次豐富。";
+                } else if (absAz > 70 && absAz <= 110) {
+                    baseStyle = "分割光 (Split)";
+                    baseDesc = "半面光，創造強烈的明暗對比與陽剛氣息。";
+                } else {
+                    baseStyle = "側逆光 (Kicker)";
+                    baseDesc = "主光偏後，面部大部分在陰影中。";
                 }
             }
 
-            lightName.innerText = role;
-            // 結合基礎描述與當下角度分析
-            lightDesc.innerText = `[${data.label}] 目前位置形成「${role}」。${detail}`;
+            // 2. 判斷混合效果 (Mix Logic)
+            let finalName = baseStyle;
+            let finalDesc = baseDesc;
+
+            // 如果主光開啟，且有其他光
+            if (key.on) {
+                if (rim.on && fill.on) {
+                    finalName = `三點式 ${baseStyle}`;
+                    finalDesc += " 搭配補光保留細節，以及輪廓光分離背景，這是最標準的商業與電影佈光結構。";
+                } else if (rim.on && !fill.on) {
+                    finalName = `戲劇性 ${baseStyle}`;
+                    finalDesc += " 加上強烈輪廓光 (Rim)，增強了立體感與電影氛圍，但暗部對比強烈。";
+                } else if (!rim.on && fill.on) {
+                    finalName = `柔和 ${baseStyle}`;
+                    finalDesc += " 補光 (Fill) 降低了反差，使畫面更柔和、自然，適合一般人像。";
+                } else {
+                    finalName = `單燈 ${baseStyle}`;
+                    finalDesc += " 僅使用單一主光，陰影深邃，對比度最高，風格強烈。";
+                }
+            } 
+            // 如果主光關閉，但有 Rim + Fill
+            else if (!key.on && rim.on && fill.on) {
+                finalName = "雙邊緣光 (Double Rim)";
+                finalDesc = "利用兩側光線勾勒輪廓，中間保留神秘的陰影。常用於體育或充滿張力的宣傳照。";
+            }
+
+            // 如果沒有匹配到標準，顯示自定義
+            if (finalName === "") {
+                finalName = "自定義混合光 (Custom Mix)";
+                finalDesc = "當前的光線組合較為特殊，形成了獨特的視覺實驗。";
+            }
+
+            // 輸出結果
+            lightName.innerText = finalName;
+            lightDesc.innerText = finalDesc;
         }
 
         // Animation Loop
