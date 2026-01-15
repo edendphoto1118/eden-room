@@ -35,9 +35,8 @@
     <style>
         body { background-color: #050505; color: #C0C0C0; overflow-x: hidden; }
 
-        /* UI 層級修復：確保 UI 在 Canvas 之上，且按鈕可點 */
+        /* UI 層級修復 */
         #ui-layer { position: relative; z-index: 50; pointer-events: none; }
-        /* 讓 UI 內的所有互動元素恢復可點擊 */
         #ui-layer nav, #ui-layer main, .interactive-el { pointer-events: auto; }
         
         #canvas-container { 
@@ -92,13 +91,13 @@
         #loader {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             font-family: 'Space Mono'; color: #D4AF37; font-size: 12px; z-index: 100;
-            pointer-events: none; transition: opacity 0.5s;
+            pointer-events: none; transition: opacity 0.5s; text-align: center;
         }
     </style>
 </head>
 <body class="flex flex-col min-h-screen lang-en transition-colors duration-500">
 
-    <div id="loader">LOADING MODEL...</div>
+    <div id="loader">LOADING .OBJ MODEL...<br><span style="font-size:9px; color:#666;">(face.glb.obj)</span></div>
     <div id="canvas-container"></div>
 
     <div id="ui-layer" class="flex flex-col min-h-screen">
@@ -186,7 +185,8 @@
 
     <script type="module">
         import * as THREE from 'three';
-        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        // 🟢 關鍵修改：改用 OBJLoader
+        import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
         // --- GLOBAL VARIABLES ---
         let currentLang = 'en';
@@ -208,7 +208,7 @@
         const scene = new THREE.Scene();
         
         const camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 100);
-        camera.position.set(0, 0, 6);
+        camera.position.set(0, 0, 6); // 預設視角
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -236,7 +236,6 @@
             }
         };
 
-        // Create Lights
         for (const k in lightsData) {
             const data = lightsData[k];
             const light = new THREE.SpotLight(data.color, data.intensity);
@@ -245,69 +244,68 @@
             light.shadow.mapSize.height = 2048;
             light.shadow.bias = -0.0001;
             scene.add(light);
-            // Add target to center
             light.target.position.set(0, 0, 0);
             scene.add(light.target);
             data.obj = light;
         }
 
-        // Ambient Light (Failsafe)
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // 微光，確保不全黑
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
         scene.add(ambientLight);
 
-        // --- MODEL LOADING ---
-        const loader = new GLTFLoader();
+        // --- MODEL LOADING (OBJ) ---
+        const loader = new OBJLoader();
         
-        // 核心材質：白色石膏 (Plaster)
         const plasterMat = new THREE.MeshStandardMaterial({
             color: 0xffffff,
             roughness: 0.6,
-            metalness: 0.05
+            metalness: 0.05,
+            side: THREE.DoubleSide // 確保不會有破面
         });
 
-        // 嘗試讀取 face.glb
+        // 讀取 face.glb.obj
         loader.load(
-            'face.glb', 
-            (gltf) => {
-                const model = gltf.scene;
+            'face.glb.obj', 
+            (object) => {
+                const model = object;
                 
-                // 自動縮放與置中
+                // 自動置中與縮放
                 const box = new THREE.Box3().setFromObject(model);
                 const size = box.getSize(new THREE.Vector3());
                 const center = box.getCenter(new THREE.Vector3());
                 
-                // 調整位置到中心
                 model.position.x = -center.x;
                 model.position.y = -center.y;
                 model.position.z = -center.z;
 
-                // 調整大小 (正規化到高度約 3)
                 const maxDim = Math.max(size.x, size.y, size.z);
-                const scale = 3.0 / maxDim;
+                const scale = 3.0 / maxDim; // 統一縮放到高度約 3
                 model.scale.set(scale, scale, scale);
 
-                // 替換材質為石膏白模
-                model.traverse((node) => {
-                    if (node.isMesh) {
-                        node.material = plasterMat;
-                        node.castShadow = true;
-                        node.receiveShadow = true;
+                // 穿上石膏材質
+                model.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material = plasterMat;
+                        child.castShadow = true;
+                        child.receiveShadow = true;
                     }
                 });
 
                 scene.add(model);
                 loaderDiv.style.opacity = '0';
             },
-            undefined, 
+            (xhr) => {
+                // Progress
+                const percent = (xhr.loaded / xhr.total * 100).toFixed(0);
+                loaderDiv.innerHTML = `LOADING .OBJ... ${percent}%<br><span style="font-size:9px;">(face.glb.obj)</span>`;
+            },
             (error) => {
                 console.error(error);
-                loaderDiv.innerText = "MODEL NOT FOUND (請放入 face.glb)";
-                createFallbackGeo(); // 讀不到檔案時的備案
+                loaderDiv.innerText = "ERROR: File Not Found (請確認檔名為 face.glb.obj)";
+                createFallbackGeo();
             }
         );
 
         function createFallbackGeo() {
-            // 如果讀不到檔案，生成一個簡單球體，避免畫面全黑
             const geo = new THREE.SphereGeometry(1.5, 64, 64);
             const mesh = new THREE.Mesh(geo, plasterMat);
             mesh.castShadow = true; mesh.receiveShadow = true;
@@ -315,17 +313,14 @@
         }
 
         // --- EVENTS & LOGIC ---
-
         function updateLightPhysics(key) {
             const data = lightsData[key];
             const light = data.obj;
             const type = data.modifier;
 
-            // Visibility
             light.visible = data.on;
             if (!data.on) return;
 
-            // Position
             const r = 6;
             const phi = (90 - data.pol) * (Math.PI / 180);
             const theta = (data.az + 90) * (Math.PI / 180);
@@ -335,7 +330,6 @@
                 r * Math.sin(phi) * Math.sin(theta)
             );
 
-            // Modifiers
             if (type === 'softbox') { light.angle = 1.0; light.penumbra = 1.0; }
             if (type === 'radar') { light.angle = 0.7; light.penumbra = 0.4; }
             if (type === 'grid') { light.angle = 0.4; light.penumbra = 0.2; }
@@ -350,28 +344,23 @@
             polVal.innerText = `${data.pol}°`;
             powerSwitch.checked = data.on;
 
-            // Modifiers UI
             document.querySelectorAll('.mod-btn').forEach(btn => {
                 if(btn.dataset.mod === data.modifier) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
 
-            // Tabs UI
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`tab${currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1)}`).classList.add('active');
 
-            // Dim controls if off
             if (data.on) {
                 controlPanel.style.opacity = '1';
                 controlPanel.style.pointerEvents = 'auto';
             } else {
                 controlPanel.style.opacity = '0.5';
             }
-
             analyzeGlobal();
         }
 
-        // Event Listeners
         azSlider.addEventListener('input', (e) => {
             lightsData[currentTarget].az = parseInt(e.target.value);
             updateLightPhysics(currentTarget);
@@ -398,33 +387,28 @@
             });
         });
 
-        // Tab Selectors
         document.getElementById('tabKey').onclick = () => { currentTarget = 'key'; updateUI(); };
         document.getElementById('tabFill').onclick = () => { currentTarget = 'fill'; updateUI(); };
         document.getElementById('tabRim').onclick = () => { currentTarget = 'rim'; updateUI(); };
 
-        // Lang
         document.getElementById('langBtn').onclick = () => {
             currentLang = currentLang === 'en' ? 'zh' : 'en';
             document.body.className = document.body.className.replace(/lang-\w+/, `lang-${currentLang}`);
             analyzeGlobal();
         };
 
-        // Resize
         window.addEventListener('resize', () => {
             camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(container.clientWidth, container.clientHeight);
         });
 
-        // Analysis Logic
         function analyzeGlobal() {
             const key = lightsData.key;
-            let titleEn = "CUSTOM", titleZh = "自定義", descEn = "Unique lighting setup.", descZh = "獨特的佈光組合。";
+            let titleEn = "CUSTOM", titleZh = "自定義", descEn = "Unique lighting.", descZh = "獨特佈光。";
 
             if (!key.on) {
-                titleEn = "LOW KEY"; titleZh = "暗調";
-                descEn = "Main light off."; descZh = "主光已關閉。";
+                titleEn = "LOW KEY"; titleZh = "暗調"; descZh = "主光已關閉。";
             } else {
                 const absAz = Math.abs(key.az);
                 if (key.pol > 60) { titleEn = "TOP LIGHT"; titleZh = "頂光"; descZh = "結構感強，眼窩陰影深。"; }
@@ -432,18 +416,15 @@
                 else if (absAz >= 30 && absAz <= 70) { titleEn = "REMBRANDT"; titleZh = "倫勃朗光"; descZh = "經典倒三角光區。"; }
                 else if (absAz > 70) { titleEn = "SPLIT"; titleZh = "分割光"; descZh = "戲劇性半面光。"; }
             }
-
             lightName.innerText = currentLang === 'en' ? titleEn : titleZh;
             lightDesc.innerText = currentLang === 'en' ? descEn : descZh;
         }
 
-        // Loop
         function animate() {
             requestAnimationFrame(animate);
             renderer.render(scene, camera);
         }
 
-        // Start
         updateLightPhysics('key');
         updateLightPhysics('fill');
         updateLightPhysics('rim');
