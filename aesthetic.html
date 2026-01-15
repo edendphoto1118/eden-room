@@ -16,7 +16,7 @@
                     fontFamily: { 
                         serif: ['Cinzel', 'serif'], 
                         mono: ['Space Mono', 'monospace'],
-                        zh: ['Shippori Mincho', 'serif'] // 改用質感更好的明朝體
+                        zh: ['Shippori Mincho', 'serif'] 
                     },
                     colors: { eden: { dark: '#020202', gold: '#C5A059' } },
                     animation: { 'fade-in': 'fadeIn 0.8s ease-out' },
@@ -33,6 +33,7 @@
             background-color: #020202; 
             color: #e2e8f0; 
             overflow-x: hidden; 
+            /* 靜態質感噪點 */
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
@@ -42,13 +43,13 @@
             background: #050505; border: 1px solid #151515; box-shadow: 0 20px 40px rgba(0,0,0,0.8); 
         }
         
-        /* 輸入框 Label 優化：中文為主 */
+        /* 輸入框 Label 優化：中文為主，英文為輔 */
         .input-group label { 
-            display: block; font-size: 13px; color: #aaa; margin-bottom: 6px; 
+            display: block; font-size: 13px; color: #bbb; margin-bottom: 8px; 
             font-family: 'Shippori Mincho', serif; letter-spacing: 0.1em;
         }
         .input-group label span {
-            font-size: 9px; color: #555; font-family: 'Space Mono'; margin-left: 4px; text-transform: uppercase;
+            font-size: 9px; color: #555; font-family: 'Space Mono'; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.05em;
         }
 
         .input-field { 
@@ -56,6 +57,8 @@
             text-align: center; font-family: 'Space Mono', monospace; width: 100%; padding: 12px; font-size: 13px; border-radius: 0; 
         }
         .input-field:focus { border-color: #C5A059; outline: none; background: #0f0f0f; }
+        
+        /* 下拉選單中文字體優化 */
         select.input-field { appearance: none; -webkit-appearance: none; cursor: pointer; font-family: 'Shippori Mincho', serif; }
         select.input-field option { background-color: #0a0a0a; color: #fff; padding: 10px; }
 
@@ -160,7 +163,7 @@
                 </div>
 
                 <button onclick="startQuiz()" class="btn-gold w-full py-4 text-xs tracking-[0.2em] font-bold mt-2 hover:brightness-110">
-                    開始診斷 (INITIALIZE)
+                    開始診斷 (START)
                 </button>
             </div>
         </div>
@@ -273,7 +276,7 @@
     </main>
 
     <script>
-        // --- 9大美學原型資料庫 (同前，省略以節省長度，內容不變) ---
+        // --- 9大美學原型資料庫 (保持原樣，字體已透過 CSS 全局套用) ---
         const archetypes = {
             1: { title: "THE PIONEER (開創者)", keywords: "#MINIMAL #BOLD", desc: "你擁有強大的內在驅動力，習慣在混亂中迅速找到秩序。你討厭拖泥帶水，也不喜歡過度包裝。你的魅力來自於那種『我知道我要什麼』的堅定。", reason: "這是一個轉折點。現在的你，比以往任何時候都更需要一張能夠『定義自己』的照片。不需要討好任何人，只要純粹地宣告你的存在。", visual: "高反差黑白肖像。背景是極致的純淨，一道硬光 (Hard Light) 俐落地勾勒出你的輪廓。你穿著剪裁合身的高領黑衣，眼神直視鏡頭。", colors: ["#1A1A1A", "#C5A059"] },
             2: { title: "THE DIPLOMAT (協調者)", keywords: "#SOFT #FLOW", desc: "你對周遭的情緒流動有著極高的敏銳度。你內心有一片寧靜的湖泊，雖然不常大聲喧嘩，但那份安定的力量卻能深深感染身邊的人。", reason: "你總是習慣照顧別人，卻鮮少花時間好好看自己。這組照片是給你的禮物，記錄下你此刻溫柔而堅定的模樣。", visual: "自然光下的莫蘭迪色調。穿著亞麻或絲質的柔軟衣物，光影透過窗簾在你的臉龐上形成溫柔的漫射。", colors: ["#E0D8D1", "#A89F91"] },
@@ -324,7 +327,7 @@
             renderQuestion();
         }
 
-        // ... (其餘渲染與截圖邏輯保持不變) ...
+        // 其餘邏輯保持不變
         function renderQuestion() {
             const q = questions[currentQuestion];
             document.getElementById('questionNumber').innerText = `0${currentQuestion + 1}`;
@@ -332,12 +335,9 @@
             
             const container = document.getElementById('optionsContainer');
             container.innerHTML = '';
-
             q.options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt.text;
-                btn.onclick = () => selectOption(opt.scores);
+                const btn = document.createElement('button'); btn.className = 'option-btn';
+                btn.innerText = opt.text; btn.onclick = () => selectOption(opt.scores);
                 container.appendChild(btn);
             });
         }
@@ -356,8 +356,7 @@
             setTimeout(() => { showResult(winningId); }, 2000);
         }
         function showResult(id) {
-            const data = archetypes[id];
-            const parts = data.title.split(' (');
+            const data = archetypes[id]; const parts = data.title.split(' (');
             document.getElementById('resName').innerText = userData.name;
             document.getElementById('resDate').innerText = new Date().toISOString().split('T')[0].replace(/-/g, '.');
             document.getElementById('resNum').innerText = `00${id}`;
