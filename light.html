@@ -35,72 +35,75 @@
         /* 基礎設定 */
         body { background-color: #050505; color: #C0C0C0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 
-        /* 佈局核心：
-           1. canvas-wrapper: 佔據剩餘空間 (flex-1)
-           2. ui-container: 根據內容高度自動撐開 (flex-shrink-0)
-           這樣網頁放大時，UI 變大，Canvas 會自動縮小，絕不遮擋。
-        */
-        #canvas-wrapper { position: relative; flex: 1; width: 100%; min-height: 0; background: radial-gradient(circle at center, #1f1f1f 0%, #000000 90%); }
+        /* 3D 畫布背景 - 改亮一點的深灰，增加對比 */
+        #canvas-wrapper { position: relative; flex: 1; width: 100%; min-height: 0; background: radial-gradient(circle at center, #2a2a2a 0%, #000000 100%); }
         #canvas-element { width: 100%; height: 100%; display: block; }
         
+        /* UI 容器 - 關鍵：允許滑鼠穿透容器，但攔截按鈕點擊 */
         #ui-container { 
             position: relative; z-index: 20; flex-shrink: 0; 
-            background: #080808; border-top: 1px solid #222;
-            padding-bottom: env(safe-area-inset-bottom); /* 適配 iPhone 底部橫條 */
+            background: #080808; border-top: 1px solid #333;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        /* 導航列懸浮 */
+        /* 導航列 */
         #navbar { position: absolute; top: 0; left: 0; width: 100%; z-index: 30; pointer-events: none; }
-        #navbar a, #navbar button { pointer-events: auto; }
+        /* 讓內部元素可點擊 */
+        #navbar a, #navbar button, .interactive { pointer-events: auto; cursor: pointer; }
 
-        /* 質感滑桿 */
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; padding: 10px 0; cursor: pointer; }
+        /* 滑桿 */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; padding: 10px 0; cursor: pointer; pointer-events: auto; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 14px; width: 14px; 
-            background: #D4AF37; margin-top: -6px; border: 1px solid #000; 
+            -webkit-appearance: none; height: 16px; width: 16px; 
+            background: #D4AF37; margin-top: -7px; border: 1px solid #fff; 
             box-shadow: 0 0 10px rgba(212, 175, 55, 0.8); border-radius: 50%;
         }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; cursor: pointer; background: #333; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; cursor: pointer; background: #444; }
 
-        /* 按鈕系統 */
+        /* 燈光切換標籤 */
         .tab-btn {
-            font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.1em; color: #555;
-            padding: 12px 0; cursor: pointer; transition: 0.3s; border-bottom: 2px solid transparent; text-align: center; flex: 1;
+            font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.1em; color: #666; font-weight: bold;
+            padding: 14px 0; cursor: pointer; transition: 0.2s; border-bottom: 3px solid transparent; text-align: center; flex: 1;
+            background: #0a0a0a; pointer-events: auto; /* 強制可點 */
         }
-        .tab-btn.active { color: #D4AF37; border-bottom: 2px solid #D4AF37; text-shadow: 0 0 10px rgba(212,175,55,0.4); }
-        .tab-btn:hover { color: #888; }
+        .tab-btn:hover { background: #111; color: #aaa; }
+        .tab-btn.active { color: #D4AF37; border-bottom: 3px solid #D4AF37; background: #151515; }
         
+        /* 配件按鈕 */
         .mod-btn {
             border: 1px solid #333; color: #777; font-family: 'Space Mono'; font-size: 10px;
-            padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.3s; background: #0a0a0a;
+            padding: 10px 0; text-align: center; cursor: pointer; transition: all 0.2s; background: #0a0a0a;
+            pointer-events: auto; /* 強制可點 */
         }
-        .mod-btn:hover { border-color: #666; color: #eee; }
-        .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); color: #D4AF37; font-weight: bold; }
+        .mod-btn:hover { border-color: #666; color: #eee; background: #111; }
+        .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.15); color: #D4AF37; font-weight: bold; border-width: 1px; }
 
+        /* 臉型按鈕 */
         .face-shape-btn {
-            width: 24px; height: 24px; border: 1px solid #333; border-radius: 50%; 
+            width: 28px; height: 28px; border: 1px solid #444; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; transition: 0.3s; background: rgba(0,0,0,0.5);
+            cursor: pointer; transition: 0.2s; background: rgba(0,0,0,0.5); pointer-events: auto;
         }
-        .face-shape-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.2); }
-        .face-shape-icon { width: 10px; height: 10px; border: 1px solid #aaa; border-radius: 50%; transition: 0.3s; }
+        .face-shape-btn:hover { border-color: #888; background: rgba(255,255,255,0.1); }
+        .face-shape-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.2); box-shadow: 0 0 8px rgba(212,175,55,0.3); }
+        .face-shape-icon { width: 12px; height: 12px; border: 1px solid #aaa; border-radius: 50%; transition: 0.3s; }
         .face-shape-btn.active .face-shape-icon { border-color: #D4AF37; background: #D4AF37; }
 
-        /* Toggle Switch */
-        .toggle-switch { position: relative; display: inline-block; width: 36px; height: 18px; }
+        /* 開關 */
+        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 20px; pointer-events: auto; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider-tg {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #333; transition: .4s; border-radius: 18px;
+            background-color: #333; transition: .3s; border-radius: 20px; border: 1px solid #444;
         }
         .slider-tg:before {
-            position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px;
-            background-color: #888; transition: .4s; border-radius: 50%;
+            position: absolute; content: ""; height: 14px; width: 14px; left: 2px; bottom: 2px;
+            background-color: #888; transition: .3s; border-radius: 50%;
         }
-        input:checked + .slider-tg { background-color: #111; border: 1px solid #D4AF37; }
-        input:checked + .slider-tg:before { transform: translateX(18px); background-color: #D4AF37; }
+        input:checked + .slider-tg { background-color: #111; border-color: #D4AF37; }
+        input:checked + .slider-tg:before { transform: translateX(20px); background-color: #D4AF37; }
 
-        /* 語言 */
+        /* 語言切換 */
         body.lang-en .text-zh { display: none; }
         body.lang-zh .text-en { display: none; }
         body.lang-zh { font-family: 'Shippori Mincho', serif; letter-spacing: 0.05em; font-weight: 500; }
@@ -110,15 +113,15 @@
 
     <div id="canvas-wrapper">
         <nav id="navbar" class="flex justify-between items-center px-6 py-4">
-            <a href="index.html" class="text-[10px] tracking-[0.2em] text-[#888] hover:text-[#fff] transition-colors font-mono">← EDEN ROOM</a>
+            <a href="index.html" class="text-[10px] tracking-[0.2em] text-[#888] hover:text-[#fff] transition-colors font-mono interactive">← EDEN ROOM</a>
             
-            <div class="flex gap-3 items-center">
-                <div class="flex gap-2 border-r border-[#333] pr-3 mr-1">
-                    <div class="face-shape-btn" id="shapeOval" onclick="setFaceShape('oval')" title="OVAL"><div class="face-shape-icon" style="transform: scale(0.8, 1.2);"></div></div>
-                    <div class="face-shape-btn active" id="shapeRound" onclick="setFaceShape('round')" title="ROUND"><div class="face-shape-icon" style="transform: scale(1, 1);"></div></div>
-                    <div class="face-shape-btn" id="shapeWide" onclick="setFaceShape('wide')" title="WIDE"><div class="face-shape-icon" style="transform: scale(1.2, 0.9);"></div></div>
+            <div class="flex gap-4 items-center">
+                <div class="flex gap-3 border-r border-[#444] pr-4 mr-1">
+                    <div class="face-shape-btn" id="shapeOval" onclick="window.setFaceShape('oval')" title="OVAL"><div class="face-shape-icon" style="transform: scale(0.8, 1.2);"></div></div>
+                    <div class="face-shape-btn active" id="shapeRound" onclick="window.setFaceShape('round')" title="ROUND"><div class="face-shape-icon" style="transform: scale(1, 1);"></div></div>
+                    <div class="face-shape-btn" id="shapeWide" onclick="window.setFaceShape('wide')" title="WIDE"><div class="face-shape-icon" style="transform: scale(1.2, 0.9);"></div></div>
                 </div>
-                <button id="langBtn" class="border border-[#333] px-2 py-1 text-[9px] font-mono hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors text-[#666] bg-black/50 backdrop-blur">
+                <button onclick="window.toggleLang()" class="border border-[#444] px-3 py-1 text-[9px] font-mono hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors text-[#888] bg-black/50 backdrop-blur interactive">
                     <span class="text-en">中 / EN</span><span class="text-zh">EN / 中</span>
                 </button>
             </div>
@@ -130,13 +133,13 @@
     <div id="ui-container">
         <main class="w-full max-w-3xl mx-auto px-6 pt-2 pb-6">
             
-            <div class="flex justify-between border-b border-[#222] mb-6">
-                <div id="tabKey" class="tab-btn active"><span class="text-en">KEY</span><span class="text-zh">主光</span></div>
-                <div id="tabFill" class="tab-btn"><span class="text-en">FILL</span><span class="text-zh">補光</span></div>
-                <div id="tabRim" class="tab-btn"><span class="text-en">RIM</span><span class="text-zh">輪廓</span></div>
+            <div class="flex justify-between border-b border-[#222] mb-6 bg-[#050505]">
+                <div id="tabKey" class="tab-btn active" onclick="window.selectLight('key')"><span class="text-en">KEY</span><span class="text-zh">主光</span></div>
+                <div id="tabFill" class="tab-btn" onclick="window.selectLight('fill')"><span class="text-en">FILL</span><span class="text-zh">補光</span></div>
+                <div id="tabRim" class="tab-btn" onclick="window.selectLight('rim')"><span class="text-en">RIM</span><span class="text-zh">輪廓</span></div>
             </div>
 
-            <div id="controlPanel" class="space-y-6 transition-opacity duration-300">
+            <div id="controlPanel" class="space-y-6 transition-opacity duration-200">
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                     <div class="flex items-center justify-between border-b border-[#333] pb-2">
@@ -144,7 +147,7 @@
                             <span class="text-en">STATUS</span><span class="text-zh">電源</span>
                         </span>
                         <label class="toggle-switch">
-                            <input type="checkbox" id="powerSwitch" checked>
+                            <input type="checkbox" id="powerSwitch" checked onchange="window.toggleCurrentLight(this.checked)">
                             <span class="slider-tg"></span>
                         </label>
                     </div>
@@ -154,10 +157,10 @@
                             <span class="text-en">MODIFIER</span><span class="text-zh">配件</span>
                         </span>
                         <div class="flex-1 grid grid-cols-4 gap-2">
-                            <div class="mod-btn active" data-mod="softbox">SOFT</div>
-                            <div class="mod-btn" data-mod="radar">RADAR</div>
-                            <div class="mod-btn" data-mod="grid">GRID</div>
-                            <div class="mod-btn" data-mod="bare">BARE</div>
+                            <div class="mod-btn active" id="mod-softbox" onclick="window.setModifier('softbox')">SOFT</div>
+                            <div class="mod-btn" id="mod-radar" onclick="window.setModifier('radar')">RADAR</div>
+                            <div class="mod-btn" id="mod-grid" onclick="window.setModifier('grid')">GRID</div>
+                            <div class="mod-btn" id="mod-bare" onclick="window.setModifier('bare')">BARE</div>
                         </div>
                     </div>
                 </div>
@@ -168,20 +171,20 @@
                             <span class="font-serif text-[10px] text-gray-400 tracking-widest"><span class="text-en">AZIMUTH</span><span class="text-zh">方位角</span></span>
                             <span id="azVal" class="font-mono text-[10px] text-[#D4AF37]">45°</span>
                         </div>
-                        <input type="range" id="azSlider" min="-180" max="180" step="5">
+                        <input type="range" id="azSlider" min="-180" max="180" step="5" oninput="window.updateAzimuth(this.value)">
                     </div>
                     <div>
                         <div class="flex justify-between mb-1">
                             <span class="font-serif text-[10px] text-gray-400 tracking-widest"><span class="text-en">ALTITUDE</span><span class="text-zh">高度角</span></span>
                             <span id="polVal" class="font-mono text-[10px] text-[#D4AF37]">30°</span>
                         </div>
-                        <input type="range" id="polSlider" min="-40" max="90" step="5">
+                        <input type="range" id="polSlider" min="-40" max="90" step="5" oninput="window.updateAltitude(this.value)">
                     </div>
                 </div>
 
-                <div class="border-t border-[#222] pt-3 text-center md:text-left flex flex-col md:flex-row items-baseline gap-2">
-                    <h3 class="font-serif text-[#D4AF37] text-sm tracking-widest font-bold" id="lightName">REMBRANDT</h3>
-                    <p class="font-zh text-xs text-gray-500 font-light" id="lightDesc">...</p>
+                <div class="border-t border-[#222] pt-3 text-center md:text-left flex flex-col md:flex-row items-baseline gap-4">
+                    <h3 class="font-serif text-[#D4AF37] text-sm tracking-widest font-bold min-w-[120px]" id="lightName">REMBRANDT</h3>
+                    <p class="font-zh text-xs text-gray-400 font-light leading-relaxed" id="lightDesc">...</p>
                 </div>
 
             </div>
@@ -196,7 +199,7 @@
         const canvasWrapper = document.getElementById('canvas-wrapper');
         
         const scene = new THREE.Scene();
-        // 鏡頭設置：Y軸微調，確保視角平視臉部
+        // 鏡頭設置
         const camera = new THREE.PerspectiveCamera(35, canvasWrapper.clientWidth / canvasWrapper.clientHeight, 0.1, 100);
         camera.position.set(0, 0.1, 8); 
         camera.lookAt(0, -0.2, 0);
@@ -204,29 +207,31 @@
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 柔和陰影
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+        
+        // 🔥 關鍵設置：高曝光 ToneMapping
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.0;
+        renderer.toneMappingExposure = 1.5; // 曝光拉高 50%
 
         // --- 2. GEOMETRY (高質感幾何石膏) ---
         const headGroup = new THREE.Group();
         scene.add(headGroup);
 
-        // 材質優化：降低粗糙度(Roughness)以增加對比度，讓光影更立體
+        // 材質：純白，低粗糙度 (增加反光)，高對比
         const plasterMat = new THREE.MeshStandardMaterial({
             color: 0xffffff,
-            roughness: 0.45, // 微降，增加高光
-            metalness: 0.1,
+            roughness: 0.4, // 降到 0.4 讓高光更明顯
+            metalness: 0.05,
             flatShading: false
         });
 
-        // 結構組裝
+        // 結構組裝 (Sphere + Cone + Torus)
         const head = new THREE.Mesh(new THREE.SphereGeometry(1.4, 64, 64), plasterMat);
         head.scale.set(0.85, 1.15, 0.95);
         head.castShadow = true; head.receiveShadow = true;
         headGroup.add(head);
 
-        // 鼻子 (關鍵陰影來源) - 稍微加大以確保陰影明顯
+        // 鼻子
         const nose = new THREE.Mesh(new THREE.ConeGeometry(0.28, 1.15, 32), plasterMat);
         nose.position.set(0, -0.1, 1.35);
         nose.rotation.x = -0.1;
@@ -234,7 +239,7 @@
         nose.castShadow = true; nose.receiveShadow = true;
         headGroup.add(nose);
 
-        // 眉骨 (深邃眼窩)
+        // 眉骨
         const brow = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.15, 16, 32, 2.5), plasterMat);
         brow.rotation.z = -Math.PI / 2 + 1.25;
         brow.rotation.x = 0.5;
@@ -243,8 +248,7 @@
         headGroup.add(brow);
 
         // 耳朵
-        const earGeo = new THREE.CapsuleGeometry(0.25, 0.5, 4, 16);
-        const earL = new THREE.Mesh(earGeo, plasterMat);
+        const earL = new THREE.Mesh(new THREE.CapsuleGeometry(0.25, 0.5, 4, 16), plasterMat);
         earL.position.set(-1.45, -0.1, 0); earL.castShadow = true; earL.receiveShadow = true;
         headGroup.add(earL);
         const earR = earL.clone();
@@ -255,31 +259,21 @@
         neck.position.y = -2; neck.castShadow = true; neck.receiveShadow = true;
         headGroup.add(neck);
 
-        // 環境地板
-        const plane = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 1 }));
+        // 地板
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 1 }));
         plane.rotation.x = -Math.PI / 2; plane.position.y = -3.5; plane.receiveShadow = true;
         scene.add(plane);
 
-        // 🔥 關鍵修正：降低環境光 (增加對比)
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); 
+        // 🔥 關鍵設置：超亮環境光 (0.6)，保證絕對不黑
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
         scene.add(ambientLight);
 
-        // --- 3. FACE SHAPE LOGIC ---
-        window.setFaceShape = function(shape) {
-            document.querySelectorAll('.face-shape-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('shape' + shape.charAt(0).toUpperCase() + shape.slice(1)).classList.add('active');
-            if (shape === 'round') headGroup.scale.set(1, 1, 1);
-            else if (shape === 'oval') headGroup.scale.set(0.9, 1.15, 0.95);
-            else if (shape === 'wide') headGroup.scale.set(1.15, 0.9, 1.05);
-        };
-        setFaceShape('round');
-
-        // --- 4. LIGHTS ---
+        // --- 3. LIGHTS DATA ---
         const lightsData = {
-            // 🔥 關鍵修正：主光強度提升 (1.5 -> 2.2)
-            key: { obj: null, az: 45, pol: 30, on: true, name: "KEY", modifier: 'softbox', color: 0xffffff, intensity: 2.2 },
-            fill: { obj: null, az: -45, pol: 10, on: true, name: "FILL", modifier: 'softbox', color: 0xffeedd, intensity: 0.5 },
-            rim: { obj: null, az: 135, pol: 30, on: true, name: "RIM", modifier: 'bare', color: 0xffc266, intensity: 2.0 }
+            // 主光：強度拉到 3.0
+            key: { obj: null, az: 45, pol: 30, on: true, name: "KEY", modifier: 'softbox', color: 0xffffff, intensity: 3.0 },
+            fill: { obj: null, az: -45, pol: 10, on: true, name: "FILL", modifier: 'softbox', color: 0xffeedd, intensity: 0.8 },
+            rim: { obj: null, az: 135, pol: 30, on: true, name: "RIM", modifier: 'bare', color: 0xffc266, intensity: 3.5 }
         };
 
         for (const k in lightsData) {
@@ -287,15 +281,18 @@
             const light = new THREE.SpotLight(data.color, data.intensity);
             light.castShadow = true;
             light.shadow.mapSize.set(2048, 2048);
-            light.shadow.bias = -0.00005;
+            light.shadow.bias = -0.00005; // 修正條紋
             scene.add(light);
             light.target.position.set(0, 0, 0);
             scene.add(light.target);
             data.obj = light;
         }
 
-        // --- 5. UI LOGIC ---
-        let currentLang = 'en', currentTarget = 'key';
+        // --- 4. GLOBAL INTERACTION FUNCTIONS ---
+        // 將函數掛載到 window，確保 HTML onclick 能讀取到
+        let currentTarget = 'key';
+        let currentLang = 'en';
+
         const els = {
             azSlider: document.getElementById('azSlider'),
             polSlider: document.getElementById('polSlider'),
@@ -307,7 +304,56 @@
             panel: document.getElementById('controlPanel')
         };
 
-        function updateState() {
+        window.selectLight = (type) => {
+            currentTarget = type;
+            // Update Tab UI
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('active');
+            updateUI();
+        };
+
+        window.updateAzimuth = (val) => {
+            lightsData[currentTarget].az = parseInt(val);
+            updateLightState();
+            updateUI(); // 只更新文字
+        };
+
+        window.updateAltitude = (val) => {
+            lightsData[currentTarget].pol = parseInt(val);
+            updateLightState();
+            updateUI();
+        };
+
+        window.toggleCurrentLight = (isChecked) => {
+            lightsData[currentTarget].on = isChecked;
+            updateLightState();
+            updateUI();
+        };
+
+        window.setModifier = (mod) => {
+            lightsData[currentTarget].modifier = mod;
+            updateLightState();
+            updateUI();
+        };
+
+        window.setFaceShape = (shape) => {
+            document.querySelectorAll('.face-shape-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('shape' + shape.charAt(0).toUpperCase() + shape.slice(1)).classList.add('active');
+            
+            // 物理變形
+            if (shape === 'round') headGroup.scale.set(1, 1, 1);
+            else if (shape === 'oval') headGroup.scale.set(0.9, 1.15, 0.95);
+            else if (shape === 'wide') headGroup.scale.set(1.15, 0.9, 1.05);
+        };
+
+        window.toggleLang = () => {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            document.body.className = document.body.className.replace(/lang-\w+/, `lang-${currentLang}`);
+            analyze();
+        };
+
+        // 核心更新邏輯
+        function updateLightState() {
             const data = lightsData[currentTarget];
             const light = data.obj;
             light.visible = data.on;
@@ -318,36 +364,48 @@
                 const theta = (data.az + 90) * (Math.PI / 180);
                 light.position.set(-(r * Math.sin(phi) * Math.cos(theta)), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
                 
-                if (data.modifier === 'softbox') { light.angle = 1.0; light.penumbra = 1.0; }
-                if (data.modifier === 'radar') { light.angle = 0.7; light.penumbra = 0.4; }
-                if (data.modifier === 'grid') { light.angle = 0.35; light.penumbra = 0.1; }
-                if (data.modifier === 'bare') { light.angle = 1.2; light.penumbra = 0.05; }
+                // 配件物理模擬 (差異化)
+                if (data.modifier === 'softbox') { 
+                    light.angle = 1.2; light.penumbra = 1.0; light.intensity = data.name === 'RIM' ? 3.5 : 3.0; // 柔光維持原強度
+                }
+                else if (data.modifier === 'radar') { 
+                    light.angle = 0.7; light.penumbra = 0.4; light.intensity = data.name === 'RIM' ? 4.0 : 3.5; // 雷達稍亮
+                }
+                else if (data.modifier === 'grid') { 
+                    light.angle = 0.35; light.penumbra = 0.2; light.intensity = data.name === 'RIM' ? 5.0 : 4.5; // 蜂巢聚光超亮
+                }
+                else if (data.modifier === 'bare') { 
+                    light.angle = 1.3; light.penumbra = 0.05; light.intensity = data.name === 'RIM' ? 4.0 : 3.5; // 裸燈硬光
+                }
             }
+            analyze();
+        }
 
+        function updateUI() {
+            const data = lightsData[currentTarget];
             els.azSlider.value = data.az;
             els.polSlider.value = data.pol;
             els.azVal.innerText = `${data.az}°`;
             els.polVal.innerText = `${data.pol}°`;
             els.powerSwitch.checked = data.on;
             
-            document.querySelectorAll('.mod-btn').forEach(b => b.classList.toggle('active', b.dataset.mod === data.modifier));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById(`tab${currentTarget.charAt(0).toUpperCase() + currentTarget.slice(1)}`).classList.add('active');
-            
-            els.panel.style.opacity = data.on ? '1' : '0.5';
-            analyze();
+            // 更新 Modifier 按鈕狀態
+            document.querySelectorAll('.mod-btn').forEach(b => {
+                if (b.id === 'mod-' + data.modifier) b.classList.add('active');
+                else b.classList.remove('active');
+            });
+
+            // 禁用效果
+            if (data.on) {
+                els.panel.style.opacity = '1';
+                els.panel.style.pointerEvents = 'auto';
+            } else {
+                els.panel.style.opacity = '0.5';
+                // 保留開關可點，其他禁用
+            }
         }
 
-        // Listeners
-        els.azSlider.oninput = (e) => { lightsData[currentTarget].az = parseInt(e.target.value); updateState(); };
-        els.polSlider.oninput = (e) => { lightsData[currentTarget].pol = parseInt(e.target.value); updateState(); };
-        els.powerSwitch.onchange = (e) => { lightsData[currentTarget].on = e.target.checked; updateState(); };
-        document.querySelectorAll('.mod-btn').forEach(b => b.onclick = (e) => { lightsData[currentTarget].modifier = e.target.dataset.mod; updateState(); });
-        
-        ['key','fill','rim'].forEach(t => document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).onclick = () => { currentTarget = t; updateState(); });
-        document.getElementById('langBtn').onclick = () => { currentLang = currentLang === 'en' ? 'zh' : 'en'; document.body.className = document.body.className.replace(/lang-\w+/, `lang-${currentLang}`); analyze(); };
-        
-        // RWD Resize (Fix for Flex Layout)
+        // --- RWD Resize ---
         function onResize() {
             const w = canvasWrapper.clientWidth;
             const h = canvasWrapper.clientHeight;
@@ -356,9 +414,9 @@
             renderer.setSize(w, h);
         }
         window.addEventListener('resize', onResize);
-        // Initial Trigger
         setTimeout(onResize, 100);
 
+        // --- Analysis ---
         function analyze() {
             const k = lightsData.key;
             let en = "CUSTOM", zh = "自定義", den = "Unique setup.", dzh = "獨特佈光。";
@@ -374,8 +432,17 @@
             els.lightDesc.innerText = currentLang === 'en' ? den : dzh;
         }
 
-        function animate() { requestAnimationFrame(animate); renderer.render(scene, camera); }
-        updateState(); animate();
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        // Init
+        updateLightState(); // Apply defaults
+        updateUI();
+        animate();
+
     </script>
 </body>
 </html>
