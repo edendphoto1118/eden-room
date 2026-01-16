@@ -32,20 +32,29 @@
     </script>
 
     <style>
-        body { background-color: #050505; color: #C0C0C0; overflow-x: hidden; }
+        /* 基礎設定 */
+        body { background-color: #050505; color: #C0C0C0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 
-        /* UI 層級管理：確保按鈕可點 */
-        #ui-layer { position: relative; z-index: 50; pointer-events: none; }
-        .interactive { pointer-events: auto; }
+        /* 佈局核心：
+           1. canvas-wrapper: 佔據剩餘空間 (flex-1)
+           2. ui-container: 根據內容高度自動撐開 (flex-shrink-0)
+           這樣網頁放大時，UI 變大，Canvas 會自動縮小，絕不遮擋。
+        */
+        #canvas-wrapper { position: relative; flex: 1; width: 100%; min-height: 0; background: radial-gradient(circle at center, #1f1f1f 0%, #000000 90%); }
+        #canvas-element { width: 100%; height: 100%; display: block; }
         
-        #canvas-container { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0; 
-            /* 背景：深灰漸層，確保模型輪廓清晰 */
-            background: radial-gradient(circle at center, #1f1f1f 0%, #000000 90%);
+        #ui-container { 
+            position: relative; z-index: 20; flex-shrink: 0; 
+            background: #080808; border-top: 1px solid #222;
+            padding-bottom: env(safe-area-inset-bottom); /* 適配 iPhone 底部橫條 */
         }
 
+        /* 導航列懸浮 */
+        #navbar { position: absolute; top: 0; left: 0; width: 100%; z-index: 30; pointer-events: none; }
+        #navbar a, #navbar button { pointer-events: auto; }
+
         /* 質感滑桿 */
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; padding: 15px 0; cursor: pointer; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; padding: 10px 0; cursor: pointer; }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none; height: 14px; width: 14px; 
             background: #D4AF37; margin-top: -6px; border: 1px solid #000; 
@@ -56,41 +65,40 @@
         /* 按鈕系統 */
         .tab-btn {
             font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: 0.1em; color: #555;
-            padding: 12px 0; cursor: pointer; transition: 0.3s; border-bottom: 2px solid transparent; text-align: center; width: 33%;
+            padding: 12px 0; cursor: pointer; transition: 0.3s; border-bottom: 2px solid transparent; text-align: center; flex: 1;
         }
         .tab-btn.active { color: #D4AF37; border-bottom: 2px solid #D4AF37; text-shadow: 0 0 10px rgba(212,175,55,0.4); }
         .tab-btn:hover { color: #888; }
         
         .mod-btn {
             border: 1px solid #333; color: #777; font-family: 'Space Mono'; font-size: 10px;
-            padding: 10px 0; text-align: center; cursor: pointer; transition: all 0.3s; background: #0a0a0a;
+            padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.3s; background: #0a0a0a;
         }
         .mod-btn:hover { border-color: #666; color: #eee; }
         .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); color: #D4AF37; font-weight: bold; }
 
         .face-shape-btn {
-            width: 30px; height: 30px; border: 1px solid #333; border-radius: 50%; 
+            width: 24px; height: 24px; border: 1px solid #333; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; transition: 0.3s; background: #0a0a0a;
+            cursor: pointer; transition: 0.3s; background: rgba(0,0,0,0.5);
         }
-        .face-shape-btn:hover { border-color: #666; }
-        .face-shape-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); color: #D4AF37; }
-        .face-shape-icon { width: 12px; height: 12px; border: 1px solid #777; border-radius: 50%; transition: 0.3s; }
+        .face-shape-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.2); }
+        .face-shape-icon { width: 10px; height: 10px; border: 1px solid #aaa; border-radius: 50%; transition: 0.3s; }
         .face-shape-btn.active .face-shape-icon { border-color: #D4AF37; background: #D4AF37; }
 
-        /* Toggle */
-        .toggle-switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        /* Toggle Switch */
+        .toggle-switch { position: relative; display: inline-block; width: 36px; height: 18px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider-tg {
             position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #333; transition: .4s; border-radius: 20px;
+            background-color: #333; transition: .4s; border-radius: 18px;
         }
         .slider-tg:before {
             position: absolute; content: ""; height: 12px; width: 12px; left: 3px; bottom: 3px;
             background-color: #888; transition: .4s; border-radius: 50%;
         }
         input:checked + .slider-tg { background-color: #111; border: 1px solid #D4AF37; }
-        input:checked + .slider-tg:before { transform: translateX(20px); background-color: #D4AF37; }
+        input:checked + .slider-tg:before { transform: translateX(18px); background-color: #D4AF37; }
 
         /* 語言 */
         body.lang-en .text-zh { display: none; }
@@ -98,56 +106,42 @@
         body.lang-zh { font-family: 'Shippori Mincho', serif; letter-spacing: 0.05em; font-weight: 500; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen lang-en transition-colors duration-500">
+<body class="lang-en transition-colors duration-500">
 
-    <div id="canvas-container"></div>
-
-    <div id="ui-layer" class="flex flex-col min-h-screen">
-        
-        <nav class="w-full flex justify-between items-center px-6 py-5 bg-gradient-to-b from-black/90 to-transparent interactive">
+    <div id="canvas-wrapper">
+        <nav id="navbar" class="flex justify-between items-center px-6 py-4">
             <a href="index.html" class="text-[10px] tracking-[0.2em] text-[#888] hover:text-[#fff] transition-colors font-mono">← EDEN ROOM</a>
             
-            <div class="flex gap-4 items-center">
-                <div class="flex gap-2 mr-4 border-r border-[#333] pr-4">
-                    <div class="face-shape-btn interactive" id="shapeOval" onclick="setFaceShape('oval')" title="OVAL">
-                        <div class="face-shape-icon" style="transform: scale(0.8, 1.2);"></div>
-                    </div>
-                    <div class="face-shape-btn active interactive" id="shapeRound" onclick="setFaceShape('round')" title="ROUND">
-                        <div class="face-shape-icon" style="transform: scale(1, 1);"></div>
-                    </div>
-                    <div class="face-shape-btn interactive" id="shapeWide" onclick="setFaceShape('wide')" title="WIDE">
-                        <div class="face-shape-icon" style="transform: scale(1.2, 0.9);"></div>
-                    </div>
+            <div class="flex gap-3 items-center">
+                <div class="flex gap-2 border-r border-[#333] pr-3 mr-1">
+                    <div class="face-shape-btn" id="shapeOval" onclick="setFaceShape('oval')" title="OVAL"><div class="face-shape-icon" style="transform: scale(0.8, 1.2);"></div></div>
+                    <div class="face-shape-btn active" id="shapeRound" onclick="setFaceShape('round')" title="ROUND"><div class="face-shape-icon" style="transform: scale(1, 1);"></div></div>
+                    <div class="face-shape-btn" id="shapeWide" onclick="setFaceShape('wide')" title="WIDE"><div class="face-shape-icon" style="transform: scale(1.2, 0.9);"></div></div>
                 </div>
-
-                <button id="langBtn" class="border border-[#333] px-3 py-1 text-[9px] font-mono hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors text-[#666] bg-black/50 backdrop-blur interactive">
+                <button id="langBtn" class="border border-[#333] px-2 py-1 text-[9px] font-mono hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors text-[#666] bg-black/50 backdrop-blur">
                     <span class="text-en">中 / EN</span><span class="text-zh">EN / 中</span>
                 </button>
             </div>
         </nav>
+        
+        <canvas id="canvas-element"></canvas>
+    </div>
 
-        <div class="flex-grow"></div>
-
-        <main class="w-full max-w-2xl mx-auto px-6 pb-12 interactive">
+    <div id="ui-container">
+        <main class="w-full max-w-3xl mx-auto px-6 pt-2 pb-6">
             
-            <div class="flex justify-between bg-black/80 backdrop-blur-md border border-[#222] mb-6 rounded-sm">
-                <div id="tabKey" class="tab-btn active">
-                    <span class="text-en">KEY</span><span class="text-zh">主光</span>
-                </div>
-                <div id="tabFill" class="tab-btn">
-                    <span class="text-en">FILL</span><span class="text-zh">補光</span>
-                </div>
-                <div id="tabRim" class="tab-btn">
-                    <span class="text-en">RIM</span><span class="text-zh">輪廓</span>
-                </div>
+            <div class="flex justify-between border-b border-[#222] mb-6">
+                <div id="tabKey" class="tab-btn active"><span class="text-en">KEY</span><span class="text-zh">主光</span></div>
+                <div id="tabFill" class="tab-btn"><span class="text-en">FILL</span><span class="text-zh">補光</span></div>
+                <div id="tabRim" class="tab-btn"><span class="text-en">RIM</span><span class="text-zh">輪廓</span></div>
             </div>
 
-            <div id="controlPanel" class="bg-black/80 backdrop-blur-md border border-[#222] p-6 space-y-8 rounded-sm transition-opacity duration-300">
+            <div id="controlPanel" class="space-y-6 transition-opacity duration-300">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                     <div class="flex items-center justify-between border-b border-[#333] pb-2">
                         <span class="font-serif text-[10px] text-gray-400 tracking-widest">
-                            <span class="text-en">STATUS</span><span class="text-zh">開關狀態</span>
+                            <span class="text-en">STATUS</span><span class="text-zh">電源</span>
                         </span>
                         <label class="toggle-switch">
                             <input type="checkbox" id="powerSwitch" checked>
@@ -155,13 +149,11 @@
                         </label>
                     </div>
                     
-                    <div>
-                        <div class="flex justify-between mb-2">
-                            <span class="font-serif text-[10px] text-gray-400 tracking-widest">
-                                <span class="text-en">MODIFIER</span><span class="text-zh">控光配件</span>
-                            </span>
-                        </div>
-                        <div class="grid grid-cols-4 gap-2">
+                    <div class="flex gap-2 items-center">
+                        <span class="font-serif text-[10px] text-gray-400 tracking-widest w-16">
+                            <span class="text-en">MODIFIER</span><span class="text-zh">配件</span>
+                        </span>
+                        <div class="flex-1 grid grid-cols-4 gap-2">
                             <div class="mod-btn active" data-mod="softbox">SOFT</div>
                             <div class="mod-btn" data-mod="radar">RADAR</div>
                             <div class="mod-btn" data-mod="grid">GRID</div>
@@ -170,30 +162,26 @@
                     </div>
                 </div>
 
-                <div class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                     <div>
                         <div class="flex justify-between mb-1">
-                            <span class="font-serif text-[10px] text-gray-400 tracking-widest">
-                                <span class="text-en">AZIMUTH</span><span class="text-zh">水平位置</span>
-                            </span>
+                            <span class="font-serif text-[10px] text-gray-400 tracking-widest"><span class="text-en">AZIMUTH</span><span class="text-zh">方位角</span></span>
                             <span id="azVal" class="font-mono text-[10px] text-[#D4AF37]">45°</span>
                         </div>
                         <input type="range" id="azSlider" min="-180" max="180" step="5">
                     </div>
                     <div>
                         <div class="flex justify-between mb-1">
-                            <span class="font-serif text-[10px] text-gray-400 tracking-widest">
-                                <span class="text-en">ALTITUDE</span><span class="text-zh">垂直高度</span>
-                            </span>
+                            <span class="font-serif text-[10px] text-gray-400 tracking-widest"><span class="text-en">ALTITUDE</span><span class="text-zh">高度角</span></span>
                             <span id="polVal" class="font-mono text-[10px] text-[#D4AF37]">30°</span>
                         </div>
                         <input type="range" id="polSlider" min="-40" max="90" step="5">
                     </div>
                 </div>
 
-                <div class="border-t border-[#333] pt-4">
-                    <h3 class="font-serif text-[#D4AF37] text-sm tracking-widest mb-1 font-bold" id="lightName">REMBRANDT</h3>
-                    <p class="font-zh text-xs text-gray-400 font-light" id="lightDesc">...</p>
+                <div class="border-t border-[#222] pt-3 text-center md:text-left flex flex-col md:flex-row items-baseline gap-2">
+                    <h3 class="font-serif text-[#D4AF37] text-sm tracking-widest font-bold" id="lightName">REMBRANDT</h3>
+                    <p class="font-zh text-xs text-gray-500 font-light" id="lightDesc">...</p>
                 </div>
 
             </div>
@@ -203,110 +191,95 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // --- SETUP ---
-        const container = document.getElementById('canvas-container');
+        // --- 1. SETUP ---
+        const canvas = document.getElementById('canvas-element');
+        const canvasWrapper = document.getElementById('canvas-wrapper');
+        
         const scene = new THREE.Scene();
-        // 鏡頭稍微拉遠一點，看清楚整體
-        const camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 100);
-        camera.position.set(0, 0, 7.5); 
-        camera.lookAt(0, -0.3, 0);
+        // 鏡頭設置：Y軸微調，確保視角平視臉部
+        const camera = new THREE.PerspectiveCamera(35, canvasWrapper.clientWidth / canvasWrapper.clientHeight, 0.1, 100);
+        camera.position.set(0, 0.1, 8); 
+        camera.lookAt(0, -0.2, 0);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(container.clientWidth, container.clientHeight);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 柔和陰影
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.1; 
-        container.appendChild(renderer.domElement);
+        renderer.toneMappingExposure = 1.0;
 
-        // --- GEOMETRY PLASTER HEAD (石膏幾何頭像) ---
-        // 使用 Group，方便整體縮放做臉型
+        // --- 2. GEOMETRY (高質感幾何石膏) ---
         const headGroup = new THREE.Group();
         scene.add(headGroup);
 
-        // 材質：高質感平滑石膏
+        // 材質優化：降低粗糙度(Roughness)以增加對比度，讓光影更立體
         const plasterMat = new THREE.MeshStandardMaterial({
             color: 0xffffff,
-            roughness: 0.5,
+            roughness: 0.45, // 微降，增加高光
             metalness: 0.1,
-            flatShading: false // 平滑模式，非 Low Poly
+            flatShading: false
         });
 
-        // 1. 頭部 (Sphere - 絕對可靠)
-        const headGeo = new THREE.SphereGeometry(1.4, 64, 64);
-        const head = new THREE.Mesh(headGeo, plasterMat);
+        // 結構組裝
+        const head = new THREE.Mesh(new THREE.SphereGeometry(1.4, 64, 64), plasterMat);
+        head.scale.set(0.85, 1.15, 0.95);
         head.castShadow = true; head.receiveShadow = true;
         headGroup.add(head);
 
-        // 2. 鼻子 (Cone - 產生陰影的關鍵)
-        // 位置調整過，確保在任何臉型下都突出
-        const noseGeo = new THREE.ConeGeometry(0.25, 1.1, 32); 
-        const nose = new THREE.Mesh(noseGeo, plasterMat);
-        nose.position.set(0, -0.1, 1.35); 
+        // 鼻子 (關鍵陰影來源) - 稍微加大以確保陰影明顯
+        const nose = new THREE.Mesh(new THREE.ConeGeometry(0.28, 1.15, 32), plasterMat);
+        nose.position.set(0, -0.1, 1.35);
         nose.rotation.x = -0.1;
-        nose.scale.z = 0.5; // 壓扁
+        nose.scale.z = 0.55;
         nose.castShadow = true; nose.receiveShadow = true;
         headGroup.add(nose);
 
-        // 3. 眉骨 (Torus - 產生眼窩陰影)
-        const browGeo = new THREE.TorusGeometry(0.6, 0.15, 16, 32, 2.5);
-        const brow = new THREE.Mesh(browGeo, plasterMat);
+        // 眉骨 (深邃眼窩)
+        const brow = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.15, 16, 32, 2.5), plasterMat);
         brow.rotation.z = -Math.PI / 2 + 1.25;
         brow.rotation.x = 0.5;
         brow.position.set(0, 0.4, 1.05);
         brow.castShadow = true; brow.receiveShadow = true;
         headGroup.add(brow);
 
-        // 4. 耳朵 (Capsule)
+        // 耳朵
         const earGeo = new THREE.CapsuleGeometry(0.25, 0.5, 4, 16);
         const earL = new THREE.Mesh(earGeo, plasterMat);
-        earL.position.set(-1.45, -0.1, 0);
-        earL.castShadow = true; earL.receiveShadow = true;
+        earL.position.set(-1.45, -0.1, 0); earL.castShadow = true; earL.receiveShadow = true;
         headGroup.add(earL);
         const earR = earL.clone();
-        earR.position.set(1.45, -0.1, 0);
-        headGroup.add(earR);
+        earR.position.set(1.45, -0.1, 0); headGroup.add(earR);
 
-        // 5. 脖子
+        // 脖子
         const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.85, 2.5, 32), plasterMat);
-        neck.position.y = -2; 
-        neck.castShadow = true; neck.receiveShadow = true;
+        neck.position.y = -2; neck.castShadow = true; neck.receiveShadow = true;
         headGroup.add(neck);
 
-        // 環境
+        // 環境地板
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshStandardMaterial({ color: 0x080808, roughness: 1 }));
         plane.rotation.x = -Math.PI / 2; plane.position.y = -3.5; plane.receiveShadow = true;
         scene.add(plane);
 
-        // 安全環境光 (保證不可見全黑)
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+        // 🔥 關鍵修正：降低環境光 (增加對比)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.1); 
         scene.add(ambientLight);
 
-        // --- FACE SHAPE LOGIC ---
-        // 透過縮放 Group 來達成臉型變化，這是最安全的方法
+        // --- 3. FACE SHAPE LOGIC ---
         window.setFaceShape = function(shape) {
-            // UI Update
             document.querySelectorAll('.face-shape-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('shape' + shape.charAt(0).toUpperCase() + shape.slice(1)).classList.add('active');
-
-            // Physics Update
-            if (shape === 'round') {
-                headGroup.scale.set(1, 1, 1);
-            } else if (shape === 'oval') {
-                headGroup.scale.set(0.9, 1.15, 0.95);
-            } else if (shape === 'wide') {
-                headGroup.scale.set(1.15, 0.9, 1.05);
-            }
+            if (shape === 'round') headGroup.scale.set(1, 1, 1);
+            else if (shape === 'oval') headGroup.scale.set(0.9, 1.15, 0.95);
+            else if (shape === 'wide') headGroup.scale.set(1.15, 0.9, 1.05);
         };
-        // 預設圓臉
         setFaceShape('round');
 
-        // --- LIGHTS & LOGIC ---
+        // --- 4. LIGHTS ---
         const lightsData = {
-            key: { obj: null, az: 45, pol: 30, on: true, name: "KEY", modifier: 'softbox', color: 0xffffff, intensity: 1.5 },
+            // 🔥 關鍵修正：主光強度提升 (1.5 -> 2.2)
+            key: { obj: null, az: 45, pol: 30, on: true, name: "KEY", modifier: 'softbox', color: 0xffffff, intensity: 2.2 },
             fill: { obj: null, az: -45, pol: 10, on: true, name: "FILL", modifier: 'softbox', color: 0xffeedd, intensity: 0.5 },
-            rim: { obj: null, az: 135, pol: 30, on: true, name: "RIM", modifier: 'bare', color: 0xffc266, intensity: 1.5 }
+            rim: { obj: null, az: 135, pol: 30, on: true, name: "RIM", modifier: 'bare', color: 0xffc266, intensity: 2.0 }
         };
 
         for (const k in lightsData) {
@@ -321,7 +294,7 @@
             data.obj = light;
         }
 
-        // UI Logic
+        // --- 5. UI LOGIC ---
         let currentLang = 'en', currentTarget = 'key';
         const els = {
             azSlider: document.getElementById('azSlider'),
@@ -347,11 +320,10 @@
                 
                 if (data.modifier === 'softbox') { light.angle = 1.0; light.penumbra = 1.0; }
                 if (data.modifier === 'radar') { light.angle = 0.7; light.penumbra = 0.4; }
-                if (data.modifier === 'grid') { light.angle = 0.4; light.penumbra = 0.2; }
+                if (data.modifier === 'grid') { light.angle = 0.35; light.penumbra = 0.1; }
                 if (data.modifier === 'bare') { light.angle = 1.2; light.penumbra = 0.05; }
             }
 
-            // UI
             els.azSlider.value = data.az;
             els.polSlider.value = data.pol;
             els.azVal.innerText = `${data.az}°`;
@@ -375,7 +347,17 @@
         ['key','fill','rim'].forEach(t => document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).onclick = () => { currentTarget = t; updateState(); });
         document.getElementById('langBtn').onclick = () => { currentLang = currentLang === 'en' ? 'zh' : 'en'; document.body.className = document.body.className.replace(/lang-\w+/, `lang-${currentLang}`); analyze(); };
         
-        window.onresize = () => { camera.aspect = container.clientWidth / container.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(container.clientWidth, container.clientHeight); };
+        // RWD Resize (Fix for Flex Layout)
+        function onResize() {
+            const w = canvasWrapper.clientWidth;
+            const h = canvasWrapper.clientHeight;
+            camera.aspect = w / h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        }
+        window.addEventListener('resize', onResize);
+        // Initial Trigger
+        setTimeout(onResize, 100);
 
         function analyze() {
             const k = lightsData.key;
