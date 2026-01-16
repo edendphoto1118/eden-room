@@ -13,7 +13,7 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { eden: { gold: '#D4AF37', black: '#050505' } },
+                    colors: { eden: { gold: '#D4AF37', black: '#050505', panel: '#0F0F0F' } },
                     fontFamily: { serif: ['Cinzel', 'serif'], mono: ['Space Mono', 'monospace'], zh: ['Shippori Mincho', 'serif'] }
                 }
             }
@@ -21,56 +21,82 @@
     </script>
 
     <style>
-        /* --- 核心佈局：無捲動 --- */
+        /* --- 核心佈局 --- */
         body { 
             background-color: #050505; color: #C0C0C0; 
-            height: 100vh; height: 100dvh; 
-            width: 100vw; overflow: hidden;
+            height: 100vh; height: 100dvh; width: 100vw; overflow: hidden;
             display: flex; flex-direction: column;
         }
 
-        /* 1. Header (品牌與 IG) */
+        /* 1. Header */
         header { 
-            height: 50px; flex-shrink: 0; z-index: 20;
+            height: 50px; flex-shrink: 0; z-index: 30;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 20px; border-bottom: 1px solid #1a1a1a; background: #050505;
         }
         .ig-link {
             font-family: 'Space Mono'; font-size: 10px; color: #888; letter-spacing: 0.1em;
             display: flex; align-items: center; gap: 6px; transition: 0.3s;
-            text-decoration: none; border: 1px solid #333; padding: 4px 10px; border-radius: 20px;
+            text-decoration: none; border: 1px solid #333; padding: 4px 12px; border-radius: 20px;
         }
         .ig-link:hover { color: #D4AF37; border-color: #D4AF37; background: rgba(212,175,55,0.1); }
 
-        /* 2. 3D Canvas */
+        /* 2. Main Layout Container (響應式核心) */
+        #main-layout {
+            display: flex; flex: 1; min-height: 0; position: relative;
+            flex-direction: column; /* 手機預設：垂直 */
+        }
+        /* 電腦版 (md以上)：改為水平排列 */
+        @media (min-width: 768px) {
+            #main-layout { flex-direction: row; }
+        }
+
+        /* 3. Canvas Area */
         #canvas-wrapper { 
-            flex-grow: 1; position: relative; width: 100%; min-height: 0; 
-            background: radial-gradient(circle at center, #1f1f1f 0%, #000000 90%);
+            flex-grow: 1; position: relative; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000000 90%);
+            order: 1; /* 手機：畫布在上方 */
         }
         canvas { display: block; width: 100%; height: 100%; outline: none; }
 
-        /* 3. Dashboard (控制台) */
+        /* 4. Dashboard (Sidebar) */
         #dashboard { 
-            flex-shrink: 0; z-index: 20; background: #0a0a0a; border-top: 1px solid #222;
-            padding: 15px 20px; padding-bottom: max(10px, env(safe-area-inset-bottom));
-            display: flex; flex-direction: column; gap: 12px;
+            z-index: 20; background: #0a0a0a; 
+            display: flex; flex-direction: column; gap: 15px;
+            
+            /* 手機樣式 */
+            width: 100%; flex-shrink: 0; 
+            padding: 15px 20px; padding-bottom: max(15px, env(safe-area-inset-bottom));
+            border-top: 1px solid #222;
+            order: 2; /* 手機：控制台在下方 */
         }
 
-        /* Tabs */
-        .tabs { display: flex; border: 1px solid #333; border-radius: 2px; overflow: hidden; height: 32px; }
+        /* 電腦樣式 override */
+        @media (min-width: 768px) {
+            #dashboard {
+                width: 360px; /* 固定寬度，像專業軟體側邊欄 */
+                height: 100%;
+                border-top: none; border-left: 1px solid #222;
+                padding: 25px;
+                order: 2; /* 電腦：控制台在右側 */
+                overflow-y: auto; /* 內容過長可捲動 */
+            }
+        }
+
+        /* UI Components */
+        .tabs { display: flex; border: 1px solid #333; border-radius: 2px; overflow: hidden; height: 32px; flex-shrink: 0; }
         .tab-btn {
             flex: 1; display: flex; align-items: center; justify-content: center;
             font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em; color: #666;
             background: #0e0e0e; cursor: pointer; transition: 0.2s;
         }
+        .tab-btn:hover { background: #151515; color: #888; }
         .tab-btn.active { background: #D4AF37; color: #000; font-weight: bold; }
 
-        /* Control Rows */
-        .slider-row { display: flex; align-items: center; gap: 12px; height: 24px; }
-        .slider-label { font-family: 'Space Mono'; font-size: 9px; color: #555; width: 55px; letter-spacing: 0.05em; }
-        .slider-val { font-family: 'Space Mono'; font-size: 9px; color: #D4AF37; width: 30px; text-align: right; }
+        .slider-row { display: flex; align-items: center; gap: 12px; height: 28px; }
+        .slider-label { font-family: 'Space Mono'; font-size: 9px; color: #666; width: 60px; letter-spacing: 0.05em; }
+        .slider-val { font-family: 'Space Mono'; font-size: 9px; color: #D4AF37; width: 35px; text-align: right; }
         
-        /* Custom Range Slider */
         input[type=range] { -webkit-appearance: none; flex: 1; background: transparent; cursor: pointer; }
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none; height: 12px; width: 12px; background: #D4AF37; 
@@ -79,66 +105,91 @@
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: #333; border-radius: 1px; }
 
         /* Power Toggle */
-        .status-row { display: flex; justify-content: space-between; align-items: center; height: 20px; margin-bottom: 5px; }
-        .toggle { position: relative; display: inline-block; width: 30px; height: 16px; }
+        .status-row { display: flex; justify-content: space-between; align-items: center; height: 24px; margin-bottom: 5px; }
+        .toggle { position: relative; display: inline-block; width: 32px; height: 16px; }
         .toggle input { opacity: 0; width: 0; height: 0; }
         .slider-tg { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 16px; border: 1px solid #444; }
-        .slider-tg:before { position: absolute; content: ""; height: 10px; width: 10px; left: 2px; bottom: 2px; background-color: #888; transition: .3s; border-radius: 50%; }
+        .slider-tg:before { position: absolute; content: ""; height: 10px; width: 10px; left: 3px; bottom: 3px; background-color: #888; transition: .3s; border-radius: 50%; }
         input:checked + .slider-tg { background-color: #111; border-color: #D4AF37; }
-        input:checked + .slider-tg:before { transform: translateX(14px); background-color: #D4AF37; }
+        input:checked + .slider-tg:before { transform: translateX(16px); background-color: #D4AF37; }
 
-        /* 4. Gear Section (Affiliate) - Designed like a "Recommended Tool" bar */
+        /* Gear Section */
         .gear-section {
-            border-top: 1px solid #222; margin-top: 5px; pt-3;
-            display: flex; gap: 10px;
+            border-top: 1px solid #222; margin-top: auto; pt-4; /* margin-top: auto 確保在電腦版推到底部 */
+            display: flex; gap: 10px; flex-direction: column;
         }
+        @media (min-width: 768px) { .gear-section { gap: 12px; } }
+        
         .gear-card {
-            flex: 1; background: #111; border: 1px solid #222; padding: 8px;
-            display: flex; align-items: center; gap: 10px;
+            background: #111; border: 1px solid #222; padding: 10px 12px;
+            display: flex; align-items: center; gap: 12px;
             text-decoration: none; transition: 0.3s; border-radius: 4px;
         }
-        .gear-card:hover { border-color: #444; background: #151515; }
-        .gear-icon { width: 32px; height: 32px; background: #222; color: #666; display: flex; align-items: center; justify-content: center; font-size: 14px; border-radius: 2px; }
-        .gear-info h4 { font-family: 'Shippori Mincho', serif; font-size: 10px; color: #ccc; margin-bottom: 2px; }
-        .gear-info p { font-family: 'Space Mono', monospace; font-size: 8px; color: #D4AF37; }
+        .gear-card:hover { border-color: #444; background: #151515; transform: translateY(-1px); }
+        .gear-icon { width: 32px; height: 32px; background: #1a1a1a; color: #666; display: flex; align-items: center; justify-content: center; font-size: 14px; border-radius: 4px; }
+        .gear-info h4 { font-family: 'Shippori Mincho', serif; font-size: 11px; color: #ccc; margin-bottom: 2px; font-weight: 500; }
+        .gear-info p { font-family: 'Space Mono', monospace; font-size: 9px; color: #D4AF37; opacity: 0.8; }
         .gear-arrow { color: #444; font-size: 10px; margin-left: auto; }
+
+        /* Modifiers Grid */
+        .mod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .mod-btn {
+            border: 1px solid #333; color: #666; font-family: 'Space Mono'; font-size: 9px;
+            padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.2s; background: #0e0e0e; border-radius: 2px;
+        }
+        .mod-btn:hover { border-color: #555; color: #ccc; }
+        .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); color: #D4AF37; font-weight: bold; }
 
     </style>
 </head>
 <body>
 
     <header>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
             <span class="text-[12px] tracking-[0.2em] text-[#D4AF37] font-serif font-bold">EDEN</span>
-            <span class="text-[8px] text-[#444] tracking-widest mt-1">LIGHT SCULPTOR</span>
+            <span class="text-[9px] text-[#444] tracking-widest border-l border-[#333] pl-3">LIGHT SCULPTOR</span>
         </div>
         <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="ig-link">
             <i class="fab fa-instagram"></i> EDEN_D_PHOTO
         </a>
     </header>
 
-    <div id="canvas-wrapper">
-        <canvas id="webgl"></canvas>
-    </div>
-
-    <footer id="dashboard">
+    <div id="main-layout">
         
-        <div class="tabs">
-            <div id="tabKey" class="tab-btn active" onclick="selectLight('key')">KEY</div>
-            <div id="tabFill" class="tab-btn" onclick="selectLight('fill')">FILL</div>
-            <div id="tabRim" class="tab-btn" onclick="selectLight('rim')">RIM</div>
+        <div id="canvas-wrapper">
+            <canvas id="webgl"></canvas>
         </div>
 
-        <div>
-            <div class="status-row">
-                <span id="targetName" class="font-serif text-[9px] tracking-widest text-[#666]">LIGHT STATUS</span>
-                <label class="toggle">
-                    <input type="checkbox" id="powerSwitch" checked onchange="toggleLight()">
-                    <span class="slider-tg"></span>
-                </label>
+        <footer id="dashboard">
+            
+            <div class="tabs">
+                <div id="tabKey" class="tab-btn active" onclick="selectLight('key')">KEY</div>
+                <div id="tabFill" class="tab-btn" onclick="selectLight('fill')">FILL</div>
+                <div id="tabRim" class="tab-btn" onclick="selectLight('rim')">RIM</div>
             </div>
 
-            <div class="flex flex-col gap-2 mt-2">
+            <div class="bg-[#111] p-3 border border-[#222] rounded-sm">
+                <div class="status-row">
+                    <span id="targetName" class="font-serif text-[9px] tracking-widest text-[#888]">KEY STATUS</span>
+                    <label class="toggle">
+                        <input type="checkbox" id="powerSwitch" checked onchange="toggleLight()">
+                        <span class="slider-tg"></span>
+                    </label>
+                </div>
+                <div class="mt-3">
+                    <div class="flex justify-between mb-2">
+                        <span class="font-serif text-[9px] tracking-widest text-[#666]">MODIFIER</span>
+                    </div>
+                    <div class="mod-grid">
+                        <div class="mod-btn active" id="mod-softbox" onclick="setModifier('softbox')">SOFT</div>
+                        <div class="mod-btn" id="mod-radar" onclick="setModifier('radar')">RADAR</div>
+                        <div class="mod-btn" id="mod-grid" onclick="setModifier('grid')">GRID</div>
+                        <div class="mod-btn" id="mod-bare" onclick="setModifier('bare')">BARE</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 py-2">
                 <div class="slider-row">
                     <span class="slider-label">AZIMUTH</span>
                     <input type="range" id="azSlider" min="-180" max="180" step="5" oninput="updateVal()">
@@ -155,28 +206,34 @@
                     <span id="intDisplay" class="slider-val text-[#D4AF37]">2.5</span>
                 </div>
             </div>
-        </div>
 
-        <div class="gear-section">
-            <a href="https://s.shopee.tw/1BG8Bdote6" target="_blank" class="gear-card">
-                <div class="gear-icon"><i class="fas fa-bullseye"></i></div>
-                <div class="gear-info">
-                    <h4>專業光學束光筒</h4>
-                    <p>SHAPING LIGHT</p>
-                </div>
-                <i class="fas fa-chevron-right gear-arrow"></i>
-            </a>
-            <a href="https://s.shopee.tw/5fiXXyefqc" target="_blank" class="gear-card">
-                <div class="gear-icon"><i class="fas fa-lightbulb"></i></div>
-                <div class="gear-info">
-                    <h4>雙色溫聚光燈</h4>
-                    <p>STUDIO ESSENTIAL</p>
-                </div>
-                <i class="fas fa-chevron-right gear-arrow"></i>
-            </a>
-        </div>
+            <div class="border-t border-[#222] pt-3">
+                <span id="algoTitle" class="text-[#D4AF37] font-serif text-xs font-bold tracking-wider block mb-1">REMBRANDT</span>
+                <span id="algoDesc" class="text-[#666] font-zh text-xs block leading-relaxed">經典倫勃朗光，立體感強。</span>
+            </div>
 
-    </footer>
+            <div class="gear-section">
+                <div class="text-[9px] font-mono text-[#444] tracking-widest mb-1 pl-1">RECOMMENDED GEAR</div>
+                <a href="https://s.shopee.tw/1BG8Bdote6" target="_blank" class="gear-card">
+                    <div class="gear-icon"><i class="fas fa-bullseye"></i></div>
+                    <div class="gear-info">
+                        <h4>專業光學束光筒</h4>
+                        <p>PRECISE LIGHT SHAPING</p>
+                    </div>
+                    <i class="fas fa-chevron-right gear-arrow"></i>
+                </a>
+                <a href="https://s.shopee.tw/5fiXXyefqc" target="_blank" class="gear-card">
+                    <div class="gear-icon"><i class="fas fa-lightbulb"></i></div>
+                    <div class="gear-info">
+                        <h4>雙色溫聚光燈</h4>
+                        <p>ESSENTIAL STUDIO LIGHT</p>
+                    </div>
+                    <i class="fas fa-chevron-right gear-arrow"></i>
+                </a>
+            </div>
+
+        </footer>
+    </div>
 
     <script>
         // --- 1. Three.js Init ---
@@ -192,32 +249,30 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        // 使用高對比色調映射
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.1;
 
         // --- 2. Object: Diamond Faceted Sphere ---
-        // 關鍵：IcosahedronGeometry(1.5, 3) 增加面數，但保持 flatShading
-        const geometry = new THREE.IcosahedronGeometry(1.5, 3); 
+        const geometry = new THREE.IcosahedronGeometry(1.5, 3); // 3 subdivisions for diamond look
         const material = new THREE.MeshStandardMaterial({ 
             color: 0xffffff, 
-            roughness: 0.2, // 更光滑，像鑽石/玻璃切面
+            roughness: 0.2, 
             metalness: 0.1,
-            flatShading: true // 💎 關鍵：保留切面感，不平滑化
+            flatShading: true // Faceted look
         });
         const mesh = new THREE.Mesh(geometry, material);
         mesh.castShadow = true; 
         mesh.receiveShadow = true;
         scene.add(mesh);
 
-        // 底座
+        // Floor
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 1 }));
         plane.rotation.x = -Math.PI / 2;
         plane.position.y = -2;
         plane.receiveShadow = true;
         scene.add(plane);
 
-        // 環境光
+        // Ambient Light
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
         scene.add(ambientLight);
 
@@ -225,16 +280,16 @@
         const lights = {
             key: { 
                 obj: createSpot(0xffffff, 2.5), 
-                az: 45, pol: 30, on: true, intensity: 2.5, name: "KEY LIGHT" 
+                az: 45, pol: 30, on: true, intensity: 2.5, name: "KEY", modifier: 'softbox' 
             },
             fill: { 
                 obj: createSpot(0xffeedd, 0.8), 
-                az: -45, pol: 10, on: true, intensity: 0.8, name: "FILL LIGHT" 
+                az: -45, pol: 10, on: true, intensity: 0.8, name: "FILL", modifier: 'softbox' 
             },
             rim: { 
-                // ⚠️ 6600K 顏色 (冷白略帶藍) -> 0xEBF4FF
+                // 6600K Rim Light
                 obj: createSpot(0xEBF4FF, 3.0), 
-                az: 135, pol: 30, on: true, intensity: 3.0, name: "RIM LIGHT" 
+                az: 135, pol: 30, on: true, intensity: 3.0, name: "RIM", modifier: 'bare' 
             }
         };
 
@@ -254,7 +309,7 @@
         
         const azSlider = document.getElementById('azSlider');
         const polSlider = document.getElementById('polSlider');
-        const intSlider = document.getElementById('intSlider'); // 新增瓦數滑桿
+        const intSlider = document.getElementById('intSlider');
         
         const azDisplay = document.getElementById('azDisplay');
         const polDisplay = document.getElementById('polDisplay');
@@ -262,62 +317,74 @@
         
         const powerSwitch = document.getElementById('powerSwitch');
         const targetName = document.getElementById('targetName');
+        const algoTitle = document.getElementById('algoTitle');
+        const algoDesc = document.getElementById('algoDesc');
 
-        function selectLight(id) {
+        // Functions to expose to window for interaction
+        window.selectLight = (id) => {
             currentTarget = id;
-            
-            // UI Style
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab' + id.charAt(0).toUpperCase() + id.slice(1)).classList.add('active');
-            
-            // Sync Values
-            const data = lights[id];
-            azSlider.value = data.az;
-            polSlider.value = data.pol;
-            intSlider.value = data.intensity; // 同步瓦數
-            powerSwitch.checked = data.on;
-            targetName.innerText = data.name + " STATUS";
-            
-            updateVal(false);
-        }
+            updateUI(false);
+        };
 
-        function updateVal(updatePhysics = true) {
+        window.updateVal = () => {
             const data = lights[currentTarget];
-            if(updatePhysics) {
-                data.az = parseInt(azSlider.value);
-                data.pol = parseInt(polSlider.value);
-                data.intensity = parseFloat(intSlider.value); // 更新瓦數
+            data.az = parseInt(azSlider.value);
+            data.pol = parseInt(polSlider.value);
+            data.intensity = parseFloat(intSlider.value);
+            updateUI(true);
+        };
+
+        window.toggleLight = () => {
+            lights[currentTarget].on = powerSwitch.checked;
+            updateUI(true);
+        };
+
+        window.setModifier = (mod) => {
+            lights[currentTarget].modifier = mod;
+            updateUI(true);
+        };
+
+        function updateUI(updatePhysics = false) {
+            const data = lights[currentTarget];
+            
+            // Sync Controls
+            if (!updatePhysics) {
+                azSlider.value = data.az;
+                polSlider.value = data.pol;
+                intSlider.value = data.intensity;
             }
             
             azDisplay.innerText = data.az + "°";
             polDisplay.innerText = data.pol + "°";
             intDisplay.innerText = data.intensity;
+            powerSwitch.checked = data.on;
+            targetName.innerText = data.name + " STATUS";
 
-            // UI Feedback
-            const opacity = data.on ? '1' : '0.3';
+            // Modifiers UI
+            document.querySelectorAll('.mod-btn').forEach(b => {
+                if (b.id === 'mod-' + data.modifier) b.classList.add('active');
+                else b.classList.remove('active');
+            });
+
+            // Opacity
+            const opacity = data.on ? '1' : '0.4';
             azSlider.parentElement.style.opacity = opacity;
             polSlider.parentElement.style.opacity = opacity;
             intSlider.parentElement.style.opacity = opacity;
             
-            azSlider.disabled = !data.on;
-            polSlider.disabled = !data.on;
-            intSlider.disabled = !data.on;
-
-            updateLightPos(currentTarget);
-        }
-
-        function toggleLight() {
-            lights[currentTarget].on = powerSwitch.checked;
-            updateVal(false);
-            updateLightPos(currentTarget);
+            // Physics Update
+            if (updatePhysics || !updatePhysics) { // Always update for safety
+                updateLightPos(currentTarget);
+            }
+            analyze();
         }
 
         function updateLightPos(id) {
             const data = lights[id];
             const light = data.obj;
             light.visible = data.on;
-            
-            // 實時更新亮度
             light.intensity = data.intensity;
 
             if(!data.on) return;
@@ -331,6 +398,30 @@
                 r * Math.cos(phi),
                 r * Math.sin(phi) * Math.sin(theta)
             );
+
+            // Modifier Physics
+            if (data.modifier === 'softbox') { light.angle = 1.0; light.penumbra = 1.0; }
+            else if (data.modifier === 'radar') { light.angle = 0.7; light.penumbra = 0.4; }
+            else if (data.modifier === 'grid') { light.angle = 0.35; light.penumbra = 0.2; }
+            else if (data.modifier === 'bare') { light.angle = 1.2; light.penumbra = 0.05; }
+        }
+
+        function analyze() {
+            const k = lights.key;
+            let t = "CUSTOM", d = "自定義混合光。";
+
+            if(!k.on) {
+                t = "LOW KEY"; d = "主光關閉，暗調或剪影效果。";
+            } else {
+                const az = Math.abs(k.az);
+                if(k.pol > 60) { t = "TOP LIGHT"; d = "頂光。強調結構，眼神深邃。"; }
+                else if(az < 25 && k.pol > 20) { t = "BUTTERFLY"; d = "蝴蝶光。美顏，鼻下蝶形影。"; }
+                else if(az >= 30 && az <= 65) { t = "REMBRANDT"; d = "倫勃朗光。經典倒三角光區。"; }
+                else if(az > 70) { t = "SPLIT"; d = "分割光。半面陰影，戲劇性強。"; }
+                else { t = "LOOP"; d = "環形光。自然通用佈光。"; }
+            }
+            algoTitle.innerText = t;
+            algoDesc.innerText = d;
         }
 
         // --- 5. Core Loop ---
@@ -352,7 +443,7 @@
         updateLightPos('key');
         updateLightPos('fill');
         updateLightPos('rim');
-        selectLight('key'); 
+        updateUI(); // Sync initial state
         animate();
 
     </script>
