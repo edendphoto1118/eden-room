@@ -35,11 +35,11 @@
         /* 基礎設定 */
         body { background-color: #050505; color: #C0C0C0; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
 
-        /* 3D 畫布背景 - 改亮一點的深灰，增加對比 */
-        #canvas-wrapper { position: relative; flex: 1; width: 100%; min-height: 0; background: radial-gradient(circle at center, #2a2a2a 0%, #000000 100%); }
+        /* 3D 畫布背景 - 深邃漸層 */
+        #canvas-wrapper { position: relative; flex: 1; width: 100%; min-height: 0; background: radial-gradient(circle at center, #222 0%, #000 100%); }
         #canvas-element { width: 100%; height: 100%; display: block; }
         
-        /* UI 容器 - 關鍵：允許滑鼠穿透容器，但攔截按鈕點擊 */
+        /* UI 容器 */
         #ui-container { 
             position: relative; z-index: 20; flex-shrink: 0; 
             background: #080808; border-top: 1px solid #333;
@@ -48,7 +48,6 @@
 
         /* 導航列 */
         #navbar { position: absolute; top: 0; left: 0; width: 100%; z-index: 30; pointer-events: none; }
-        /* 讓內部元素可點擊 */
         #navbar a, #navbar button, .interactive { pointer-events: auto; cursor: pointer; }
 
         /* 滑桿 */
@@ -64,7 +63,7 @@
         .tab-btn {
             font-family: 'Cinzel', serif; font-size: 12px; letter-spacing: 0.1em; color: #666; font-weight: bold;
             padding: 14px 0; cursor: pointer; transition: 0.2s; border-bottom: 3px solid transparent; text-align: center; flex: 1;
-            background: #0a0a0a; pointer-events: auto; /* 強制可點 */
+            background: #0a0a0a; pointer-events: auto;
         }
         .tab-btn:hover { background: #111; color: #aaa; }
         .tab-btn.active { color: #D4AF37; border-bottom: 3px solid #D4AF37; background: #151515; }
@@ -73,21 +72,10 @@
         .mod-btn {
             border: 1px solid #333; color: #777; font-family: 'Space Mono'; font-size: 10px;
             padding: 10px 0; text-align: center; cursor: pointer; transition: all 0.2s; background: #0a0a0a;
-            pointer-events: auto; /* 強制可點 */
+            pointer-events: auto;
         }
         .mod-btn:hover { border-color: #666; color: #eee; background: #111; }
         .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.15); color: #D4AF37; font-weight: bold; border-width: 1px; }
-
-        /* 臉型按鈕 */
-        .face-shape-btn {
-            width: 28px; height: 28px; border: 1px solid #444; border-radius: 50%; 
-            display: flex; align-items: center; justify-content: center; 
-            cursor: pointer; transition: 0.2s; background: rgba(0,0,0,0.5); pointer-events: auto;
-        }
-        .face-shape-btn:hover { border-color: #888; background: rgba(255,255,255,0.1); }
-        .face-shape-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.2); box-shadow: 0 0 8px rgba(212,175,55,0.3); }
-        .face-shape-icon { width: 12px; height: 12px; border: 1px solid #aaa; border-radius: 50%; transition: 0.3s; }
-        .face-shape-btn.active .face-shape-icon { border-color: #D4AF37; background: #D4AF37; }
 
         /* 開關 */
         .toggle-switch { position: relative; display: inline-block; width: 40px; height: 20px; pointer-events: auto; }
@@ -116,11 +104,6 @@
             <a href="index.html" class="text-[10px] tracking-[0.2em] text-[#888] hover:text-[#fff] transition-colors font-mono interactive">← EDEN ROOM</a>
             
             <div class="flex gap-4 items-center">
-                <div class="flex gap-3 border-r border-[#444] pr-4 mr-1">
-                    <div class="face-shape-btn" id="shapeOval" onclick="window.setFaceShape('oval')" title="OVAL"><div class="face-shape-icon" style="transform: scale(0.8, 1.2);"></div></div>
-                    <div class="face-shape-btn active" id="shapeRound" onclick="window.setFaceShape('round')" title="ROUND"><div class="face-shape-icon" style="transform: scale(1, 1);"></div></div>
-                    <div class="face-shape-btn" id="shapeWide" onclick="window.setFaceShape('wide')" title="WIDE"><div class="face-shape-icon" style="transform: scale(1.2, 0.9);"></div></div>
-                </div>
                 <button onclick="window.toggleLang()" class="border border-[#444] px-3 py-1 text-[9px] font-mono hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors text-[#888] bg-black/50 backdrop-blur interactive">
                     <span class="text-en">中 / EN</span><span class="text-zh">EN / 中</span>
                 </button>
@@ -199,81 +182,50 @@
         const canvasWrapper = document.getElementById('canvas-wrapper');
         
         const scene = new THREE.Scene();
-        // 鏡頭設置
         const camera = new THREE.PerspectiveCamera(35, canvasWrapper.clientWidth / canvasWrapper.clientHeight, 0.1, 100);
-        camera.position.set(0, 0.1, 8); 
-        camera.lookAt(0, -0.2, 0);
+        camera.position.set(0, 0, 8); // 正視角
+        camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
         renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap; 
         
-        // 🔥 關鍵設置：高曝光 ToneMapping
+        // 光影校準：降低一點曝光，避免圓球過曝死白
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.5; // 曝光拉高 50%
+        renderer.toneMappingExposure = 1.2; 
 
-        // --- 2. GEOMETRY (高質感幾何石膏) ---
-        const headGroup = new THREE.Group();
-        scene.add(headGroup);
-
-        // 材質：純白，低粗糙度 (增加反光)，高對比
+        // --- 2. GEOMETRY (極簡圓球) ---
+        // 材質：高質感石膏，帶有細微的粗糙感
         const plasterMat = new THREE.MeshStandardMaterial({
             color: 0xffffff,
-            roughness: 0.4, // 降到 0.4 讓高光更明顯
+            roughness: 0.5, // 適中粗糙度，讓光影過渡柔和
             metalness: 0.05,
             flatShading: false
         });
 
-        // 結構組裝 (Sphere + Cone + Torus)
-        const head = new THREE.Mesh(new THREE.SphereGeometry(1.4, 64, 64), plasterMat);
-        head.scale.set(0.85, 1.15, 0.95);
-        head.castShadow = true; head.receiveShadow = true;
-        headGroup.add(head);
-
-        // 鼻子
-        const nose = new THREE.Mesh(new THREE.ConeGeometry(0.28, 1.15, 32), plasterMat);
-        nose.position.set(0, -0.1, 1.35);
-        nose.rotation.x = -0.1;
-        nose.scale.z = 0.55;
-        nose.castShadow = true; nose.receiveShadow = true;
-        headGroup.add(nose);
-
-        // 眉骨
-        const brow = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.15, 16, 32, 2.5), plasterMat);
-        brow.rotation.z = -Math.PI / 2 + 1.25;
-        brow.rotation.x = 0.5;
-        brow.position.set(0, 0.4, 1.05);
-        brow.castShadow = true; brow.receiveShadow = true;
-        headGroup.add(brow);
-
-        // 耳朵
-        const earL = new THREE.Mesh(new THREE.CapsuleGeometry(0.25, 0.5, 4, 16), plasterMat);
-        earL.position.set(-1.45, -0.1, 0); earL.castShadow = true; earL.receiveShadow = true;
-        headGroup.add(earL);
-        const earR = earL.clone();
-        earR.position.set(1.45, -0.1, 0); headGroup.add(earR);
-
-        // 脖子
-        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.65, 0.85, 2.5, 32), plasterMat);
-        neck.position.y = -2; neck.castShadow = true; neck.receiveShadow = true;
-        headGroup.add(neck);
+        // 唯一的幾何體：高精度圓球
+        const sphereGeo = new THREE.SphereGeometry(1.6, 128, 128);
+        const sphere = new THREE.Mesh(sphereGeo, plasterMat);
+        sphere.castShadow = true; 
+        sphere.receiveShadow = true;
+        scene.add(sphere);
 
         // 地板
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(50, 50), new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 1 }));
-        plane.rotation.x = -Math.PI / 2; plane.position.y = -3.5; plane.receiveShadow = true;
+        plane.rotation.x = -Math.PI / 2; plane.position.y = -2.5; plane.receiveShadow = true;
         scene.add(plane);
 
-        // 🔥 關鍵設置：超亮環境光 (0.6)，保證絕對不黑
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); 
+        // 環境光校準：降低亮度，增加陰影對比
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.3); 
         scene.add(ambientLight);
 
-        // --- 3. LIGHTS DATA ---
+        // --- 3. LIGHTS DATA (校準強度) ---
         const lightsData = {
-            // 主光：強度拉到 3.0
-            key: { obj: null, az: 45, pol: 30, on: true, name: "KEY", modifier: 'softbox', color: 0xffffff, intensity: 3.0 },
-            fill: { obj: null, az: -45, pol: 10, on: true, name: "FILL", modifier: 'softbox', color: 0xffeedd, intensity: 0.8 },
-            rim: { obj: null, az: 135, pol: 30, on: true, name: "RIM", modifier: 'bare', color: 0xffc266, intensity: 3.5 }
+            // 主光強度從 3.0 降回 2.0，避免圓球過曝
+            key: { obj: null, az: 45, pol: 30, on: true, name: "KEY", modifier: 'softbox', color: 0xffffff, intensity: 2.0 },
+            fill: { obj: null, az: -45, pol: 10, on: true, name: "FILL", modifier: 'softbox', color: 0xffeedd, intensity: 0.6 },
+            rim: { obj: null, az: 135, pol: 30, on: true, name: "RIM", modifier: 'bare', color: 0xffc266, intensity: 2.5 }
         };
 
         for (const k in lightsData) {
@@ -281,7 +233,7 @@
             const light = new THREE.SpotLight(data.color, data.intensity);
             light.castShadow = true;
             light.shadow.mapSize.set(2048, 2048);
-            light.shadow.bias = -0.00005; // 修正條紋
+            light.shadow.bias = -0.00005;
             scene.add(light);
             light.target.position.set(0, 0, 0);
             scene.add(light.target);
@@ -289,7 +241,6 @@
         }
 
         // --- 4. GLOBAL INTERACTION FUNCTIONS ---
-        // 將函數掛載到 window，確保 HTML onclick 能讀取到
         let currentTarget = 'key';
         let currentLang = 'en';
 
@@ -306,7 +257,6 @@
 
         window.selectLight = (type) => {
             currentTarget = type;
-            // Update Tab UI
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab' + type.charAt(0).toUpperCase() + type.slice(1)).classList.add('active');
             updateUI();
@@ -315,7 +265,7 @@
         window.updateAzimuth = (val) => {
             lightsData[currentTarget].az = parseInt(val);
             updateLightState();
-            updateUI(); // 只更新文字
+            updateUI();
         };
 
         window.updateAltitude = (val) => {
@@ -336,16 +286,6 @@
             updateUI();
         };
 
-        window.setFaceShape = (shape) => {
-            document.querySelectorAll('.face-shape-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('shape' + shape.charAt(0).toUpperCase() + shape.slice(1)).classList.add('active');
-            
-            // 物理變形
-            if (shape === 'round') headGroup.scale.set(1, 1, 1);
-            else if (shape === 'oval') headGroup.scale.set(0.9, 1.15, 0.95);
-            else if (shape === 'wide') headGroup.scale.set(1.15, 0.9, 1.05);
-        };
-
         window.toggleLang = () => {
             currentLang = currentLang === 'en' ? 'zh' : 'en';
             document.body.className = document.body.className.replace(/lang-\w+/, `lang-${currentLang}`);
@@ -364,18 +304,18 @@
                 const theta = (data.az + 90) * (Math.PI / 180);
                 light.position.set(-(r * Math.sin(phi) * Math.cos(theta)), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
                 
-                // 配件物理模擬 (差異化)
+                // 配件物理模擬 (針對圓球校準)
                 if (data.modifier === 'softbox') { 
-                    light.angle = 1.2; light.penumbra = 1.0; light.intensity = data.name === 'RIM' ? 3.5 : 3.0; // 柔光維持原強度
+                    light.angle = 1.2; light.penumbra = 1.0; light.intensity = data.name === 'RIM' ? 2.5 : 2.0;
                 }
                 else if (data.modifier === 'radar') { 
-                    light.angle = 0.7; light.penumbra = 0.4; light.intensity = data.name === 'RIM' ? 4.0 : 3.5; // 雷達稍亮
+                    light.angle = 0.7; light.penumbra = 0.4; light.intensity = data.name === 'RIM' ? 3.0 : 2.5;
                 }
                 else if (data.modifier === 'grid') { 
-                    light.angle = 0.35; light.penumbra = 0.2; light.intensity = data.name === 'RIM' ? 5.0 : 4.5; // 蜂巢聚光超亮
+                    light.angle = 0.35; light.penumbra = 0.2; light.intensity = data.name === 'RIM' ? 3.5 : 3.0;
                 }
                 else if (data.modifier === 'bare') { 
-                    light.angle = 1.3; light.penumbra = 0.05; light.intensity = data.name === 'RIM' ? 4.0 : 3.5; // 裸燈硬光
+                    light.angle = 1.3; light.penumbra = 0.05; light.intensity = data.name === 'RIM' ? 3.0 : 2.5;
                 }
             }
             analyze();
@@ -389,19 +329,16 @@
             els.polVal.innerText = `${data.pol}°`;
             els.powerSwitch.checked = data.on;
             
-            // 更新 Modifier 按鈕狀態
             document.querySelectorAll('.mod-btn').forEach(b => {
                 if (b.id === 'mod-' + data.modifier) b.classList.add('active');
                 else b.classList.remove('active');
             });
 
-            // 禁用效果
             if (data.on) {
                 els.panel.style.opacity = '1';
                 els.panel.style.pointerEvents = 'auto';
             } else {
                 els.panel.style.opacity = '0.5';
-                // 保留開關可點，其他禁用
             }
         }
 
@@ -416,17 +353,17 @@
         window.addEventListener('resize', onResize);
         setTimeout(onResize, 100);
 
-        // --- Analysis ---
+        // --- Analysis (針對圓球簡化描述) ---
         function analyze() {
             const k = lightsData.key;
-            let en = "CUSTOM", zh = "自定義", den = "Unique setup.", dzh = "獨特佈光。";
-            if (!k.on) { en = "LOW KEY"; zh = "暗調"; dzh = "主光已關閉。"; }
+            let en = "CUSTOM", zh = "自定義", den = "Unique lighting.", dzh = "獨特佈光。";
+            if (!k.on) { en = "LOW KEY"; zh = "暗調"; dzh = "主光已關閉，強調輪廓或剪影。"; }
             else {
                 const absAz = Math.abs(k.az);
-                if (k.pol > 60) { en = "TOP LIGHT"; zh = "頂光"; dzh = "結構感強，眼窩陰影深。"; }
-                else if (absAz < 25 && k.pol > 20) { en = "BUTTERFLY"; zh = "蝴蝶光"; dzh = "美顏佈光，修飾臉型。"; }
-                else if (absAz >= 30 && absAz <= 70) { en = "REMBRANDT"; zh = "倫勃朗光"; dzh = "經典倒三角光區。"; }
-                else if (absAz > 70) { en = "SPLIT"; zh = "分割光"; dzh = "戲劇性半面光。"; }
+                if (k.pol > 60) { en = "TOP LIGHT"; zh = "頂光"; dzh = "來自上方，強調頂部結構。"; }
+                else if (absAz < 25 && k.pol > 20) { en = "BUTTERFLY"; zh = "蝴蝶光位"; dzh = "正面高位光，陰影對稱。"; }
+                else if (absAz >= 30 && absAz <= 70) { en = "REMBRANDT"; zh = "倫勃朗光位"; dzh = "經典45度角光影。"; }
+                else if (absAz > 70) { en = "SPLIT"; zh = "分割光/側光"; dzh = "側面光，強烈的明暗對比。"; }
             }
             els.lightName.innerText = currentLang === 'en' ? en : zh;
             els.lightDesc.innerText = currentLang === 'en' ? den : dzh;
@@ -439,7 +376,7 @@
         }
 
         // Init
-        updateLightState(); // Apply defaults
+        updateLightState();
         updateUI();
         animate();
 
