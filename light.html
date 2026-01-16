@@ -28,58 +28,48 @@
             display: flex; flex-direction: column;
         }
 
-        /* 1. Header */
+        /* Header */
         header { 
             height: 50px; flex-shrink: 0; z-index: 30;
             display: flex; justify-content: space-between; align-items: center;
             padding: 0 20px; border-bottom: 1px solid #1a1a1a; background: #050505;
         }
         .ig-link {
-            font-family: 'Space Mono'; font-size: 10px; color: #888; letter-spacing: 0.1em;
+            font-family: 'Space Mono'; font-size: 9px; color: #666; letter-spacing: 0.05em;
             display: flex; align-items: center; gap: 6px; transition: 0.3s;
-            text-decoration: none; border: 1px solid #333; padding: 4px 12px; border-radius: 20px;
+            text-decoration: none; padding: 4px 0;
         }
-        .ig-link:hover { color: #D4AF37; border-color: #D4AF37; background: rgba(212,175,55,0.1); }
+        .ig-link:hover { color: #D4AF37; }
 
-        /* 2. Main Layout Container (響應式核心) */
+        /* Main Layout */
         #main-layout {
             display: flex; flex: 1; min-height: 0; position: relative;
-            flex-direction: column; /* 手機預設：垂直 */
+            flex-direction: column; 
         }
-        /* 電腦版 (md以上)：改為水平排列 */
-        @media (min-width: 768px) {
-            #main-layout { flex-direction: row; }
-        }
+        @media (min-width: 768px) { #main-layout { flex-direction: row; } }
 
-        /* 3. Canvas Area */
+        /* Canvas */
         #canvas-wrapper { 
             flex-grow: 1; position: relative; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #1a1a1a 0%, #000000 90%);
-            order: 1; /* 手機：畫布在上方 */
+            order: 1; 
         }
         canvas { display: block; width: 100%; height: 100%; outline: none; }
 
-        /* 4. Dashboard (Sidebar) */
+        /* Dashboard */
         #dashboard { 
             z-index: 20; background: #0a0a0a; 
             display: flex; flex-direction: column; gap: 15px;
-            
-            /* 手機樣式 */
             width: 100%; flex-shrink: 0; 
             padding: 15px 20px; padding-bottom: max(15px, env(safe-area-inset-bottom));
             border-top: 1px solid #222;
-            order: 2; /* 手機：控制台在下方 */
+            order: 2; 
         }
-
-        /* 電腦樣式 override */
         @media (min-width: 768px) {
             #dashboard {
-                width: 360px; /* 固定寬度，像專業軟體側邊欄 */
-                height: 100%;
+                width: 360px; height: 100%;
                 border-top: none; border-left: 1px solid #222;
-                padding: 25px;
-                order: 2; /* 電腦：控制台在右側 */
-                overflow-y: auto; /* 內容過長可捲動 */
+                padding: 25px; order: 2; overflow-y: auto;
             }
         }
 
@@ -94,7 +84,7 @@
         .tab-btn.active { background: #D4AF37; color: #000; font-weight: bold; }
 
         .slider-row { display: flex; align-items: center; gap: 12px; height: 28px; }
-        .slider-label { font-family: 'Space Mono'; font-size: 9px; color: #666; width: 60px; letter-spacing: 0.05em; }
+        .slider-label { font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px; color: #666; width: 70px; letter-spacing: 0.05em; font-weight: 500; }
         .slider-val { font-family: 'Space Mono'; font-size: 9px; color: #D4AF37; width: 35px; text-align: right; }
         
         input[type=range] { -webkit-appearance: none; flex: 1; background: transparent; cursor: pointer; }
@@ -104,8 +94,9 @@
         }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: #333; border-radius: 1px; }
 
-        /* Power Toggle */
         .status-row { display: flex; justify-content: space-between; align-items: center; height: 24px; margin-bottom: 5px; }
+        .status-label { font-family: 'Space Mono', 'Shippori Mincho'; font-size: 10px; color: #888; letter-spacing: 0.1em; }
+        
         .toggle { position: relative; display: inline-block; width: 32px; height: 16px; }
         .toggle input { opacity: 0; width: 0; height: 0; }
         .slider-tg { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 16px; border: 1px solid #444; }
@@ -115,7 +106,7 @@
 
         /* Gear Section */
         .gear-section {
-            border-top: 1px solid #222; margin-top: auto; pt-4; /* margin-top: auto 確保在電腦版推到底部 */
+            border-top: 1px solid #222; margin-top: auto; pt-4; 
             display: flex; gap: 10px; flex-direction: column;
         }
         @media (min-width: 768px) { .gear-section { gap: 12px; } }
@@ -131,10 +122,9 @@
         .gear-info p { font-family: 'Space Mono', monospace; font-size: 9px; color: #D4AF37; opacity: 0.8; }
         .gear-arrow { color: #444; font-size: 10px; margin-left: auto; }
 
-        /* Modifiers Grid */
         .mod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
         .mod-btn {
-            border: 1px solid #333; color: #666; font-family: 'Space Mono'; font-size: 9px;
+            border: 1px solid #333; color: #666; font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px;
             padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.2s; background: #0e0e0e; border-radius: 2px;
         }
         .mod-btn:hover { border-color: #555; color: #ccc; }
@@ -147,15 +137,21 @@
     <header>
         <div class="flex items-center gap-3">
             <span class="text-[12px] tracking-[0.2em] text-[#D4AF37] font-serif font-bold">EDEN</span>
-            <span class="text-[9px] text-[#444] tracking-widest border-l border-[#333] pl-3">LIGHT SCULPTOR</span>
+            <span class="text-[9px] text-[#444] tracking-widest border-l border-[#333] pl-3 hidden md:inline">LIGHT SCULPTOR</span>
         </div>
-        <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="ig-link">
-            <i class="fab fa-instagram"></i> EDEN_D_PHOTO
-        </a>
+        
+        <div class="flex items-center gap-6">
+            <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="ig-link">
+                design by EDEN_D_PHOTO
+            </a>
+            
+            <button id="langBtn" onclick="window.toggleLang()" class="border border-[#444] px-2 py-1 text-[9px] font-mono hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors text-[#888] bg-black/50 backdrop-blur cursor-pointer w-16 text-center">
+                EN
+            </button>
+        </div>
     </header>
 
     <div id="main-layout">
-        
         <div id="canvas-wrapper">
             <canvas id="webgl"></canvas>
         </div>
@@ -163,14 +159,14 @@
         <footer id="dashboard">
             
             <div class="tabs">
-                <div id="tabKey" class="tab-btn active" onclick="selectLight('key')">KEY</div>
-                <div id="tabFill" class="tab-btn" onclick="selectLight('fill')">FILL</div>
-                <div id="tabRim" class="tab-btn" onclick="selectLight('rim')">RIM</div>
+                <div id="tabKey" class="tab-btn active" onclick="selectLight('key')">主光</div>
+                <div id="tabFill" class="tab-btn" onclick="selectLight('fill')">補光</div>
+                <div id="tabRim" class="tab-btn" onclick="selectLight('rim')">輪廓</div>
             </div>
 
             <div class="bg-[#111] p-3 border border-[#222] rounded-sm">
                 <div class="status-row">
-                    <span id="targetName" class="font-serif text-[9px] tracking-widest text-[#888]">KEY STATUS</span>
+                    <span id="labelStatus" class="status-label">電源開關</span>
                     <label class="toggle">
                         <input type="checkbox" id="powerSwitch" checked onchange="toggleLight()">
                         <span class="slider-tg"></span>
@@ -178,30 +174,30 @@
                 </div>
                 <div class="mt-3">
                     <div class="flex justify-between mb-2">
-                        <span class="font-serif text-[9px] tracking-widest text-[#666]">MODIFIER</span>
+                        <span id="labelMod" class="status-label" style="font-size: 9px; color: #666;">控光配件</span>
                     </div>
                     <div class="mod-grid">
-                        <div class="mod-btn active" id="mod-softbox" onclick="setModifier('softbox')">SOFT</div>
-                        <div class="mod-btn" id="mod-radar" onclick="setModifier('radar')">RADAR</div>
-                        <div class="mod-btn" id="mod-grid" onclick="setModifier('grid')">GRID</div>
-                        <div class="mod-btn" id="mod-bare" onclick="setModifier('bare')">BARE</div>
+                        <div class="mod-btn active" id="mod-softbox" onclick="setModifier('softbox')">柔光</div>
+                        <div class="mod-btn" id="mod-radar" onclick="setModifier('radar')">雷達</div>
+                        <div class="mod-btn" id="mod-grid" onclick="setModifier('grid')">蜂巢</div>
+                        <div class="mod-btn" id="mod-bare" onclick="setModifier('bare')">裸燈</div>
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col gap-3 py-2">
                 <div class="slider-row">
-                    <span class="slider-label">AZIMUTH</span>
+                    <span id="labelAz" class="slider-label">方位角</span>
                     <input type="range" id="azSlider" min="-180" max="180" step="5" oninput="updateVal()">
                     <span id="azDisplay" class="slider-val">45°</span>
                 </div>
                 <div class="slider-row">
-                    <span class="slider-label">ALTITUDE</span>
+                    <span id="labelAlt" class="slider-label">高度角</span>
                     <input type="range" id="polSlider" min="-40" max="90" step="5" oninput="updateVal()">
                     <span id="polDisplay" class="slider-val">30°</span>
                 </div>
                 <div class="slider-row">
-                    <span class="slider-label text-[#D4AF37]">INTENSITY</span>
+                    <span id="labelInt" class="slider-label text-[#D4AF37]">輸出強度</span>
                     <input type="range" id="intSlider" min="0" max="5" step="0.1" oninput="updateVal()">
                     <span id="intDisplay" class="slider-val text-[#D4AF37]">2.5</span>
                 </div>
@@ -213,20 +209,20 @@
             </div>
 
             <div class="gear-section">
-                <div class="text-[9px] font-mono text-[#444] tracking-widest mb-1 pl-1">RECOMMENDED GEAR</div>
+                <div id="labelGear" class="text-[9px] font-mono text-[#444] tracking-widest mb-1 pl-1">攝影裝備推薦</div>
                 <a href="https://s.shopee.tw/1BG8Bdote6" target="_blank" class="gear-card">
                     <div class="gear-icon"><i class="fas fa-bullseye"></i></div>
                     <div class="gear-info">
-                        <h4>專業光學束光筒</h4>
-                        <p>PRECISE LIGHT SHAPING</p>
+                        <h4 id="gear1Title">專業光學束光筒</h4>
+                        <p id="gear1Desc">精準控光 SHAPING LIGHT</p>
                     </div>
                     <i class="fas fa-chevron-right gear-arrow"></i>
                 </a>
                 <a href="https://s.shopee.tw/5fiXXyefqc" target="_blank" class="gear-card">
                     <div class="gear-icon"><i class="fas fa-lightbulb"></i></div>
                     <div class="gear-info">
-                        <h4>雙色溫聚光燈</h4>
-                        <p>ESSENTIAL STUDIO LIGHT</p>
+                        <h4 id="gear2Title">雙色溫聚光燈</h4>
+                        <p id="gear2Desc">必備光源 STUDIO ESSENTIAL</p>
                     </div>
                     <i class="fas fa-chevron-right gear-arrow"></i>
                 </a>
@@ -236,11 +232,54 @@
     </div>
 
     <script>
+        // --- TEXT RESOURCES (Dictionary) ---
+        const txt = {
+            zh: {
+                tabKey: "主光", tabFill: "補光", tabRim: "輪廓",
+                labelStatus: "電源開關", labelMod: "控光配件",
+                modSoft: "柔光", modRadar: "雷達", modGrid: "蜂巢", modBare: "裸燈",
+                labelAz: "方位角", labelAlt: "高度角", labelInt: "輸出強度",
+                labelGear: "攝影裝備推薦",
+                gear1Title: "專業光學束光筒", gear1Desc: "精準控光 SHAPING LIGHT",
+                gear2Title: "雙色溫聚光燈", gear2Desc: "必備光源 STUDIO ESSENTIAL",
+                langBtn: "EN",
+                // Analysis
+                lowKey: "暗調 / 剪影", lowKeyDesc: "主光已關閉，強調輪廓。",
+                top: "頂光", topDesc: "來自上方，強調頂部結構。",
+                butterfly: "蝴蝶光", butterflyDesc: "正面高位光，適合美顏。",
+                rembrandt: "倫勃朗光", rembrandtDesc: "經典45度角光影，立體感強。",
+                split: "分割光", splitDesc: "側面光，強烈明暗對比。",
+                loop: "環形光", loopDesc: "自然通用佈光。",
+                custom: "自定義", customDesc: "獨特佈光組合。"
+            },
+            en: {
+                tabKey: "KEY", tabFill: "FILL", tabRim: "RIM",
+                labelStatus: "POWER STATUS", labelMod: "MODIFIER",
+                modSoft: "SOFT", modRadar: "RADAR", modGrid: "GRID", modBare: "BARE",
+                labelAz: "AZIMUTH", labelAlt: "ALTITUDE", labelInt: "INTENSITY",
+                labelGear: "RECOMMENDED GEAR",
+                gear1Title: "OPTICAL SNOOT", gear1Desc: "PRECISE LIGHT SHAPING",
+                gear2Title: "BI-COLOR SPOTLIGHT", gear2Desc: "STUDIO ESSENTIAL",
+                langBtn: "中",
+                // Analysis
+                lowKey: "LOW KEY", lowKeyDesc: "Main light off. Silhouette focus.",
+                top: "TOP LIGHT", topDesc: "High drama, structure focus.",
+                butterfly: "BUTTERFLY", butterflyDesc: "Beauty light, symmetrical shadows.",
+                rembrandt: "REMBRANDT", rembrandtDesc: "Classic cinematic triangle.",
+                split: "SPLIT LIGHT", splitDesc: "High contrast side lighting.",
+                loop: "LOOP LIGHT", loopDesc: "Natural, general purpose.",
+                custom: "CUSTOM", customDesc: "Unique lighting setup."
+            }
+        };
+
+        // --- GLOBAL STATE ---
+        let currentLang = 'zh'; // Default Chinese
+        let currentTarget = 'key';
+
         // --- 1. Three.js Init ---
         const canvas = document.querySelector('#webgl');
         const wrapper = document.querySelector('#canvas-wrapper');
         const scene = new THREE.Scene();
-        
         const camera = new THREE.PerspectiveCamera(40, wrapper.clientWidth / wrapper.clientHeight, 0.1, 100);
         camera.position.z = 5.5;
 
@@ -250,77 +289,44 @@
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.1;
+        renderer.toneMappingExposure = 1.5; // High Key
 
-        // --- 2. Object: Diamond Faceted Sphere ---
-        const geometry = new THREE.IcosahedronGeometry(1.5, 3); // 3 subdivisions for diamond look
-        const material = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, 
-            roughness: 0.2, 
-            metalness: 0.1,
-            flatShading: true // Faceted look
-        });
+        // --- 2. Object ---
+        const geometry = new THREE.IcosahedronGeometry(1.5, 3);
+        const material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.1, flatShading: true });
         const mesh = new THREE.Mesh(geometry, material);
-        mesh.castShadow = true; 
-        mesh.receiveShadow = true;
+        mesh.castShadow = true; mesh.receiveShadow = true;
         scene.add(mesh);
 
-        // Floor
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 1 }));
-        plane.rotation.x = -Math.PI / 2;
-        plane.position.y = -2;
-        plane.receiveShadow = true;
+        plane.rotation.x = -Math.PI / 2; plane.position.y = -2; plane.receiveShadow = true;
         scene.add(plane);
 
-        // Ambient Light
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Bright Ambient
         scene.add(ambientLight);
 
-        // --- 3. Lights System ---
+        // --- 3. Lights ---
         const lights = {
-            key: { 
-                obj: createSpot(0xffffff, 2.5), 
-                az: 45, pol: 30, on: true, intensity: 2.5, name: "KEY", modifier: 'softbox' 
-            },
-            fill: { 
-                obj: createSpot(0xffeedd, 0.8), 
-                az: -45, pol: 10, on: true, intensity: 0.8, name: "FILL", modifier: 'softbox' 
-            },
-            rim: { 
-                // 6600K Rim Light
-                obj: createSpot(0xEBF4FF, 3.0), 
-                az: 135, pol: 30, on: true, intensity: 3.0, name: "RIM", modifier: 'bare' 
-            }
+            key: { obj: createSpot(0xffffff, 2.5), az: 45, pol: 30, on: true, intensity: 2.5, modifier: 'softbox' },
+            fill: { obj: createSpot(0xffeedd, 0.8), az: -45, pol: 10, on: true, intensity: 0.8, modifier: 'softbox' },
+            rim: { obj: createSpot(0xEBF4FF, 3.0), az: 135, pol: 30, on: true, intensity: 3.0, modifier: 'bare' }
         };
 
         function createSpot(color, intensity) {
             const l = new THREE.SpotLight(color, intensity);
-            l.castShadow = true;
-            l.shadow.mapSize.width = 1024;
-            l.shadow.mapSize.height = 1024;
-            l.angle = 0.8;
-            l.penumbra = 0.5;
-            scene.add(l);
-            return l;
+            l.castShadow = true; l.shadow.mapSize.set(1024, 1024); l.angle = 0.8; l.penumbra = 0.5;
+            scene.add(l); return l;
         }
 
-        // --- 4. Logic & UI ---
-        let currentTarget = 'key';
-        
-        const azSlider = document.getElementById('azSlider');
-        const polSlider = document.getElementById('polSlider');
-        const intSlider = document.getElementById('intSlider');
-        
-        const azDisplay = document.getElementById('azDisplay');
-        const polDisplay = document.getElementById('polDisplay');
-        const intDisplay = document.getElementById('intDisplay');
-        
-        const powerSwitch = document.getElementById('powerSwitch');
-        const targetName = document.getElementById('targetName');
-        const algoTitle = document.getElementById('algoTitle');
-        const algoDesc = document.getElementById('algoDesc');
+        // --- 4. Logic ---
+        const els = {
+            azSlider: document.getElementById('azSlider'), polSlider: document.getElementById('polSlider'), intSlider: document.getElementById('intSlider'),
+            azDisplay: document.getElementById('azDisplay'), polDisplay: document.getElementById('polDisplay'), intDisplay: document.getElementById('intDisplay'),
+            powerSwitch: document.getElementById('powerSwitch'),
+            algoTitle: document.getElementById('algoTitle'), algoDesc: document.getElementById('algoDesc'),
+            panel: document.getElementById('dashboard')
+        };
 
-        // Functions to expose to window for interaction
         window.selectLight = (id) => {
             currentTarget = id;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -330,14 +336,14 @@
 
         window.updateVal = () => {
             const data = lights[currentTarget];
-            data.az = parseInt(azSlider.value);
-            data.pol = parseInt(polSlider.value);
-            data.intensity = parseFloat(intSlider.value);
+            data.az = parseInt(els.azSlider.value);
+            data.pol = parseInt(els.polSlider.value);
+            data.intensity = parseFloat(els.intSlider.value);
             updateUI(true);
         };
 
         window.toggleLight = () => {
-            lights[currentTarget].on = powerSwitch.checked;
+            lights[currentTarget].on = els.powerSwitch.checked;
             updateUI(true);
         };
 
@@ -346,38 +352,57 @@
             updateUI(true);
         };
 
+        window.toggleLang = () => {
+            currentLang = currentLang === 'zh' ? 'en' : 'zh';
+            applyLang();
+            analyze();
+        };
+
+        function applyLang() {
+            const t = txt[currentLang];
+            // Tabs
+            document.getElementById('tabKey').innerText = t.tabKey;
+            document.getElementById('tabFill').innerText = t.tabFill;
+            document.getElementById('tabRim').innerText = t.tabRim;
+            // Labels
+            document.getElementById('labelStatus').innerText = t.labelStatus;
+            document.getElementById('labelMod').innerText = t.labelMod;
+            document.getElementById('mod-softbox').innerText = t.modSoft;
+            document.getElementById('mod-radar').innerText = t.modRadar;
+            document.getElementById('mod-grid').innerText = t.modGrid;
+            document.getElementById('mod-bare').innerText = t.modBare;
+            document.getElementById('labelAz').innerText = t.labelAz;
+            document.getElementById('labelAlt').innerText = t.labelAlt;
+            document.getElementById('labelInt').innerText = t.labelInt;
+            // Gear
+            document.getElementById('labelGear').innerText = t.labelGear;
+            document.getElementById('gear1Title').innerText = t.gear1Title;
+            document.getElementById('gear1Desc').innerText = t.gear1Desc;
+            document.getElementById('gear2Title').innerText = t.gear2Title;
+            document.getElementById('gear2Desc').innerText = t.gear2Desc;
+            // Btn
+            document.getElementById('langBtn').innerText = t.langBtn;
+        }
+
         function updateUI(updatePhysics = false) {
             const data = lights[currentTarget];
-            
-            // Sync Controls
             if (!updatePhysics) {
-                azSlider.value = data.az;
-                polSlider.value = data.pol;
-                intSlider.value = data.intensity;
+                els.azSlider.value = data.az; els.polSlider.value = data.pol; els.intSlider.value = data.intensity;
             }
-            
-            azDisplay.innerText = data.az + "°";
-            polDisplay.innerText = data.pol + "°";
-            intDisplay.innerText = data.intensity;
-            powerSwitch.checked = data.on;
-            targetName.innerText = data.name + " STATUS";
+            els.azDisplay.innerText = data.az + "°"; els.polDisplay.innerText = data.pol + "°"; els.intDisplay.innerText = data.intensity;
+            els.powerSwitch.checked = data.on;
 
-            // Modifiers UI
             document.querySelectorAll('.mod-btn').forEach(b => {
-                if (b.id === 'mod-' + data.modifier) b.classList.add('active');
-                else b.classList.remove('active');
+                if (b.id === 'mod-' + data.modifier) b.classList.add('active'); else b.classList.remove('active');
             });
 
-            // Opacity
-            const opacity = data.on ? '1' : '0.4';
-            azSlider.parentElement.style.opacity = opacity;
-            polSlider.parentElement.style.opacity = opacity;
-            intSlider.parentElement.style.opacity = opacity;
+            if (updatePhysics) updateLightPos(currentTarget);
             
-            // Physics Update
-            if (updatePhysics || !updatePhysics) { // Always update for safety
-                updateLightPos(currentTarget);
-            }
+            // UI Feedback
+            const opacity = data.on ? '1' : '0.4';
+            els.azSlider.parentElement.style.opacity = opacity;
+            els.polSlider.parentElement.style.opacity = opacity;
+            els.intSlider.parentElement.style.opacity = opacity;
             analyze();
         }
 
@@ -386,20 +411,13 @@
             const light = data.obj;
             light.visible = data.on;
             light.intensity = data.intensity;
-
             if(!data.on) return;
 
             const r = 6;
             const phi = (90 - data.pol) * (Math.PI / 180);
             const theta = (data.az + 90) * (Math.PI / 180);
+            light.position.set(-(r * Math.sin(phi) * Math.cos(theta)), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
 
-            light.position.set(
-                -(r * Math.sin(phi) * Math.cos(theta)),
-                r * Math.cos(phi),
-                r * Math.sin(phi) * Math.sin(theta)
-            );
-
-            // Modifier Physics
             if (data.modifier === 'softbox') { light.angle = 1.0; light.penumbra = 1.0; }
             else if (data.modifier === 'radar') { light.angle = 0.7; light.penumbra = 0.4; }
             else if (data.modifier === 'grid') { light.angle = 0.35; light.penumbra = 0.2; }
@@ -408,42 +426,39 @@
 
         function analyze() {
             const k = lights.key;
-            let t = "CUSTOM", d = "自定義混合光。";
+            const t = txt[currentLang];
+            let title = t.custom, desc = t.customDesc;
 
             if(!k.on) {
-                t = "LOW KEY"; d = "主光關閉，暗調或剪影效果。";
+                title = t.lowKey; desc = t.lowKeyDesc;
             } else {
                 const az = Math.abs(k.az);
-                if(k.pol > 60) { t = "TOP LIGHT"; d = "頂光。強調結構，眼神深邃。"; }
-                else if(az < 25 && k.pol > 20) { t = "BUTTERFLY"; d = "蝴蝶光。美顏，鼻下蝶形影。"; }
-                else if(az >= 30 && az <= 65) { t = "REMBRANDT"; d = "倫勃朗光。經典倒三角光區。"; }
-                else if(az > 70) { t = "SPLIT"; d = "分割光。半面陰影，戲劇性強。"; }
-                else { t = "LOOP"; d = "環形光。自然通用佈光。"; }
+                if(k.pol > 60) { title = t.top; desc = t.topDesc; }
+                else if(az < 25 && k.pol > 20) { title = t.butterfly; desc = t.butterflyDesc; }
+                else if(az >= 30 && az <= 65) { title = t.rembrandt; desc = t.rembrandtDesc; }
+                else if(az > 70) { title = t.split; desc = t.splitDesc; }
+                else { title = t.loop; desc = t.loopDesc; }
             }
-            algoTitle.innerText = t;
-            algoDesc.innerText = d;
+            els.algoTitle.innerText = title;
+            els.algoDesc.innerText = desc;
         }
 
-        // --- 5. Core Loop ---
         function animate() {
             requestAnimationFrame(animate);
-            mesh.rotation.y += 0.002; 
+            // Ultra-slow rotation (Breathing effect)
+            mesh.rotation.y += 0.0005; 
             renderer.render(scene, camera);
         }
 
         window.addEventListener('resize', () => {
-            const w = wrapper.clientWidth;
-            const h = wrapper.clientHeight;
-            camera.aspect = w / h;
-            camera.updateProjectionMatrix();
-            renderer.setSize(w, h);
+            const w = wrapper.clientWidth, h = wrapper.clientHeight;
+            camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h);
         });
 
-        // Init
-        updateLightPos('key');
-        updateLightPos('fill');
-        updateLightPos('rim');
-        updateUI(); // Sync initial state
+        // Start
+        applyLang();
+        updateLightPos('key'); updateLightPos('fill'); updateLightPos('rim');
+        updateUI();
         animate();
 
     </script>
