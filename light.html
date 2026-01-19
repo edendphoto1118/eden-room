@@ -21,14 +21,14 @@
     </script>
 
     <style>
-        /* --- 核心佈局 --- */
+        /* --- CORE LAYOUT --- */
         body { 
             background-color: #050505; color: #C0C0C0; 
             height: 100vh; height: 100dvh; width: 100vw; overflow: hidden;
             display: flex; flex-direction: column;
         }
 
-        /* Header */
+        /* HEADER */
         header { 
             height: 50px; flex-shrink: 0; z-index: 30;
             display: flex; justify-content: space-between; align-items: center;
@@ -41,14 +41,11 @@
         }
         .ig-link:hover { color: #D4AF37; }
 
-        /* Main Layout */
-        #main-layout {
-            display: flex; flex: 1; min-height: 0; position: relative;
-            flex-direction: column; 
-        }
+        /* LAYOUT */
+        #main-layout { display: flex; flex: 1; min-height: 0; position: relative; flex-direction: column; }
         @media (min-width: 768px) { #main-layout { flex-direction: row; } }
 
-        /* Canvas */
+        /* CANVAS */
         #canvas-wrapper { 
             flex-grow: 1; position: relative; width: 100%; height: 100%;
             background: radial-gradient(circle at center, #1a1a1a 0%, #000000 90%);
@@ -56,10 +53,10 @@
         }
         canvas { display: block; width: 100%; height: 100%; outline: none; }
 
-        /* Dashboard */
+        /* DASHBOARD */
         #dashboard { 
             z-index: 20; background: #0a0a0a; 
-            display: flex; flex-direction: column; gap: 15px;
+            display: flex; flex-direction: column; gap: 12px;
             width: 100%; flex-shrink: 0; 
             padding: 15px 20px; padding-bottom: max(15px, env(safe-area-inset-bottom));
             border-top: 1px solid #222;
@@ -67,13 +64,25 @@
         }
         @media (min-width: 768px) {
             #dashboard {
-                width: 360px; height: 100%;
+                width: 380px; height: 100%; /* Slightly wider for new controls */
                 border-top: none; border-left: 1px solid #222;
                 padding: 25px; order: 2; overflow-y: auto;
             }
         }
 
-        /* UI Components */
+        /* --- UI COMPONENTS --- */
+        
+        /* PRESET BUTTONS (New) */
+        .preset-row { display: flex; gap: 8px; margin-bottom: 5px; }
+        .preset-btn {
+            flex: 1; background: #111; border: 1px solid #333; color: #888;
+            font-family: 'Space Mono'; font-size: 9px; padding: 6px 0; text-align: center;
+            cursor: pointer; transition: 0.2s; border-radius: 2px;
+        }
+        .preset-btn:hover { border-color: #666; color: #fff; }
+        .preset-btn:active { background: #222; transform: translateY(1px); }
+
+        /* TABS */
         .tabs { display: flex; border: 1px solid #333; border-radius: 2px; overflow: hidden; height: 32px; flex-shrink: 0; }
         .tab-btn {
             flex: 1; display: flex; align-items: center; justify-content: center;
@@ -83,8 +92,9 @@
         .tab-btn:hover { background: #151515; color: #888; }
         .tab-btn.active { background: #D4AF37; color: #000; font-weight: bold; }
 
-        .slider-row { display: flex; align-items: center; gap: 12px; height: 28px; }
-        .slider-label { font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px; color: #666; width: 70px; letter-spacing: 0.05em; font-weight: 500; }
+        /* SLIDERS */
+        .slider-row { display: flex; align-items: center; gap: 10px; height: 26px; }
+        .slider-label { font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px; color: #666; width: 65px; letter-spacing: 0.05em; font-weight: 500; }
         .slider-val { font-family: 'Space Mono'; font-size: 9px; color: #D4AF37; width: 35px; text-align: right; }
         
         input[type=range] { -webkit-appearance: none; flex: 1; background: transparent; cursor: pointer; }
@@ -93,10 +103,16 @@
             border-radius: 50%; margin-top: -5px; border: 1px solid #000; box-shadow: 0 0 5px rgba(212,175,55,0.5);
         }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: #333; border-radius: 1px; }
+        
+        /* Color Temp Gradient Slider */
+        #tempSlider::-webkit-slider-runnable-track {
+            background: linear-gradient(to right, #ffbb00, #ffffff, #aaddff);
+            height: 2px;
+        }
 
+        /* TOGGLE */
         .status-row { display: flex; justify-content: space-between; align-items: center; height: 24px; margin-bottom: 5px; }
         .status-label { font-family: 'Space Mono', 'Shippori Mincho'; font-size: 10px; color: #888; letter-spacing: 0.1em; }
-        
         .toggle { position: relative; display: inline-block; width: 32px; height: 16px; }
         .toggle input { opacity: 0; width: 0; height: 0; }
         .slider-tg { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 16px; border: 1px solid #444; }
@@ -104,7 +120,16 @@
         input:checked + .slider-tg { background-color: #111; border-color: #D4AF37; }
         input:checked + .slider-tg:before { transform: translateX(16px); background-color: #D4AF37; }
 
-        /* Gear Section */
+        /* MODIFIERS */
+        .mod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .mod-btn {
+            border: 1px solid #333; color: #666; font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px;
+            padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.2s; background: #0e0e0e; border-radius: 2px;
+        }
+        .mod-btn:hover { border-color: #555; color: #ccc; }
+        .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); color: #D4AF37; font-weight: bold; }
+
+        /* GEAR SECTION */
         .gear-section {
             border-top: 1px solid #222; margin-top: auto; pt-4; 
             display: flex; gap: 10px; flex-direction: column;
@@ -121,14 +146,6 @@
         .gear-info h4 { font-family: 'Shippori Mincho', serif; font-size: 11px; color: #ccc; margin-bottom: 2px; font-weight: 500; }
         .gear-info p { font-family: 'Space Mono', monospace; font-size: 9px; color: #D4AF37; opacity: 0.8; }
         .gear-arrow { color: #444; font-size: 10px; margin-left: auto; }
-
-        .mod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-        .mod-btn {
-            border: 1px solid #333; color: #666; font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px;
-            padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.2s; background: #0e0e0e; border-radius: 2px;
-        }
-        .mod-btn:hover { border-color: #555; color: #ccc; }
-        .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); color: #D4AF37; font-weight: bold; }
 
     </style>
 </head>
@@ -158,6 +175,12 @@
 
         <footer id="dashboard">
             
+            <div class="preset-row">
+                <div class="preset-btn" onclick="window.applyPreset('studio')">STUDIO</div>
+                <div class="preset-btn" onclick="window.applyPreset('sunset')">SUNSET</div>
+                <div class="preset-btn" onclick="window.applyPreset('cyber')">CYBER</div>
+            </div>
+
             <div class="tabs">
                 <div id="tabKey" class="tab-btn active" onclick="selectLight('key')">主光</div>
                 <div id="tabFill" class="tab-btn" onclick="selectLight('fill')">補光</div>
@@ -201,6 +224,11 @@
                     <input type="range" id="intSlider" min="0" max="5" step="0.1" oninput="updateVal()">
                     <span id="intDisplay" class="slider-val text-[#D4AF37]">2.5</span>
                 </div>
+                <div class="slider-row">
+                    <span id="labelTemp" class="slider-label">色溫 K</span>
+                    <input type="range" id="tempSlider" min="2000" max="9000" step="100" oninput="updateVal()">
+                    <span id="tempDisplay" class="slider-val">5600</span>
+                </div>
             </div>
 
             <div class="border-t border-[#222] pt-3">
@@ -232,13 +260,13 @@
     </div>
 
     <script>
-        // --- TEXT RESOURCES (Dictionary) ---
+        // --- RESOURCES ---
         const txt = {
             zh: {
                 tabKey: "主光", tabFill: "補光", tabRim: "輪廓",
                 labelStatus: "電源開關", labelMod: "控光配件",
                 modSoft: "柔光", modRadar: "雷達", modGrid: "蜂巢", modBare: "裸燈",
-                labelAz: "方位角", labelAlt: "高度角", labelInt: "輸出強度",
+                labelAz: "方位角", labelAlt: "高度角", labelInt: "輸出強度", labelTemp: "色溫 K",
                 labelGear: "攝影裝備推薦",
                 gear1Title: "專業光學束光筒", gear1Desc: "精準控光 SHAPING LIGHT",
                 gear2Title: "雙色溫聚光燈", gear2Desc: "必備光源 STUDIO ESSENTIAL",
@@ -256,7 +284,7 @@
                 tabKey: "KEY", tabFill: "FILL", tabRim: "RIM",
                 labelStatus: "POWER STATUS", labelMod: "MODIFIER",
                 modSoft: "SOFT", modRadar: "RADAR", modGrid: "GRID", modBare: "BARE",
-                labelAz: "AZIMUTH", labelAlt: "ALTITUDE", labelInt: "INTENSITY",
+                labelAz: "AZIMUTH", labelAlt: "ALTITUDE", labelInt: "INTENSITY", labelTemp: "KELVIN",
                 labelGear: "RECOMMENDED GEAR",
                 gear1Title: "OPTICAL SNOOT", gear1Desc: "PRECISE LIGHT SHAPING",
                 gear2Title: "BI-COLOR SPOTLIGHT", gear2Desc: "STUDIO ESSENTIAL",
@@ -273,7 +301,7 @@
         };
 
         // --- GLOBAL STATE ---
-        let currentLang = 'zh'; // Default Chinese
+        let currentLang = 'zh'; 
         let currentTarget = 'key';
 
         // --- 1. Three.js Init ---
@@ -289,27 +317,37 @@
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.5; // High Key
+        renderer.toneMappingExposure = 1.5;
 
-        // --- 2. Object ---
+        // --- 2. Object: Diamond Faceted Sphere ---
         const geometry = new THREE.IcosahedronGeometry(1.5, 3);
-        const material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.2, metalness: 0.1, flatShading: true });
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff, 
+            roughness: 0.2, 
+            metalness: 0.1,
+            flatShading: true
+        });
         const mesh = new THREE.Mesh(geometry, material);
         mesh.castShadow = true; mesh.receiveShadow = true;
         scene.add(mesh);
 
-        const plane = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 1 }));
+        // Floor (Black Mirror Effect)
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ 
+            color: 0x050505, 
+            roughness: 0.1, // Shiny
+            metalness: 0.5 
+        }));
         plane.rotation.x = -Math.PI / 2; plane.position.y = -2; plane.receiveShadow = true;
         scene.add(plane);
 
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Bright Ambient
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
 
-        // --- 3. Lights ---
+        // --- 3. Lights System ---
         const lights = {
-            key: { obj: createSpot(0xffffff, 2.5), az: 45, pol: 30, on: true, intensity: 2.5, modifier: 'softbox' },
-            fill: { obj: createSpot(0xffeedd, 0.8), az: -45, pol: 10, on: true, intensity: 0.8, modifier: 'softbox' },
-            rim: { obj: createSpot(0xEBF4FF, 3.0), az: 135, pol: 30, on: true, intensity: 3.0, modifier: 'bare' }
+            key: { obj: createSpot(0xffffff, 2.5), az: 45, pol: 30, on: true, intensity: 2.5, temp: 5600, modifier: 'softbox' },
+            fill: { obj: createSpot(0xffeedd, 0.8), az: -45, pol: 10, on: true, intensity: 0.8, temp: 5600, modifier: 'softbox' },
+            rim: { obj: createSpot(0xEBF4FF, 3.0), az: 135, pol: 30, on: true, intensity: 3.0, temp: 6600, modifier: 'bare' }
         };
 
         function createSpot(color, intensity) {
@@ -320,13 +358,34 @@
 
         // --- 4. Logic ---
         const els = {
-            azSlider: document.getElementById('azSlider'), polSlider: document.getElementById('polSlider'), intSlider: document.getElementById('intSlider'),
-            azDisplay: document.getElementById('azDisplay'), polDisplay: document.getElementById('polDisplay'), intDisplay: document.getElementById('intDisplay'),
+            azSlider: document.getElementById('azSlider'), polSlider: document.getElementById('polSlider'), 
+            intSlider: document.getElementById('intSlider'), tempSlider: document.getElementById('tempSlider'),
+            azDisplay: document.getElementById('azDisplay'), polDisplay: document.getElementById('polDisplay'), 
+            intDisplay: document.getElementById('intDisplay'), tempDisplay: document.getElementById('tempDisplay'),
             powerSwitch: document.getElementById('powerSwitch'),
             algoTitle: document.getElementById('algoTitle'), algoDesc: document.getElementById('algoDesc'),
             panel: document.getElementById('dashboard')
         };
 
+        // --- Helpers ---
+        function kelvinToRGB(k) {
+            // Simple approximation
+            let r, g, b;
+            k = k / 100;
+            if (k <= 66) {
+                r = 255;
+                g = k < 6 ? 0 : 99.47 * Math.log(k) - 161.1;
+                b = k <= 19 ? 0 : 138.5 * Math.log(k - 10) - 305;
+            } else {
+                r = 329.7 * Math.pow(k - 60, -0.133);
+                g = 288.1 * Math.pow(k - 60, -0.0755);
+                b = 255;
+            }
+            return new THREE.Color(`rgb(${clamp(r)},${clamp(g)},${clamp(b)})`);
+        }
+        function clamp(v) { return Math.max(0, Math.min(255, Math.round(v))); }
+
+        // --- Interaction ---
         window.selectLight = (id) => {
             currentTarget = id;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -339,6 +398,7 @@
             data.az = parseInt(els.azSlider.value);
             data.pol = parseInt(els.polSlider.value);
             data.intensity = parseFloat(els.intSlider.value);
+            data.temp = parseInt(els.tempSlider.value);
             updateUI(true);
         };
 
@@ -352,19 +412,39 @@
             updateUI(true);
         };
 
+        // --- PRESETS ---
+        window.applyPreset = (type) => {
+            if (type === 'studio') {
+                setLightState('key', 45, 30, 2.5, 5600, 'softbox', true);
+                setLightState('fill', -45, 10, 0.8, 5600, 'softbox', true);
+                setLightState('rim', 135, 30, 3.0, 5600, 'bare', true);
+            } else if (type === 'sunset') {
+                setLightState('key', -80, 10, 3.0, 2500, 'grid', true); // Orange Low
+                setLightState('fill', 45, 30, 0.5, 7000, 'softbox', true); // Blue Fill
+                setLightState('rim', 180, 20, 2.0, 3000, 'bare', true);
+            } else if (type === 'cyber') {
+                setLightState('key', 60, 40, 3.0, 9000, 'radar', true); // Cyan
+                setLightState('fill', -60, 20, 1.5, 2000, 'bare', true); // Pink/Red
+                setLightState('rim', 0, 80, 2.0, 8000, 'grid', true); // Top Blue
+            }
+            updateUI(true);
+        }
+
+        function setLightState(id, az, pol, int, temp, mod, on) {
+            const d = lights[id];
+            d.az = az; d.pol = pol; d.intensity = int; d.temp = temp; d.modifier = mod; d.on = on;
+        }
+
         window.toggleLang = () => {
             currentLang = currentLang === 'zh' ? 'en' : 'zh';
-            applyLang();
-            analyze();
+            applyLang(); analyze();
         };
 
         function applyLang() {
             const t = txt[currentLang];
-            // Tabs
             document.getElementById('tabKey').innerText = t.tabKey;
             document.getElementById('tabFill').innerText = t.tabFill;
             document.getElementById('tabRim').innerText = t.tabRim;
-            // Labels
             document.getElementById('labelStatus').innerText = t.labelStatus;
             document.getElementById('labelMod').innerText = t.labelMod;
             document.getElementById('mod-softbox').innerText = t.modSoft;
@@ -374,22 +454,23 @@
             document.getElementById('labelAz').innerText = t.labelAz;
             document.getElementById('labelAlt').innerText = t.labelAlt;
             document.getElementById('labelInt').innerText = t.labelInt;
-            // Gear
+            document.getElementById('labelTemp').innerText = t.labelTemp;
             document.getElementById('labelGear').innerText = t.labelGear;
             document.getElementById('gear1Title').innerText = t.gear1Title;
             document.getElementById('gear1Desc').innerText = t.gear1Desc;
             document.getElementById('gear2Title').innerText = t.gear2Title;
             document.getElementById('gear2Desc').innerText = t.gear2Desc;
-            // Btn
             document.getElementById('langBtn').innerText = t.langBtn;
         }
 
         function updateUI(updatePhysics = false) {
             const data = lights[currentTarget];
             if (!updatePhysics) {
-                els.azSlider.value = data.az; els.polSlider.value = data.pol; els.intSlider.value = data.intensity;
+                els.azSlider.value = data.az; els.polSlider.value = data.pol; 
+                els.intSlider.value = data.intensity; els.tempSlider.value = data.temp;
             }
-            els.azDisplay.innerText = data.az + "°"; els.polDisplay.innerText = data.pol + "°"; els.intDisplay.innerText = data.intensity;
+            els.azDisplay.innerText = data.az + "°"; els.polDisplay.innerText = data.pol + "°"; 
+            els.intDisplay.innerText = data.intensity; els.tempDisplay.innerText = data.temp;
             els.powerSwitch.checked = data.on;
 
             document.querySelectorAll('.mod-btn').forEach(b => {
@@ -398,11 +479,11 @@
 
             if (updatePhysics) updateLightPos(currentTarget);
             
-            // UI Feedback
             const opacity = data.on ? '1' : '0.4';
             els.azSlider.parentElement.style.opacity = opacity;
             els.polSlider.parentElement.style.opacity = opacity;
             els.intSlider.parentElement.style.opacity = opacity;
+            els.tempSlider.parentElement.style.opacity = opacity;
             analyze();
         }
 
@@ -411,6 +492,8 @@
             const light = data.obj;
             light.visible = data.on;
             light.intensity = data.intensity;
+            light.color = kelvinToRGB(data.temp);
+
             if(!data.on) return;
 
             const r = 6;
@@ -445,7 +528,6 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            // Ultra-slow rotation (Breathing effect)
             mesh.rotation.y += 0.0005; 
             renderer.render(scene, camera);
         }
