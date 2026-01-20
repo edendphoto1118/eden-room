@@ -48,7 +48,7 @@
         #main-layout { display: flex; flex: 1; min-height: 0; position: relative; flex-direction: column; }
         @media (min-width: 768px) { #main-layout { flex-direction: row; } }
 
-        /* Canvas - 純淨背景 */
+        /* Canvas */
         #canvas-wrapper { 
             flex-grow: 1; position: relative; width: 100%; height: 100%; 
             background: #000000; order: 1; 
@@ -123,7 +123,7 @@
         .gear-info p { font-family: 'Space Mono', monospace; font-size: 9px; color: #777; }
         .gear-arrow { color: #555; font-size: 10px; margin-left: auto; }
 
-        /* Data Overlay (No map) */
+        /* Data Overlay */
         #lighting-data {
             position: absolute; top: 20px; right: 20px; pointer-events: none;
             font-family: 'Space Mono'; font-size: 10px; color: #D4AF37;
@@ -254,23 +254,22 @@
         const wrapper = document.getElementById('canvas-wrapper');
         const scene = new THREE.Scene();
         
-        // 主攝影機
         const camera = new THREE.PerspectiveCamera(40, wrapper.clientWidth / wrapper.clientHeight, 0.1, 100);
-        camera.position.set(0, 0.5, 9); // 確保距離適中
+        camera.position.set(0, 0.5, 9); 
         camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
         renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 柔和陰影
         
-        // 🔥 確保曝光足夠
+        // 🔥 高調曝光設定
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 2.0;
 
-        // --- 2. OBJECT: Diamond Sphere (Reliable & Beautiful) ---
-        const geometry = new THREE.IcosahedronGeometry(1.6, 2); // Level 2 subdivision = nice faceted look
+        // --- 2. OBJECT: Diamond Sphere ---
+        const geometry = new THREE.IcosahedronGeometry(1.6, 2); // Level 2 鑽石切割
         const material = new THREE.MeshStandardMaterial({ 
             color: 0xffffff, roughness: 0.2, metalness: 0.1, flatShading: true 
         });
@@ -293,11 +292,11 @@
         backWall.position.set(0, 10, -5.0); backWall.receiveShadow = true;
         envGroup.add(backWall);
 
+        // Ambient (Base Light)
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
 
         // --- 4. LIGHTS ---
-        // 強度直接拉高到 5.0 / 6.0 確保明亮
         const lights = {
             key: { obj: createSpot(0xffffff, 5.0), az: 45, pol: 30, on: true, intensity: 5.0, temp: 5600, modifier: 'softbox' },
             fill: { obj: createSpot(0xffeedd, 2.0), az: -45, pol: 10, on: true, intensity: 2.0, temp: 5600, modifier: 'softbox' },
@@ -306,7 +305,7 @@
 
         function createSpot(color, intensity) {
             const l = new THREE.SpotLight(color, intensity);
-            l.castShadow = true; l.shadow.mapSize.set(1024, 1024); l.shadow.bias = -0.0001;
+            l.castShadow = true; l.shadow.mapSize.set(2048, 2048); l.shadow.bias = -0.0001;
             scene.add(l); return l;
         }
 
@@ -322,6 +321,7 @@
                 gear1Title: "專業光學束光筒", gear1Desc: "精準控光 SHAPING LIGHT",
                 gear2Title: "雙色溫聚光燈", gear2Desc: "高顯色性攝影棚主燈",
                 langBtn: "EN",
+                // Analysis
                 lowKey: "暗調 / 剪影", lowKeyDesc: "強調結構的邊緣與輪廓。",
                 top: "頂光 (Top Light)", topDesc: "光源來自上方，產生戲劇性的長陰影。",
                 butterfly: "立體光", butterflyDesc: "正面高位光，強調形體的對稱美感。",
@@ -437,7 +437,24 @@
             const d = lights[id];
             const l = d.obj;
             l.visible = d.on; 
-            l.intensity = d.intensity; 
+            
+            // 🔥 暴力差異化 (Maximized Contrast)
+            let baseIntensity = d.intensity;
+            if (d.modifier === 'softbox') { 
+                l.angle = 1.0; l.penumbra = 1.0; // 極度柔和
+                baseIntensity *= 0.9; 
+            } else if (d.modifier === 'radar') { 
+                l.angle = 0.6; l.penumbra = 0.2; // 邊緣清晰
+                baseIntensity *= 1.1; 
+            } else if (d.modifier === 'grid') { 
+                l.angle = 0.3; l.penumbra = 0.1; // 極度聚光
+                baseIntensity *= 1.2; 
+            } else if (d.modifier === 'bare') { 
+                l.angle = 1.5; l.penumbra = 0.0; // 刀切陰影
+                baseIntensity *= 1.0; 
+            }
+            
+            l.intensity = baseIntensity;
             l.color = kelvinToRGB(d.temp);
 
             if(!d.on) return;
@@ -447,11 +464,6 @@
             const ly = r * Math.cos(phi);
             const lz = r * Math.sin(phi) * Math.sin(theta);
             l.position.set(lx, ly, lz);
-
-            if (d.modifier === 'softbox') { l.angle = 1.2; l.penumbra = 1.0; }
-            else if (d.modifier === 'radar') { l.angle = 0.7; l.penumbra = 0.4; }
-            else if (d.modifier === 'grid') { l.angle = 0.35; l.penumbra = 0.2; }
-            else if (d.modifier === 'bare') { l.angle = 1.2; l.penumbra = 0.05; }
         }
 
         function analyze() {
@@ -472,7 +484,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            // Main View
+            mesh.rotation.y += 0.0005; // 微動態
             renderer.render(scene, camera);
         }
 
