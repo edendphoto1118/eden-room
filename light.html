@@ -5,18 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Light Sculptor | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-            }
-        }
-    </script>
 
     <script>
         tailwind.config = {
@@ -30,10 +21,10 @@
     </script>
 
     <style>
-        /* 核心佈局 */
+        /* --- 核心佈局 --- */
         body { background-color: #080808; color: #C0C0C0; height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Header */
+        /* HEADER */
         header { 
             height: 50px; flex-shrink: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; 
             padding: 0 20px; border-bottom: 1px solid #222; background: #080808; 
@@ -44,18 +35,18 @@
         }
         .ig-link:hover { color: #D4AF37; border-color: #D4AF37; background: #111; }
 
-        /* Main Layout */
+        /* LAYOUT */
         #main-layout { display: flex; flex: 1; min-height: 0; position: relative; flex-direction: column; }
         @media (min-width: 768px) { #main-layout { flex-direction: row; } }
 
-        /* Canvas */
+        /* CANVAS */
         #canvas-wrapper { 
             flex-grow: 1; position: relative; width: 100%; height: 100%; 
-            background: radial-gradient(circle at center, #2a2a2a 0%, #000000 100%); order: 1; 
+            background: radial-gradient(circle at center, #222 0%, #000 100%); order: 1; 
         }
         canvas { display: block; width: 100%; height: 100%; outline: none; }
 
-        /* Dashboard */
+        /* DASHBOARD */
         #dashboard { 
             z-index: 20; background: #0c0c0c; display: flex; flex-direction: column; gap: 12px; 
             width: 100%; flex-shrink: 0; padding: 15px 20px; padding-bottom: max(15px, env(safe-area-inset-bottom)); 
@@ -65,7 +56,7 @@
             #dashboard { width: 380px; height: 100%; border-top: none; border-left: 1px solid #222; padding: 25px; overflow-y: auto; }
         }
 
-        /* UI Elements */
+        /* UI ELEMENTS */
         .preset-row { display: flex; gap: 8px; margin-bottom: 5px; }
         .preset-btn {
             flex: 1; background: #151515; border: 1px solid #333; color: #999; font-family: 'Space Mono'; font-size: 9px; 
@@ -124,7 +115,7 @@
         .gear-info p { font-family: 'Space Mono', monospace; font-size: 9px; color: #777; }
         .gear-arrow { color: #555; font-size: 10px; margin-left: auto; }
 
-        /* Overlays */
+        /* Data Overlay */
         #lighting-data {
             position: absolute; top: 20px; right: 20px; pointer-events: none;
             font-family: 'Space Mono'; font-size: 10px; color: #D4AF37;
@@ -134,6 +125,7 @@
         .data-row { display: flex; gap: 10px; justify-content: flex-end; }
         .data-label { color: #888; }
 
+        /* Top-Down Map Label */
         #map-label {
             position: absolute; top: 150px; left: 20px; pointer-events: none;
             font-family: 'Space Mono'; font-size: 9px; color: #666; z-index: 10;
@@ -172,9 +164,9 @@
         <footer id="dashboard">
             
             <div class="preset-row">
-                <div class="preset-btn" onclick="window.applyPreset('rembrandt')">REMBRANDT</div>
-                <div class="preset-btn" onclick="window.applyPreset('butterfly')">BUTTERFLY</div>
-                <div class="preset-btn" onclick="window.applyPreset('split')">SPLIT</div>
+                <div class="preset-btn" onclick="window.applyPreset('studio')">STUDIO (標準)</div>
+                <div class="preset-btn" onclick="window.applyPreset('dramatic')">DRAMATIC (戲劇)</div>
+                <div class="preset-btn" onclick="window.applyPreset('color')">COLOR (彩光)</div>
             </div>
 
             <div class="tabs">
@@ -228,8 +220,8 @@
             </div>
 
             <div class="border-t border-[#222] pt-3">
-                <span id="algoTitle" class="text-[#D4AF37] font-serif text-xs font-bold tracking-wider block mb-1">REMBRANDT</span>
-                <span id="algoDesc" class="text-[#888] font-zh text-xs block leading-relaxed">經典倫勃朗光，立體感強。</span>
+                <span id="algoTitle" class="text-[#D4AF37] font-serif text-xs font-bold tracking-wider block mb-1">ANALYSIS</span>
+                <span id="algoDesc" class="text-[#888] font-zh text-xs block leading-relaxed">...</span>
             </div>
 
             <div class="gear-section">
@@ -262,12 +254,10 @@
         const wrapper = document.getElementById('canvas-wrapper');
         const scene = new THREE.Scene();
         
-        // 主攝影機
         const mainCamera = new THREE.PerspectiveCamera(40, wrapper.clientWidth / wrapper.clientHeight, 0.1, 100);
-        mainCamera.position.set(0, 0.2, 9); // 拉遠
-        mainCamera.lookAt(0, -0.3, 0);
+        mainCamera.position.set(0, 0.5, 8); 
+        mainCamera.lookAt(0, 0, 0);
 
-        // 俯視攝影機 (PIP)
         const topCamera = new THREE.OrthographicCamera(-8, 8, 8, -8, 1, 20);
         topCamera.position.set(0, 12, 0);
         topCamera.lookAt(0, 0, 0);
@@ -277,90 +267,37 @@
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        
-        // 🔥 高曝光 (High Key)
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 2.0;
         renderer.setScissorTest(true);
 
-        // --- 2. PROCEDURAL FACETED BUST (程式化雕刻人像) ---
-        // 核心邏輯：建立高面數球體 -> 數學變形頂點 -> 套用 Flat Shading
-        const headGroup = new THREE.Group();
-        scene.add(headGroup);
-
-        // 材質：藝術石膏，保留切面感
-        const plasterMat = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, roughness: 0.4, metalness: 0.1, flatShading: true 
+        // --- 2. SCENE OBJECTS (Abstract Torus Knot) ---
+        // TorusKnot(radius, tube, tubularSegments, radialSegments, p, q)
+        // p=2, q=3 is the classic knot
+        const knotGeo = new THREE.TorusKnotGeometry(1.2, 0.35, 120, 20, 2, 3);
+        const knotMat = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff, roughness: 0.3, metalness: 0.1, flatShading: true // Low Poly Art Style
         });
+        const knot = new THREE.Mesh(knotGeo, knotMat);
+        knot.castShadow = true; knot.receiveShadow = true;
+        scene.add(knot);
+
+        // Environment
         const floorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8, metalness: 0.2 });
         const wallMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, metalness: 0.1 });
-
-        // Sculpting Function
-        function createSculptedHead() {
-            // Level 3 Icosahedron (~1280 faces) - good for faceted look
-            const geometry = new THREE.IcosahedronGeometry(1.6, 3); 
-            const pos = geometry.attributes.position;
-            const v = new THREE.Vector3();
-
-            for (let i = 0; i < pos.count; i++) {
-                v.fromBufferAttribute(pos, i);
-                const x = v.x; const y = v.y; const z = v.z;
-
-                // 1. 下巴與臉頰 (Jaw & Cheeks)
-                if (y < 0.2 && z > 0) {
-                    const narrow = Math.max(0, (Math.abs(x) - 0.5));
-                    v.x *= (1 - narrow * 0.4); // 收窄
-                    if (y < -0.5) v.z *= 0.85; // 下巴變尖
-                }
-                // 2. 鼻子 (Nose)
-                if (z > 0 && Math.abs(x) < 0.35 && y > -0.35 && y < 0.35) {
-                    const dist = Math.sqrt(x*x + (y+0.1)*(y+0.1));
-                    if (dist < 0.35) {
-                        const pull = Math.cos(dist * Math.PI / 0.7);
-                        v.z += pull * 0.6; // 大力拉出鼻子
-                        v.y -= pull * 0.1; // 鼻尖微下勾
-                    }
-                }
-                // 3. 眼窩 (Eye Sockets)
-                if (z > 0.5 && Math.abs(x) > 0.25 && Math.abs(x) < 0.75 && y > 0.15 && y < 0.5) {
-                    v.z -= 0.15; // 向內壓
-                    v.y -= 0.05;
-                }
-                // 4. 眉骨 (Brow Ridge)
-                if (z > 0.5 && Math.abs(x) < 0.8 && y > 0.45 && y < 0.65) {
-                    v.z += 0.08;
-                }
-
-                pos.setXYZ(i, v.x, v.y, v.z);
-            }
-            
-            geometry.computeVertexNormals(); // 重算光照
-            const head = new THREE.Mesh(geometry, plasterMat);
-            head.castShadow = true; head.receiveShadow = true;
-            headGroup.add(head);
-        }
-        createSculptedHead();
-
-        // Neck (Cylinder)
-        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 2.8, 8), plasterMat);
-        neck.position.y = -2.4; neck.castShadow = true; neck.receiveShadow = true;
-        headGroup.add(neck);
-
-        // --- 3. ENVIRONMENT ---
-        const envGroup = new THREE.Group();
-        scene.add(envGroup);
-        // Floor
+        
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), floorMat);
-        plane.rotation.x = -Math.PI / 2; plane.position.y = -3.0; plane.receiveShadow = true; envGroup.add(plane);
-        // Back Wall
+        plane.rotation.x = -Math.PI / 2; plane.position.y = -3.0; plane.receiveShadow = true;
+        scene.add(plane);
+        
         const backWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), wallMat);
-        backWall.position.set(0, 10, -4.0); backWall.receiveShadow = true; envGroup.add(backWall);
+        backWall.position.set(0, 10, -5.0); backWall.receiveShadow = true;
+        scene.add(backWall);
 
-        // Ambient Light (0.6 - Brighter base)
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
 
-        // --- 4. MARKERS & GUIDES ---
+        // --- 3. OVERLAYS ---
         const overlayGroup = new THREE.Group();
         const markerGeo = new THREE.SphereGeometry(0.4, 8, 8);
         const keyMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
@@ -370,7 +307,9 @@
         overlayGroup.add(keyMarker, fillMarker, rimMarker, centerMarker);
         scene.add(overlayGroup);
 
-        // Guide Lines on Floor
+        // Guide Lines (Floor)
+        const envGroup = new THREE.Group();
+        scene.add(envGroup);
         function createGuide(color) {
             const gm = new THREE.LineBasicMaterial({ color: color, opacity: 0.6, transparent: true });
             const pts = [new THREE.Vector3(0, -2.9, 0), new THREE.Vector3(0, -2.9, 5)];
@@ -382,9 +321,8 @@
         const guideFill = createGuide(0xffccaa);
         const guideRim = createGuide(0x4488ff);
 
-        // --- 5. LIGHTS ---
+        // --- 4. LIGHTS ---
         const lights = {
-            // High Intensity Defaults
             key: { obj: createSpot(0xffffff, 5.0), guide: guideKey, marker: keyMarker, az: 45, pol: 30, on: true, intensity: 5.0, temp: 5600, modifier: 'softbox' },
             fill: { obj: createSpot(0xffeedd, 2.0), guide: guideFill, marker: fillMarker, az: -45, pol: 10, on: true, intensity: 2.0, temp: 5600, modifier: 'softbox' },
             rim: { obj: createSpot(0xEBF4FF, 6.0), guide: guideRim, marker: rimMarker, az: 135, pol: 30, on: true, intensity: 6.0, temp: 6600, modifier: 'bare' }
@@ -396,7 +334,7 @@
             scene.add(l); return l;
         }
 
-        // --- 6. LOGIC & UI ---
+        // --- 5. LOGIC & UI ---
         let currentLang = 'zh', currentTarget = 'key';
         const txt = {
             zh: {
@@ -408,13 +346,14 @@
                 gear1Title: "專業光學束光筒", gear1Desc: "精準控光 SHAPING LIGHT",
                 gear2Title: "雙色溫聚光燈", gear2Desc: "高顯色性攝影棚主燈",
                 langBtn: "EN",
-                lowKey: "暗調 / 剪影", lowKeyDesc: "主光已關閉。適合表現神秘感或剪影輪廓。",
-                top: "頂光 (Top Light)", topDesc: "適合強調肌肉線條或創造戲劇性骷髏眼影。",
-                butterfly: "蝴蝶光 (Butterfly)", butterflyDesc: "經典好萊塢美顏光，在鼻下形成蝶形陰影。",
-                rembrandt: "倫勃朗光 (Rembrandt)", rembrandtDesc: "暗面臉頰形成倒三角光區，最具立體感的藝術佈光。",
-                split: "分割光 (Split)", splitDesc: "臉部明暗各半，創造強烈性格與戲劇張力。",
-                loop: "環形光 (Loop)", loopDesc: "鼻影向側邊微偏，最安全通用的訪談/肖像佈光。",
-                custom: "混合佈光", customDesc: "當前為自定義多燈組合。"
+                // Analysis (Updated for Abstract)
+                lowKey: "暗調 / 剪影", lowKeyDesc: "強調結構的邊緣與輪廓。",
+                top: "頂光 (Top Light)", topDesc: "光源來自上方，產生戲劇性的長陰影。",
+                butterfly: "立體光", butterflyDesc: "正面高位光，強調形體的對稱美感。",
+                rembrandt: "側逆光", rembrandtDesc: "經典45度角，展現物體最佳的體積感。",
+                split: "側光 (Split)", splitDesc: "強烈的明暗對比，質感表現力最強。",
+                loop: "環形光", loopDesc: "柔和的通用佈光，細節豐富。",
+                custom: "混合佈光", customDesc: "自定義多燈藝術組合。"
             },
             en: {
                 tabKey: "KEY", tabFill: "FILL", tabRim: "RIM",
@@ -425,13 +364,13 @@
                 gear1Title: "OPTICAL SNOOT", gear1Desc: "PRECISE LIGHT SHAPING",
                 gear2Title: "BI-COLOR SPOTLIGHT", gear2Desc: "STUDIO ESSENTIAL",
                 langBtn: "中",
-                lowKey: "LOW KEY", lowKeyDesc: "Main light off. Focus on silhouette.",
-                top: "TOP LIGHT", topDesc: "High drama, structure focus.",
-                butterfly: "BUTTERFLY", butterflyDesc: "Beauty lighting. Butterfly shadow.",
-                rembrandt: "REMBRANDT", rembrandtDesc: "Classic cinematic triangle.",
-                split: "SPLIT LIGHT", splitDesc: "High contrast side lighting.",
-                loop: "LOOP LIGHT", loopDesc: "Natural, general purpose.",
-                custom: "CUSTOM", customDesc: "Unique custom setup."
+                lowKey: "LOW KEY", lowKeyDesc: "Emphasis on silhouette and edges.",
+                top: "TOP LIGHT", topDesc: "Dramatic shadows from above.",
+                butterfly: "SCULPTURAL", butterflyDesc: "Frontal high light showing symmetry.",
+                rembrandt: "CLASSIC", rembrandtDesc: "45-degree light showcasing volume.",
+                split: "SIDE LIGHT", splitDesc: "High contrast texture revelation.",
+                loop: "LOOP LIGHT", loopDesc: "Soft general lighting.",
+                custom: "CUSTOM", customDesc: "Unique custom art setup."
             }
         };
 
@@ -472,9 +411,21 @@
         window.setModifier = (mod) => { lights[currentTarget].modifier = mod; updateUI(true); };
         
         window.applyPreset = (type) => {
-            if (type === 'rembrandt') { setLight('key', 45, 40, 5.0, 5600, 'softbox', true); setLight('fill', -45, 10, 2.0, 5600, 'softbox', true); setLight('rim', 180, 20, 2.0, 5600, 'bare', true); } 
-            else if (type === 'butterfly') { setLight('key', 0, 50, 5.0, 5600, 'radar', true); setLight('fill', 0, 0, 2.5, 5600, 'softbox', true); setLight('rim', 180, 40, 3.0, 5600, 'bare', true); } 
-            else if (type === 'split') { setLight('key', 90, 10, 6.0, 5600, 'grid', true); setLight('fill', -90, 10, 0.5, 5600, 'softbox', true); setLight('rim', 0, 0, 0, 5600, 'bare', false); }
+            if (type === 'studio') { 
+                setLight('key', 45, 30, 5.0, 5600, 'softbox', true); 
+                setLight('fill', -45, 10, 2.0, 5600, 'softbox', true); 
+                setLight('rim', 180, 20, 3.0, 5600, 'bare', true); 
+            } 
+            else if (type === 'dramatic') { 
+                setLight('key', 90, 10, 6.0, 5600, 'grid', true); 
+                setLight('fill', -90, 10, 0.5, 5600, 'softbox', true); 
+                setLight('rim', 0, 80, 4.0, 7000, 'bare', true); // Top rim
+            } 
+            else if (type === 'color') { 
+                setLight('key', -45, 20, 5.0, 2500, 'radar', true); // Warm
+                setLight('fill', 45, 10, 3.0, 8000, 'softbox', true); // Cool
+                setLight('rim', 180, 10, 6.0, 2000, 'grid', true); // Orange Rim
+            }
             updateUI(true);
         }
         function setLight(id, a, p, i, t, m, o) { const d = lights[id]; d.az=a; d.pol=p; d.intensity=i; d.temp=t; d.modifier=m; d.on=o; }
@@ -553,14 +504,13 @@
         let w, h;
         function animate() {
             requestAnimationFrame(animate);
-            headGroup.rotation.y = Math.sin(Date.now() * 0.0005) * 0.05;
+            knot.rotation.y = Math.sin(Date.now() * 0.0005) * 0.2;
+            knot.rotation.x = Math.cos(Date.now() * 0.0005) * 0.1;
 
-            // 1. Main View
             renderer.setViewport(0, 0, w, h); renderer.setScissor(0, 0, w, h);
             overlayGroup.visible = false;
             renderer.render(scene, mainCamera);
 
-            // 2. PIP View
             const pipSize = 140; const pad = 20;
             renderer.setViewport(pad, h - pipSize - pad, pipSize, pipSize);
             renderer.setScissor(pad, h - pipSize - pad, pipSize, pipSize);
