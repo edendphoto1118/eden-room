@@ -51,7 +51,8 @@
         /* Canvas */
         #canvas-wrapper { 
             flex-grow: 1; position: relative; width: 100%; height: 100%; 
-            background: radial-gradient(circle at center, #1f1f1f 0%, #000000 90%); order: 1; 
+            /* 背景改為純黑，因為現在有實體牆和地板了 */
+            background: #000000; order: 1; 
         }
         canvas { display: block; width: 100%; height: 100%; outline: none; }
 
@@ -123,14 +124,22 @@
         .gear-info p { font-family: 'Space Mono', monospace; font-size: 9px; color: #666; }
         .gear-arrow { color: #444; font-size: 10px; margin-left: auto; }
 
-        /* Lighting Data Overlay */
+        /* Lighting Data Overlay - 移到右上角 */
         #lighting-data {
-            position: absolute; top: 20px; left: 20px; pointer-events: none;
+            position: absolute; top: 20px; right: 20px; pointer-events: none;
             font-family: 'Space Mono'; font-size: 10px; color: #D4AF37;
             display: flex; flex-direction: column; gap: 4px; opacity: 0.7;
+            text-align: right; z-index: 10;
         }
-        .data-row { display: flex; gap: 10px; }
-        .data-label { color: #666; width: 60px; }
+        .data-row { display: flex; gap: 10px; justify-content: flex-end; }
+        .data-label { color: #666; }
+
+        /* Top-Down Map Label - 左上角佈光圖標籤 */
+        #map-label {
+            position: absolute; top: 150px; left: 20px; pointer-events: none;
+            font-family: 'Space Mono'; font-size: 9px; color: #666; z-index: 10;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 <body class="lang-zh">
@@ -152,6 +161,7 @@
 
     <div id="main-layout">
         <div id="canvas-wrapper">
+            <div id="map-label">TOP-DOWN VIEW</div>
             <div id="lighting-data">
                 <div class="data-row"><span class="data-label">ANGLE</span><span id="dataAngle">45°</span></div>
                 <div class="data-row"><span class="data-label">HEIGHT</span><span id="dataHeight">30°</span></div>
@@ -252,92 +262,77 @@
         const canvas = document.getElementById('webgl');
         const wrapper = document.getElementById('canvas-wrapper');
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(40, wrapper.clientWidth / wrapper.clientHeight, 0.1, 100);
-        camera.position.set(0, 0.2, 8); 
-        camera.lookAt(0, -0.2, 0);
+        
+        // 主攝影機 (透視)
+        const mainCamera = new THREE.PerspectiveCamera(40, wrapper.clientWidth / wrapper.clientHeight, 0.1, 100);
+        mainCamera.position.set(0, 0.5, 9); 
+        mainCamera.lookAt(0, -0.2, 0);
 
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        // 俯視攝影機 (正交) - 用於畫中畫佈光圖
+        const topCamera = new THREE.OrthographicCamera(-8, 8, 8, -8, 1, 20);
+        topCamera.position.set(0, 12, 0); // 高處往下看
+        topCamera.lookAt(0, 0, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
         renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 1.3;
+        // 啟用裁剪測試以進行畫中畫渲染
+        renderer.setScissorTest(true);
 
-        // --- 2. THE PLANAR HEAD (Structure Block) ---
-        // 核心：使用基礎幾何體拼湊出 "Asaro Head" 風格的結構人頭
+        // --- 2. SCENE OBJECTS ---
+        const plasterMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0.1, flatShading: false });
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8, metalness: 0.2 });
+        // 灰色背景牆材質，容易顯示光影
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.7, metalness: 0.1 });
+
+        // Head Group
         const headGroup = new THREE.Group();
         scene.add(headGroup);
+        const skull = new THREE.Mesh(new THREE.IcosahedronGeometry(1.6, 2), plasterMat);
+        skull.scale.set(0.85, 1.15, 0.95); skull.castShadow = true; skull.receiveShadow = true; headGroup.add(skull);
+        const nose = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1.2, 4), plasterMat);
+        nose.position.set(0, -0.2, 1.4); nose.rotation.set(-0.15, Math.PI / 4, 0); nose.scale.z = 0.6; nose.castShadow = true; nose.receiveShadow = true; headGroup.add(nose);
+        const brow = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.2, 0.5), plasterMat);
+        brow.position.set(0, 0.5, 1.1); brow.rotation.x = 0.2; brow.castShadow = true; brow.receiveShadow = true; headGroup.add(brow);
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 2.5, 16), plasterMat);
+        neck.position.y = -2.2; neck.castShadow = true; neck.receiveShadow = true; headGroup.add(neck);
 
-        const mat = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, roughness: 0.5, metalness: 0.1, flatShading: false 
-        });
+        // Environment Group
+        const envGroup = new THREE.Group();
+        scene.add(envGroup);
+        // Floor
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), floorMat);
+        plane.rotation.x = -Math.PI / 2; plane.position.y = -3.0; plane.receiveShadow = true; envGroup.add(plane);
+        // Wall (背景牆) - 放置在主體後方 Z=-2.5
+        const backWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 20), wallMat);
+        backWall.position.set(0, 5, -2.5); backWall.receiveShadow = true; envGroup.add(backWall);
 
-        // 頭顱 (Icosahedron - Low Poly Sphere)
-        const skull = new THREE.Mesh(new THREE.IcosahedronGeometry(1.6, 2), mat);
-        skull.scale.set(0.85, 1.15, 0.95);
-        skull.castShadow = true; skull.receiveShadow = true;
-        headGroup.add(skull);
-
-        // 鼻子 (Pyramid) - 產生蝴蝶光陰影
-        const nose = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1.2, 4), mat);
-        nose.position.set(0, -0.2, 1.4);
-        nose.rotation.y = Math.PI / 4; // 轉45度，讓稜線朝前
-        nose.rotation.x = -0.15;
-        nose.scale.z = 0.6;
-        nose.castShadow = true; nose.receiveShadow = true;
-        headGroup.add(nose);
-
-        // 眉骨 (Box) - 產生眼窩陰影
-        const brow = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.2, 0.5), mat);
-        brow.position.set(0, 0.5, 1.1);
-        brow.rotation.x = 0.2;
-        brow.castShadow = true; brow.receiveShadow = true;
-        headGroup.add(brow);
-
-        // 耳朵 (Box)
-        const earL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 0.4), mat);
-        earL.position.set(-1.4, -0.2, 0); earL.rotation.y = -0.3; earL.castShadow = true; earL.receiveShadow = true;
-        headGroup.add(earL);
-        const earR = earL.clone();
-        earR.position.set(1.4, -0.2, 0); earR.rotation.y = 0.3;
-        headGroup.add(earR);
-
-        // 脖子 (Cylinder)
-        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 2.5, 16), mat);
-        neck.position.y = -2.2; neck.castShadow = true; neck.receiveShadow = true;
-        headGroup.add(neck);
-
-        // --- 3. FLOOR PLAN & GUIDES ---
-        const floorGroup = new THREE.Group();
-        scene.add(floorGroup);
-
-        const plane = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ 
-            color: 0x111111, roughness: 0.8, metalness: 0.2 
-        }));
-        plane.rotation.x = -Math.PI / 2; plane.position.y = -3.0; plane.receiveShadow = true;
-        floorGroup.add(plane);
-
-        // Guide Lines Function
-        function createGuide(color) {
-            const gm = new THREE.LineBasicMaterial({ color: color, opacity: 0.4, transparent: true });
-            const pts = [new THREE.Vector3(0, -2.9, 0), new THREE.Vector3(0, -2.9, 5)];
-            const gl = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gm);
-            floorGroup.add(gl);
-            return gl;
-        }
-        const guideKey = createGuide(0xffffff);
-        const guideFill = createGuide(0xffeedd);
-        const guideRim = createGuide(0x4488ff);
-
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // Low ambient for contrast
+        // Ambient Light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
         scene.add(ambientLight);
 
-        // --- 4. LIGHTS ---
+        // --- 3. LIGHTS & MARKERS ---
+        // 燈光標記點 (只在俯視圖顯示)
+        const markerGeo = new THREE.SphereGeometry(0.3, 16, 16);
+        const keyMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        const fillMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffeedd }));
+        const rimMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0x88ccff }));
+        // 主體標記點
+        const centerMarker = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), new THREE.MeshBasicMaterial({ color: 0x666666 }));
+        
+        // 將標記點加入一個獨立的 Group
+        const overlayGroup = new THREE.Group();
+        overlayGroup.add(keyMarker, fillMarker, rimMarker, centerMarker);
+        scene.add(overlayGroup);
+
         const lights = {
-            key: { obj: createSpot(0xffffff, 2.5), guide: guideKey, az: 45, pol: 30, on: true, intensity: 2.5, temp: 5600, modifier: 'softbox' },
-            fill: { obj: createSpot(0xffeedd, 0.8), guide: guideFill, az: -45, pol: 10, on: true, intensity: 0.8, temp: 5600, modifier: 'softbox' },
-            rim: { obj: createSpot(0xEBF4FF, 3.0), guide: guideRim, az: 135, pol: 30, on: true, intensity: 3.0, temp: 6600, modifier: 'bare' }
+            key: { obj: createSpot(0xffffff, 2.5), marker: keyMarker, az: 45, pol: 30, on: true, intensity: 2.5, temp: 5600, modifier: 'softbox' },
+            fill: { obj: createSpot(0xffeedd, 0.8), marker: fillMarker, az: -45, pol: 10, on: true, intensity: 0.8, temp: 5600, modifier: 'softbox' },
+            rim: { obj: createSpot(0xEBF4FF, 3.0), marker: rimMarker, az: 135, pol: 30, on: true, intensity: 3.0, temp: 6600, modifier: 'bare' }
         };
 
         function createSpot(color, intensity) {
@@ -346,7 +341,7 @@
             scene.add(l); return l;
         }
 
-        // --- 5. LOGIC ---
+        // --- 4. LOGIC ---
         let currentLang = 'zh', currentTarget = 'key';
         const txt = {
             zh: {
@@ -460,20 +455,18 @@
 
         function updateLightPos(id) {
             const d = lights[id];
-            const l = d.obj; const guide = d.guide;
-            l.visible = d.on; guide.visible = d.on;
+            const l = d.obj; const marker = d.marker;
+            l.visible = d.on; marker.visible = d.on;
             l.intensity = d.intensity; l.color = kelvinToRGB(d.temp);
 
             if(!d.on) return;
 
             const r = 7; const phi = (90 - d.pol) * (Math.PI / 180); const theta = (d.az + 90) * (Math.PI / 180);
-            l.position.set(-(r * Math.sin(phi) * Math.cos(theta)), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
-
-            // Guide Update
-            const gr = 4; const gx = -(gr * Math.cos(theta)); const gz = gr * Math.sin(theta);
-            const pos = guide.geometry.attributes.position.array;
-            pos[0]=0; pos[1]=-2.9; pos[2]=0; pos[3]=gx; pos[4]=-2.9; pos[5]=gz;
-            guide.geometry.attributes.position.needsUpdate = true;
+            const lx = -(r * Math.sin(phi) * Math.cos(theta));
+            const ly = r * Math.cos(phi);
+            const lz = r * Math.sin(phi) * Math.sin(theta);
+            l.position.set(lx, ly, lz);
+            marker.position.set(lx, ly, lz); // 同步標記點位置
 
             if (d.modifier === 'softbox') { l.angle = 1.2; l.penumbra = 1.0; }
             else if (d.modifier === 'radar') { l.angle = 0.7; l.penumbra = 0.4; }
@@ -497,19 +490,34 @@
             els.dataAngle.innerText = k.az + "°"; els.dataHeight.innerText = k.pol + "°"; els.dataTemp.innerText = k.temp + "K";
         }
 
+        let w, h;
         function animate() {
             requestAnimationFrame(animate);
-            // Ultra-Slow Breathing
-            headGroup.rotation.y = Math.sin(Date.now() * 0.0005) * 0.05; 
-            renderer.render(scene, camera);
+            headGroup.rotation.y = Math.sin(Date.now() * 0.0005) * 0.05;
+
+            // --- Render Pass 1: Main View ---
+            renderer.setViewport(0, 0, w, h);
+            renderer.setScissor(0, 0, w, h);
+            overlayGroup.visible = false; // 主視圖隱藏標記點
+            renderer.render(scene, mainCamera);
+
+            // --- Render Pass 2: Top-Down PIP View ---
+            const pipSize = 140; const pad = 20;
+            renderer.setViewport(pad, h - pipSize - pad, pipSize, pipSize);
+            renderer.setScissor(pad, h - pipSize - pad, pipSize, pipSize);
+            renderer.clearDepth(); // 清除深度緩衝，確保 PIP 在最上層
+            overlayGroup.visible = true; // 俯視圖顯示標記點
+            renderer.render(scene, topCamera);
         }
 
-        window.addEventListener('resize', () => {
-            const w = wrapper.clientWidth, h = wrapper.clientHeight;
-            camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h);
-        });
+        window.addEventListener('resize', onResize);
+        function onResize() {
+            w = wrapper.clientWidth; h = wrapper.clientHeight;
+            mainCamera.aspect = w / h; mainCamera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        }
 
-        applyLang();
+        onResize(); applyLang();
         updateLightPos('key'); updateLightPos('fill'); updateLightPos('rim');
         updateUI(); animate();
 
