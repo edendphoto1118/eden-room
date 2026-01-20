@@ -30,7 +30,7 @@
     </script>
 
     <style>
-        /* 佈局：全螢幕無捲動 */
+        /* 核心佈局 */
         body { background-color: #080808; color: #C0C0C0; height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
 
         /* Header */
@@ -51,8 +51,7 @@
         /* Canvas */
         #canvas-wrapper { 
             flex-grow: 1; position: relative; width: 100%; height: 100%; 
-            /* 背景調亮一點點的深灰，減少壓迫感 */
-            background: radial-gradient(circle at center, #222222 0%, #000000 100%); order: 1; 
+            background: radial-gradient(circle at center, #2a2a2a 0%, #000000 100%); order: 1; 
         }
         canvas { display: block; width: 100%; height: 100%; outline: none; }
 
@@ -265,8 +264,8 @@
         
         // 主攝影機
         const mainCamera = new THREE.PerspectiveCamera(40, wrapper.clientWidth / wrapper.clientHeight, 0.1, 100);
-        mainCamera.position.set(0, 0.2, 9); // 拉遠一點點
-        mainCamera.lookAt(0, -0.2, 0);
+        mainCamera.position.set(0, 0.2, 9); // 拉遠
+        mainCamera.lookAt(0, -0.3, 0);
 
         // 俯視攝影機 (PIP)
         const topCamera = new THREE.OrthographicCamera(-8, 8, 8, -8, 1, 20);
@@ -279,40 +278,73 @@
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         
-        // 🔥 曝光設定：拉到 2.0 (High Key)
+        // 🔥 高曝光 (High Key)
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 2.0;
         renderer.setScissorTest(true);
 
-        // --- 2. SCENE OBJECTS (Planar Head / Block Head) ---
-        // 使用純幾何體 (Box/Cone/Sphere) 堆疊，不依賴外部模型，確保絕對穩定
+        // --- 2. PROCEDURAL FACETED BUST (程式化雕刻人像) ---
+        // 核心邏輯：建立高面數球體 -> 數學變形頂點 -> 套用 Flat Shading
         const headGroup = new THREE.Group();
         scene.add(headGroup);
 
-        // 材質：乾淨的白石膏
+        // 材質：藝術石膏，保留切面感
         const plasterMat = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, roughness: 0.5, metalness: 0.05, flatShading: false 
+            color: 0xffffff, roughness: 0.4, metalness: 0.1, flatShading: true 
         });
         const floorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8, metalness: 0.2 });
         const wallMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, metalness: 0.1 });
 
-        // Head Construction
-        const skull = new THREE.Mesh(new THREE.IcosahedronGeometry(1.6, 2), plasterMat);
-        skull.scale.set(0.85, 1.15, 0.95); skull.castShadow = true; skull.receiveShadow = true; headGroup.add(skull);
-        
-        // Nose (Pyramid) - 放大一點確保陰影明顯
-        const nose = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.3, 4), plasterMat);
-        nose.position.set(0, -0.2, 1.45); nose.rotation.set(-0.15, Math.PI / 4, 0); nose.scale.z = 0.6; 
-        nose.castShadow = true; nose.receiveShadow = true; headGroup.add(nose);
-        
-        // Brow (Box)
-        const brow = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.25, 0.6), plasterMat);
-        brow.position.set(0, 0.5, 1.15); brow.rotation.x = 0.2; 
-        brow.castShadow = true; brow.receiveShadow = true; headGroup.add(brow);
-        
-        // Neck
-        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 2.8, 32), plasterMat);
-        neck.position.y = -2.4; neck.castShadow = true; neck.receiveShadow = true; headGroup.add(neck);
+        // Sculpting Function
+        function createSculptedHead() {
+            // Level 3 Icosahedron (~1280 faces) - good for faceted look
+            const geometry = new THREE.IcosahedronGeometry(1.6, 3); 
+            const pos = geometry.attributes.position;
+            const v = new THREE.Vector3();
+
+            for (let i = 0; i < pos.count; i++) {
+                v.fromBufferAttribute(pos, i);
+                const x = v.x; const y = v.y; const z = v.z;
+
+                // 1. 下巴與臉頰 (Jaw & Cheeks)
+                if (y < 0.2 && z > 0) {
+                    const narrow = Math.max(0, (Math.abs(x) - 0.5));
+                    v.x *= (1 - narrow * 0.4); // 收窄
+                    if (y < -0.5) v.z *= 0.85; // 下巴變尖
+                }
+                // 2. 鼻子 (Nose)
+                if (z > 0 && Math.abs(x) < 0.35 && y > -0.35 && y < 0.35) {
+                    const dist = Math.sqrt(x*x + (y+0.1)*(y+0.1));
+                    if (dist < 0.35) {
+                        const pull = Math.cos(dist * Math.PI / 0.7);
+                        v.z += pull * 0.6; // 大力拉出鼻子
+                        v.y -= pull * 0.1; // 鼻尖微下勾
+                    }
+                }
+                // 3. 眼窩 (Eye Sockets)
+                if (z > 0.5 && Math.abs(x) > 0.25 && Math.abs(x) < 0.75 && y > 0.15 && y < 0.5) {
+                    v.z -= 0.15; // 向內壓
+                    v.y -= 0.05;
+                }
+                // 4. 眉骨 (Brow Ridge)
+                if (z > 0.5 && Math.abs(x) < 0.8 && y > 0.45 && y < 0.65) {
+                    v.z += 0.08;
+                }
+
+                pos.setXYZ(i, v.x, v.y, v.z);
+            }
+            
+            geometry.computeVertexNormals(); // 重算光照
+            const head = new THREE.Mesh(geometry, plasterMat);
+            head.castShadow = true; head.receiveShadow = true;
+            headGroup.add(head);
+        }
+        createSculptedHead();
+
+        // Neck (Cylinder)
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 2.8, 8), plasterMat);
+        neck.position.y = -2.4; neck.castShadow = true; neck.receiveShadow = true;
+        headGroup.add(neck);
 
         // --- 3. ENVIRONMENT ---
         const envGroup = new THREE.Group();
@@ -324,7 +356,7 @@
         const backWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), wallMat);
         backWall.position.set(0, 10, -4.0); backWall.receiveShadow = true; envGroup.add(backWall);
 
-        // 🔥 環境光增強：0.6 (原本0.2)
+        // Ambient Light (0.6 - Brighter base)
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
 
@@ -352,7 +384,7 @@
 
         // --- 5. LIGHTS ---
         const lights = {
-            // Intensity Boost: 5.0 / 2.0 / 6.0
+            // High Intensity Defaults
             key: { obj: createSpot(0xffffff, 5.0), guide: guideKey, marker: keyMarker, az: 45, pol: 30, on: true, intensity: 5.0, temp: 5600, modifier: 'softbox' },
             fill: { obj: createSpot(0xffeedd, 2.0), guide: guideFill, marker: fillMarker, az: -45, pol: 10, on: true, intensity: 2.0, temp: 5600, modifier: 'softbox' },
             rim: { obj: createSpot(0xEBF4FF, 6.0), guide: guideRim, marker: rimMarker, az: 135, pol: 30, on: true, intensity: 6.0, temp: 6600, modifier: 'bare' }
@@ -376,7 +408,7 @@
                 gear1Title: "專業光學束光筒", gear1Desc: "精準控光 SHAPING LIGHT",
                 gear2Title: "雙色溫聚光燈", gear2Desc: "高顯色性攝影棚主燈",
                 langBtn: "EN",
-                lowKey: "暗調 (Low Key)", lowKeyDesc: "主光已關閉。適合表現神秘感或剪影輪廓。",
+                lowKey: "暗調 / 剪影", lowKeyDesc: "主光已關閉。適合表現神秘感或剪影輪廓。",
                 top: "頂光 (Top Light)", topDesc: "適合強調肌肉線條或創造戲劇性骷髏眼影。",
                 butterfly: "蝴蝶光 (Butterfly)", butterflyDesc: "經典好萊塢美顏光，在鼻下形成蝶形陰影。",
                 rembrandt: "倫勃朗光 (Rembrandt)", rembrandtDesc: "暗面臉頰形成倒三角光區，最具立體感的藝術佈光。",
@@ -393,7 +425,7 @@
                 gear1Title: "OPTICAL SNOOT", gear1Desc: "PRECISE LIGHT SHAPING",
                 gear2Title: "BI-COLOR SPOTLIGHT", gear2Desc: "STUDIO ESSENTIAL",
                 langBtn: "中",
-                lowKey: "LOW KEY", lowKeyDesc: "Main light off. Silhouette focus.",
+                lowKey: "LOW KEY", lowKeyDesc: "Main light off. Focus on silhouette.",
                 top: "TOP LIGHT", topDesc: "High drama, structure focus.",
                 butterfly: "BUTTERFLY", butterflyDesc: "Beauty lighting. Butterfly shadow.",
                 rembrandt: "REMBRANDT", rembrandtDesc: "Classic cinematic triangle.",
