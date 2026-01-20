@@ -5,9 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Light Sculptor | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
 
     <script>
         tailwind.config = {
@@ -21,32 +30,32 @@
     </script>
 
     <style>
-        /* --- 核心佈局 --- */
-        body { background-color: #080808; color: #C0C0C0; height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
+        /* --- CORE LAYOUT --- */
+        body { background-color: #050505; color: #C0C0C0; height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* HEADER */
+        /* Header */
         header { 
             height: 50px; flex-shrink: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; 
-            padding: 0 20px; border-bottom: 1px solid #222; background: #080808; 
+            padding: 0 20px; border-bottom: 1px solid #1a1a1a; background: #050505; 
         }
         .ig-link {
-            font-family: 'Space Mono'; font-size: 10px; color: #888; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; 
+            font-family: 'Space Mono'; font-size: 10px; color: #666; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; 
             text-decoration: none; padding: 4px 10px; border: 1px solid #333; border-radius: 4px; transition: 0.3s;
         }
         .ig-link:hover { color: #D4AF37; border-color: #D4AF37; background: #111; }
 
-        /* LAYOUT */
+        /* Main Layout */
         #main-layout { display: flex; flex: 1; min-height: 0; position: relative; flex-direction: column; }
         @media (min-width: 768px) { #main-layout { flex-direction: row; } }
 
-        /* CANVAS */
+        /* Canvas - 純淨背景 */
         #canvas-wrapper { 
             flex-grow: 1; position: relative; width: 100%; height: 100%; 
-            background: radial-gradient(circle at center, #222 0%, #000 100%); order: 1; 
+            background: #000000; order: 1; 
         }
         canvas { display: block; width: 100%; height: 100%; outline: none; }
 
-        /* DASHBOARD */
+        /* Dashboard */
         #dashboard { 
             z-index: 20; background: #0c0c0c; display: flex; flex-direction: column; gap: 12px; 
             width: 100%; flex-shrink: 0; padding: 15px 20px; padding-bottom: max(15px, env(safe-area-inset-bottom)); 
@@ -56,14 +65,13 @@
             #dashboard { width: 380px; height: 100%; border-top: none; border-left: 1px solid #222; padding: 25px; overflow-y: auto; }
         }
 
-        /* UI ELEMENTS */
+        /* --- UI COMPONENTS --- */
         .preset-row { display: flex; gap: 8px; margin-bottom: 5px; }
         .preset-btn {
             flex: 1; background: #151515; border: 1px solid #333; color: #999; font-family: 'Space Mono'; font-size: 9px; 
             padding: 8px 0; text-align: center; cursor: pointer; transition: 0.2s; border-radius: 2px;
         }
         .preset-btn:hover { border-color: #777; color: #fff; background: #222; }
-        .preset-btn:active { background: #D4AF37; color: #000; border-color: #D4AF37; }
         
         .tabs { display: flex; border: 1px solid #333; border-radius: 2px; overflow: hidden; height: 32px; flex-shrink: 0; }
         .tab-btn {
@@ -101,7 +109,7 @@
         }
         .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.15); color: #D4AF37; font-weight: bold; }
 
-        /* Gear */
+        /* Gear Section */
         .gear-section { border-top: 1px solid #222; margin-top: auto; pt-4; display: flex; gap: 10px; flex-direction: column; }
         @media (min-width: 768px) { .gear-section { gap: 12px; } }
         .gear-card {
@@ -115,7 +123,7 @@
         .gear-info p { font-family: 'Space Mono', monospace; font-size: 9px; color: #777; }
         .gear-arrow { color: #555; font-size: 10px; margin-left: auto; }
 
-        /* Data Overlay */
+        /* Data Overlay (No map) */
         #lighting-data {
             position: absolute; top: 20px; right: 20px; pointer-events: none;
             font-family: 'Space Mono'; font-size: 10px; color: #D4AF37;
@@ -124,13 +132,6 @@
         }
         .data-row { display: flex; gap: 10px; justify-content: flex-end; }
         .data-label { color: #888; }
-
-        /* Top-Down Map Label */
-        #map-label {
-            position: absolute; top: 150px; left: 20px; pointer-events: none;
-            font-family: 'Space Mono'; font-size: 9px; color: #666; z-index: 10;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
     </style>
 </head>
 <body class="lang-zh">
@@ -152,7 +153,6 @@
 
     <div id="main-layout">
         <div id="canvas-wrapper">
-            <div id="map-label">TOP-DOWN VIEW</div>
             <div id="lighting-data">
                 <div class="data-row"><span class="data-label">ANGLE</span><span id="dataAngle">45°</span></div>
                 <div class="data-row"><span class="data-label">HEIGHT</span><span id="dataHeight">30°</span></div>
@@ -220,7 +220,7 @@
             </div>
 
             <div class="border-t border-[#222] pt-3">
-                <span id="algoTitle" class="text-[#D4AF37] font-serif text-xs font-bold tracking-wider block mb-1">ANALYSIS</span>
+                <span id="algoTitle" class="text-[#D4AF37] font-serif text-xs font-bold tracking-wider block mb-1">REMBRANDT</span>
                 <span id="algoDesc" class="text-[#888] font-zh text-xs block leading-relaxed">...</span>
             </div>
 
@@ -254,78 +254,54 @@
         const wrapper = document.getElementById('canvas-wrapper');
         const scene = new THREE.Scene();
         
-        const mainCamera = new THREE.PerspectiveCamera(40, wrapper.clientWidth / wrapper.clientHeight, 0.1, 100);
-        mainCamera.position.set(0, 0.5, 8); 
-        mainCamera.lookAt(0, 0, 0);
-
-        const topCamera = new THREE.OrthographicCamera(-8, 8, 8, -8, 1, 20);
-        topCamera.position.set(0, 12, 0);
-        topCamera.lookAt(0, 0, 0);
+        // 主攝影機
+        const camera = new THREE.PerspectiveCamera(40, wrapper.clientWidth / wrapper.clientHeight, 0.1, 100);
+        camera.position.set(0, 0.5, 9); // 確保距離適中
+        camera.lookAt(0, 0, 0);
 
         const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
         renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        
+        // 🔥 確保曝光足夠
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
         renderer.toneMappingExposure = 2.0;
-        renderer.setScissorTest(true);
 
-        // --- 2. SCENE OBJECTS (Abstract Torus Knot) ---
-        // TorusKnot(radius, tube, tubularSegments, radialSegments, p, q)
-        // p=2, q=3 is the classic knot
-        const knotGeo = new THREE.TorusKnotGeometry(1.2, 0.35, 120, 20, 2, 3);
-        const knotMat = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, roughness: 0.3, metalness: 0.1, flatShading: true // Low Poly Art Style
+        // --- 2. OBJECT: Diamond Sphere (Reliable & Beautiful) ---
+        const geometry = new THREE.IcosahedronGeometry(1.6, 2); // Level 2 subdivision = nice faceted look
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff, roughness: 0.2, metalness: 0.1, flatShading: true 
         });
-        const knot = new THREE.Mesh(knotGeo, knotMat);
-        knot.castShadow = true; knot.receiveShadow = true;
-        scene.add(knot);
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.castShadow = true; mesh.receiveShadow = true;
+        scene.add(mesh);
 
-        // Environment
+        // --- 3. ENVIRONMENT (Wall & Floor) ---
+        const envGroup = new THREE.Group();
+        scene.add(envGroup);
+        
         const floorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8, metalness: 0.2 });
         const wallMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, metalness: 0.1 });
         
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), floorMat);
-        plane.rotation.x = -Math.PI / 2; plane.position.y = -3.0; plane.receiveShadow = true;
-        scene.add(plane);
+        plane.rotation.x = -Math.PI / 2; plane.position.y = -2.5; plane.receiveShadow = true;
+        envGroup.add(plane);
         
         const backWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), wallMat);
         backWall.position.set(0, 10, -5.0); backWall.receiveShadow = true;
-        scene.add(backWall);
+        envGroup.add(backWall);
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
 
-        // --- 3. OVERLAYS ---
-        const overlayGroup = new THREE.Group();
-        const markerGeo = new THREE.SphereGeometry(0.4, 8, 8);
-        const keyMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
-        const fillMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffccaa }));
-        const rimMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0x88ccff }));
-        const centerMarker = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 8), new THREE.MeshBasicMaterial({ color: 0x555555 }));
-        overlayGroup.add(keyMarker, fillMarker, rimMarker, centerMarker);
-        scene.add(overlayGroup);
-
-        // Guide Lines (Floor)
-        const envGroup = new THREE.Group();
-        scene.add(envGroup);
-        function createGuide(color) {
-            const gm = new THREE.LineBasicMaterial({ color: color, opacity: 0.6, transparent: true });
-            const pts = [new THREE.Vector3(0, -2.9, 0), new THREE.Vector3(0, -2.9, 5)];
-            const gl = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gm);
-            envGroup.add(gl);
-            return gl;
-        }
-        const guideKey = createGuide(0xffffff);
-        const guideFill = createGuide(0xffccaa);
-        const guideRim = createGuide(0x4488ff);
-
         // --- 4. LIGHTS ---
+        // 強度直接拉高到 5.0 / 6.0 確保明亮
         const lights = {
-            key: { obj: createSpot(0xffffff, 5.0), guide: guideKey, marker: keyMarker, az: 45, pol: 30, on: true, intensity: 5.0, temp: 5600, modifier: 'softbox' },
-            fill: { obj: createSpot(0xffeedd, 2.0), guide: guideFill, marker: fillMarker, az: -45, pol: 10, on: true, intensity: 2.0, temp: 5600, modifier: 'softbox' },
-            rim: { obj: createSpot(0xEBF4FF, 6.0), guide: guideRim, marker: rimMarker, az: 135, pol: 30, on: true, intensity: 6.0, temp: 6600, modifier: 'bare' }
+            key: { obj: createSpot(0xffffff, 5.0), az: 45, pol: 30, on: true, intensity: 5.0, temp: 5600, modifier: 'softbox' },
+            fill: { obj: createSpot(0xffeedd, 2.0), az: -45, pol: 10, on: true, intensity: 2.0, temp: 5600, modifier: 'softbox' },
+            rim: { obj: createSpot(0xEBF4FF, 6.0), az: 135, pol: 30, on: true, intensity: 6.0, temp: 6600, modifier: 'bare' }
         };
 
         function createSpot(color, intensity) {
@@ -334,7 +310,7 @@
             scene.add(l); return l;
         }
 
-        // --- 5. LOGIC & UI ---
+        // --- 5. LOGIC ---
         let currentLang = 'zh', currentTarget = 'key';
         const txt = {
             zh: {
@@ -346,7 +322,6 @@
                 gear1Title: "專業光學束光筒", gear1Desc: "精準控光 SHAPING LIGHT",
                 gear2Title: "雙色溫聚光燈", gear2Desc: "高顯色性攝影棚主燈",
                 langBtn: "EN",
-                // Analysis (Updated for Abstract)
                 lowKey: "暗調 / 剪影", lowKeyDesc: "強調結構的邊緣與輪廓。",
                 top: "頂光 (Top Light)", topDesc: "光源來自上方，產生戲劇性的長陰影。",
                 butterfly: "立體光", butterflyDesc: "正面高位光，強調形體的對稱美感。",
@@ -419,12 +394,12 @@
             else if (type === 'dramatic') { 
                 setLight('key', 90, 10, 6.0, 5600, 'grid', true); 
                 setLight('fill', -90, 10, 0.5, 5600, 'softbox', true); 
-                setLight('rim', 0, 80, 4.0, 7000, 'bare', true); // Top rim
+                setLight('rim', 0, 80, 4.0, 7000, 'bare', true); 
             } 
             else if (type === 'color') { 
-                setLight('key', -45, 20, 5.0, 2500, 'radar', true); // Warm
-                setLight('fill', 45, 10, 3.0, 8000, 'softbox', true); // Cool
-                setLight('rim', 180, 10, 6.0, 2000, 'grid', true); // Orange Rim
+                setLight('key', -45, 20, 5.0, 2500, 'radar', true); 
+                setLight('fill', 45, 10, 3.0, 8000, 'softbox', true); 
+                setLight('rim', 180, 10, 6.0, 2000, 'grid', true); 
             }
             updateUI(true);
         }
@@ -460,9 +435,10 @@
 
         function updateLightPos(id) {
             const d = lights[id];
-            const l = d.obj; const guide = d.guide; const marker = d.marker;
-            l.visible = d.on; guide.visible = d.on; marker.visible = d.on;
-            l.intensity = d.intensity; l.color = kelvinToRGB(d.temp);
+            const l = d.obj;
+            l.visible = d.on; 
+            l.intensity = d.intensity; 
+            l.color = kelvinToRGB(d.temp);
 
             if(!d.on) return;
 
@@ -471,13 +447,6 @@
             const ly = r * Math.cos(phi);
             const lz = r * Math.sin(phi) * Math.sin(theta);
             l.position.set(lx, ly, lz);
-            marker.position.set(lx, ly, lz);
-
-            const guideR = 4;
-            const gx = -(guideR * Math.cos(theta)); const gz = guideR * Math.sin(theta);
-            const pos = guide.geometry.attributes.position.array;
-            pos[0]=0; pos[1]=-2.9; pos[2]=0; pos[3]=gx; pos[4]=-2.9; pos[5]=gz;
-            guide.geometry.attributes.position.needsUpdate = true;
 
             if (d.modifier === 'softbox') { l.angle = 1.2; l.penumbra = 1.0; }
             else if (d.modifier === 'radar') { l.angle = 0.7; l.penumbra = 0.4; }
@@ -501,28 +470,16 @@
             els.dataAngle.innerText = k.az + "°"; els.dataHeight.innerText = k.pol + "°"; els.dataTemp.innerText = k.temp + "K";
         }
 
-        let w, h;
         function animate() {
             requestAnimationFrame(animate);
-            knot.rotation.y = Math.sin(Date.now() * 0.0005) * 0.2;
-            knot.rotation.x = Math.cos(Date.now() * 0.0005) * 0.1;
-
-            renderer.setViewport(0, 0, w, h); renderer.setScissor(0, 0, w, h);
-            overlayGroup.visible = false;
-            renderer.render(scene, mainCamera);
-
-            const pipSize = 140; const pad = 20;
-            renderer.setViewport(pad, h - pipSize - pad, pipSize, pipSize);
-            renderer.setScissor(pad, h - pipSize - pad, pipSize, pipSize);
-            renderer.clearDepth();
-            overlayGroup.visible = true;
-            renderer.render(scene, topCamera);
+            // Main View
+            renderer.render(scene, camera);
         }
 
         window.addEventListener('resize', onResize);
         function onResize() {
-            w = wrapper.clientWidth; h = wrapper.clientHeight;
-            mainCamera.aspect = w / h; mainCamera.updateProjectionMatrix();
+            const w = wrapper.clientWidth; const h = wrapper.clientHeight;
+            camera.aspect = w / h; camera.updateProjectionMatrix();
             renderer.setSize(w, h);
         }
 
