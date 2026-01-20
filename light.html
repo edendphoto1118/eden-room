@@ -31,18 +31,18 @@
 
     <style>
         /* 佈局：全螢幕無捲動 */
-        body { background-color: #050505; color: #C0C0C0; height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
+        body { background-color: #080808; color: #C0C0C0; height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
 
         /* Header */
         header { 
             height: 50px; flex-shrink: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; 
-            padding: 0 20px; border-bottom: 1px solid #1a1a1a; background: #050505; 
+            padding: 0 20px; border-bottom: 1px solid #222; background: #080808; 
         }
         .ig-link {
-            font-family: 'Space Mono'; font-size: 10px; color: #666; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; 
-            text-decoration: none; padding: 4px 8px; border: 1px solid #222; border-radius: 4px; transition: 0.3s;
+            font-family: 'Space Mono'; font-size: 10px; color: #888; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; 
+            text-decoration: none; padding: 4px 10px; border: 1px solid #333; border-radius: 4px; transition: 0.3s;
         }
-        .ig-link:hover { color: #D4AF37; border-color: #D4AF37; }
+        .ig-link:hover { color: #D4AF37; border-color: #D4AF37; background: #111; }
 
         /* Main Layout */
         #main-layout { display: flex; flex: 1; min-height: 0; position: relative; flex-direction: column; }
@@ -51,14 +51,14 @@
         /* Canvas */
         #canvas-wrapper { 
             flex-grow: 1; position: relative; width: 100%; height: 100%; 
-            /* 背景改為純黑，因為現在有實體牆和地板了 */
-            background: #000000; order: 1; 
+            /* 背景調亮一點點的深灰，減少壓迫感 */
+            background: radial-gradient(circle at center, #222222 0%, #000000 100%); order: 1; 
         }
         canvas { display: block; width: 100%; height: 100%; outline: none; }
 
         /* Dashboard */
         #dashboard { 
-            z-index: 20; background: #0a0a0a; display: flex; flex-direction: column; gap: 12px; 
+            z-index: 20; background: #0c0c0c; display: flex; flex-direction: column; gap: 12px; 
             width: 100%; flex-shrink: 0; padding: 15px 20px; padding-bottom: max(15px, env(safe-area-inset-bottom)); 
             border-top: 1px solid #222; order: 2; 
         }
@@ -69,46 +69,47 @@
         /* UI Elements */
         .preset-row { display: flex; gap: 8px; margin-bottom: 5px; }
         .preset-btn {
-            flex: 1; background: #111; border: 1px solid #333; color: #888; font-family: 'Space Mono'; font-size: 9px; 
+            flex: 1; background: #151515; border: 1px solid #333; color: #999; font-family: 'Space Mono'; font-size: 9px; 
             padding: 8px 0; text-align: center; cursor: pointer; transition: 0.2s; border-radius: 2px;
         }
-        .preset-btn:hover { border-color: #666; color: #fff; background: #1a1a1a; }
+        .preset-btn:hover { border-color: #777; color: #fff; background: #222; }
+        .preset-btn:active { background: #D4AF37; color: #000; border-color: #D4AF37; }
         
         .tabs { display: flex; border: 1px solid #333; border-radius: 2px; overflow: hidden; height: 32px; flex-shrink: 0; }
         .tab-btn {
             flex: 1; display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-size: 10px; 
-            letter-spacing: 0.1em; color: #666; background: #0e0e0e; cursor: pointer; transition: 0.2s;
+            letter-spacing: 0.1em; color: #666; background: #111; cursor: pointer; transition: 0.2s;
         }
         .tab-btn.active { background: #D4AF37; color: #000; font-weight: bold; }
 
         .slider-row { display: flex; align-items: center; gap: 10px; height: 26px; }
-        .slider-label { font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px; color: #666; width: 65px; letter-spacing: 0.05em; font-weight: 500; }
+        .slider-label { font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px; color: #888; width: 65px; letter-spacing: 0.05em; font-weight: 500; }
         .slider-val { font-family: 'Space Mono'; font-size: 9px; color: #D4AF37; width: 35px; text-align: right; }
         
         input[type=range] { -webkit-appearance: none; flex: 1; background: transparent; cursor: pointer; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 12px; width: 12px; background: #D4AF37; border-radius: 50%; 
-            margin-top: -5px; border: 1px solid #000; box-shadow: 0 0 5px rgba(212,175,55,0.5);
+            -webkit-appearance: none; height: 14px; width: 14px; background: #D4AF37; border-radius: 50%; 
+            margin-top: -6px; border: 2px solid #000; box-shadow: 0 0 8px rgba(212,175,55,0.6);
         }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: #333; border-radius: 1px; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: #444; border-radius: 1px; }
         #tempSlider::-webkit-slider-runnable-track { background: linear-gradient(to right, #ffaa00, #ffffff, #88ccff); height: 2px; }
 
         .status-row { display: flex; justify-content: space-between; align-items: center; height: 24px; margin-bottom: 5px; }
-        .status-label { font-family: 'Space Mono', 'Shippori Mincho'; font-size: 10px; color: #888; letter-spacing: 0.1em; }
+        .status-label { font-family: 'Space Mono', 'Shippori Mincho'; font-size: 10px; color: #aaa; letter-spacing: 0.1em; }
         
         .toggle { position: relative; display: inline-block; width: 32px; height: 16px; }
         .toggle input { opacity: 0; width: 0; height: 0; }
-        .slider-tg { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 16px; border: 1px solid #444; }
+        .slider-tg { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #333; transition: .3s; border-radius: 16px; border: 1px solid #555; }
         .slider-tg:before { position: absolute; content: ""; height: 10px; width: 10px; left: 3px; bottom: 3px; background-color: #888; transition: .3s; border-radius: 50%; }
         input:checked + .slider-tg { background-color: #111; border-color: #D4AF37; }
         input:checked + .slider-tg:before { transform: translateX(16px); background-color: #D4AF37; }
 
         .mod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
         .mod-btn {
-            border: 1px solid #333; color: #666; font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px;
-            padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.2s; background: #0e0e0e; border-radius: 2px;
+            border: 1px solid #333; color: #777; font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px;
+            padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.2s; background: #111; border-radius: 2px;
         }
-        .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); color: #D4AF37; font-weight: bold; }
+        .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.15); color: #D4AF37; font-weight: bold; }
 
         /* Gear */
         .gear-section { border-top: 1px solid #222; margin-top: auto; pt-4; display: flex; gap: 10px; flex-direction: column; }
@@ -117,24 +118,23 @@
             background: #111; border: 1px solid #222; padding: 10px 12px; display: flex; align-items: center; gap: 12px;
             text-decoration: none; transition: 0.3s; border-radius: 4px;
         }
-        .gear-card:hover { border-color: #D4AF37; background: #151515; transform: translateY(-1px); }
-        .gear-icon { width: 32px; height: 32px; background: #1a1a1a; color: #666; display: flex; align-items: center; justify-content: center; font-size: 14px; border-radius: 4px; }
-        .gear-card:hover .gear-icon { color: #D4AF37; }
-        .gear-info h4 { font-family: 'Shippori Mincho', serif; font-size: 11px; color: #ccc; margin-bottom: 2px; font-weight: 500; }
-        .gear-info p { font-family: 'Space Mono', monospace; font-size: 9px; color: #666; }
-        .gear-arrow { color: #444; font-size: 10px; margin-left: auto; }
+        .gear-card:hover { border-color: #D4AF37; background: #181818; transform: translateY(-1px); }
+        .gear-icon { width: 32px; height: 32px; background: #1f1f1f; color: #777; display: flex; align-items: center; justify-content: center; font-size: 14px; border-radius: 4px; }
+        .gear-card:hover .gear-icon { color: #D4AF37; background: #2a2a2a; }
+        .gear-info h4 { font-family: 'Shippori Mincho', serif; font-size: 11px; color: #ddd; margin-bottom: 2px; font-weight: 500; }
+        .gear-info p { font-family: 'Space Mono', monospace; font-size: 9px; color: #777; }
+        .gear-arrow { color: #555; font-size: 10px; margin-left: auto; }
 
-        /* Lighting Data Overlay - 移到右上角 */
+        /* Overlays */
         #lighting-data {
             position: absolute; top: 20px; right: 20px; pointer-events: none;
             font-family: 'Space Mono'; font-size: 10px; color: #D4AF37;
-            display: flex; flex-direction: column; gap: 4px; opacity: 0.7;
-            text-align: right; z-index: 10;
+            display: flex; flex-direction: column; gap: 4px; opacity: 0.8;
+            text-align: right; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
         .data-row { display: flex; gap: 10px; justify-content: flex-end; }
-        .data-label { color: #666; }
+        .data-label { color: #888; }
 
-        /* Top-Down Map Label - 左上角佈光圖標籤 */
         #map-label {
             position: absolute; top: 150px; left: 20px; pointer-events: none;
             font-family: 'Space Mono'; font-size: 9px; color: #666; z-index: 10;
@@ -147,13 +147,13 @@
     <header>
         <div class="flex items-center gap-3">
             <span class="text-[12px] tracking-[0.2em] text-[#D4AF37] font-serif font-bold">EDEN</span>
-            <span class="text-[9px] text-[#444] tracking-widest border-l border-[#333] pl-3 hidden md:inline">LIGHT SCULPTOR</span>
+            <span class="text-[9px] text-[#555] tracking-widest border-l border-[#333] pl-3 hidden md:inline">LIGHT SCULPTOR</span>
         </div>
-        <div class="flex items-center gap-6">
+        <div class="flex items-center gap-4">
             <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="ig-link">
                 design by EDEN_D_PHOTO
             </a>
-            <button id="langBtn" onclick="window.toggleLang()" class="border border-[#444] px-2 py-1 text-[9px] font-mono hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors text-[#888] bg-black/50 backdrop-blur cursor-pointer w-16 text-center">
+            <button id="langBtn" onclick="window.toggleLang()" class="border border-[#444] px-2 py-1 text-[9px] font-mono hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors text-[#888] bg-black/50 backdrop-blur cursor-pointer w-12 text-center">
                 EN
             </button>
         </div>
@@ -184,7 +184,7 @@
                 <div id="tabRim" class="tab-btn" onclick="selectLight('rim')">輪廓</div>
             </div>
 
-            <div class="bg-[#111] p-3 border border-[#222] rounded-sm">
+            <div class="bg-[#151515] p-3 border border-[#222] rounded-sm">
                 <div class="status-row">
                     <span id="labelStatus" class="status-label">電源開關</span>
                     <label class="toggle">
@@ -194,7 +194,7 @@
                 </div>
                 <div class="mt-3">
                     <div class="flex justify-between mb-2">
-                        <span id="labelMod" class="status-label" style="font-size: 9px; color: #666;">控光配件</span>
+                        <span id="labelMod" class="status-label" style="font-size: 9px; color: #888;">控光配件</span>
                     </div>
                     <div class="mod-grid">
                         <div class="mod-btn active" id="mod-softbox" onclick="setModifier('softbox')">柔光罩</div>
@@ -218,8 +218,8 @@
                 </div>
                 <div class="slider-row">
                     <span id="labelInt" class="slider-label text-[#D4AF37]">輸出強度</span>
-                    <input type="range" id="intSlider" min="0" max="5" step="0.1" oninput="updateVal()">
-                    <span id="intDisplay" class="slider-val text-[#D4AF37]">2.5</span>
+                    <input type="range" id="intSlider" min="0" max="10" step="0.1" oninput="updateVal()">
+                    <span id="intDisplay" class="slider-val text-[#D4AF37]">5.0</span>
                 </div>
                 <div class="slider-row">
                     <span id="labelTemp" class="slider-label">色溫 K</span>
@@ -230,11 +230,11 @@
 
             <div class="border-t border-[#222] pt-3">
                 <span id="algoTitle" class="text-[#D4AF37] font-serif text-xs font-bold tracking-wider block mb-1">REMBRANDT</span>
-                <span id="algoDesc" class="text-[#666] font-zh text-xs block leading-relaxed">經典倫勃朗光，立體感強。</span>
+                <span id="algoDesc" class="text-[#888] font-zh text-xs block leading-relaxed">經典倫勃朗光，立體感強。</span>
             </div>
 
             <div class="gear-section">
-                <div id="labelGear" class="text-[9px] font-mono text-[#444] tracking-widest mb-1 pl-1">專業攝影裝備 (AFFILIATE)</div>
+                <div id="labelGear" class="text-[9px] font-mono text-[#555] tracking-widest mb-1 pl-1">專業攝影裝備 (AFFILIATE)</div>
                 <a href="https://s.shopee.tw/1BG8Bdote6" target="_blank" class="gear-card">
                     <div class="gear-icon"><i class="fas fa-bullseye"></i></div>
                     <div class="gear-info">
@@ -263,76 +263,99 @@
         const wrapper = document.getElementById('canvas-wrapper');
         const scene = new THREE.Scene();
         
-        // 主攝影機 (透視)
+        // 主攝影機
         const mainCamera = new THREE.PerspectiveCamera(40, wrapper.clientWidth / wrapper.clientHeight, 0.1, 100);
-        mainCamera.position.set(0, 0.5, 9); 
+        mainCamera.position.set(0, 0.2, 9); // 拉遠一點點
         mainCamera.lookAt(0, -0.2, 0);
 
-        // 俯視攝影機 (正交) - 用於畫中畫佈光圖
+        // 俯視攝影機 (PIP)
         const topCamera = new THREE.OrthographicCamera(-8, 8, 8, -8, 1, 20);
-        topCamera.position.set(0, 12, 0); // 高處往下看
+        topCamera.position.set(0, 12, 0);
         topCamera.lookAt(0, 0, 0);
 
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
         renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        
+        // 🔥 曝光設定：拉到 2.0 (High Key)
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.3;
-        // 啟用裁剪測試以進行畫中畫渲染
+        renderer.toneMappingExposure = 2.0;
         renderer.setScissorTest(true);
 
-        // --- 2. SCENE OBJECTS ---
-        const plasterMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.5, metalness: 0.1, flatShading: false });
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8, metalness: 0.2 });
-        // 灰色背景牆材質，容易顯示光影
-        const wallMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.7, metalness: 0.1 });
-
-        // Head Group
+        // --- 2. SCENE OBJECTS (Planar Head / Block Head) ---
+        // 使用純幾何體 (Box/Cone/Sphere) 堆疊，不依賴外部模型，確保絕對穩定
         const headGroup = new THREE.Group();
         scene.add(headGroup);
+
+        // 材質：乾淨的白石膏
+        const plasterMat = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff, roughness: 0.5, metalness: 0.05, flatShading: false 
+        });
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8, metalness: 0.2 });
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, metalness: 0.1 });
+
+        // Head Construction
         const skull = new THREE.Mesh(new THREE.IcosahedronGeometry(1.6, 2), plasterMat);
         skull.scale.set(0.85, 1.15, 0.95); skull.castShadow = true; skull.receiveShadow = true; headGroup.add(skull);
-        const nose = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1.2, 4), plasterMat);
-        nose.position.set(0, -0.2, 1.4); nose.rotation.set(-0.15, Math.PI / 4, 0); nose.scale.z = 0.6; nose.castShadow = true; nose.receiveShadow = true; headGroup.add(nose);
-        const brow = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.2, 0.5), plasterMat);
-        brow.position.set(0, 0.5, 1.1); brow.rotation.x = 0.2; brow.castShadow = true; brow.receiveShadow = true; headGroup.add(brow);
-        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 2.5, 16), plasterMat);
-        neck.position.y = -2.2; neck.castShadow = true; neck.receiveShadow = true; headGroup.add(neck);
+        
+        // Nose (Pyramid) - 放大一點確保陰影明顯
+        const nose = new THREE.Mesh(new THREE.ConeGeometry(0.35, 1.3, 4), plasterMat);
+        nose.position.set(0, -0.2, 1.45); nose.rotation.set(-0.15, Math.PI / 4, 0); nose.scale.z = 0.6; 
+        nose.castShadow = true; nose.receiveShadow = true; headGroup.add(nose);
+        
+        // Brow (Box)
+        const brow = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.25, 0.6), plasterMat);
+        brow.position.set(0, 0.5, 1.15); brow.rotation.x = 0.2; 
+        brow.castShadow = true; brow.receiveShadow = true; headGroup.add(brow);
+        
+        // Neck
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 2.8, 32), plasterMat);
+        neck.position.y = -2.4; neck.castShadow = true; neck.receiveShadow = true; headGroup.add(neck);
 
-        // Environment Group
+        // --- 3. ENVIRONMENT ---
         const envGroup = new THREE.Group();
         scene.add(envGroup);
         // Floor
-        const plane = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), floorMat);
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), floorMat);
         plane.rotation.x = -Math.PI / 2; plane.position.y = -3.0; plane.receiveShadow = true; envGroup.add(plane);
-        // Wall (背景牆) - 放置在主體後方 Z=-2.5
-        const backWall = new THREE.Mesh(new THREE.PlaneGeometry(30, 20), wallMat);
-        backWall.position.set(0, 5, -2.5); backWall.receiveShadow = true; envGroup.add(backWall);
+        // Back Wall
+        const backWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), wallMat);
+        backWall.position.set(0, 10, -4.0); backWall.receiveShadow = true; envGroup.add(backWall);
 
-        // Ambient Light
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+        // 🔥 環境光增強：0.6 (原本0.2)
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
 
-        // --- 3. LIGHTS & MARKERS ---
-        // 燈光標記點 (只在俯視圖顯示)
-        const markerGeo = new THREE.SphereGeometry(0.3, 16, 16);
-        const keyMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
-        const fillMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffeedd }));
-        const rimMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0x88ccff }));
-        // 主體標記點
-        const centerMarker = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), new THREE.MeshBasicMaterial({ color: 0x666666 }));
-        
-        // 將標記點加入一個獨立的 Group
+        // --- 4. MARKERS & GUIDES ---
         const overlayGroup = new THREE.Group();
+        const markerGeo = new THREE.SphereGeometry(0.4, 8, 8);
+        const keyMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffffff }));
+        const fillMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffccaa }));
+        const rimMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0x88ccff }));
+        const centerMarker = new THREE.Mesh(new THREE.SphereGeometry(0.5, 8, 8), new THREE.MeshBasicMaterial({ color: 0x555555 }));
         overlayGroup.add(keyMarker, fillMarker, rimMarker, centerMarker);
         scene.add(overlayGroup);
 
+        // Guide Lines on Floor
+        function createGuide(color) {
+            const gm = new THREE.LineBasicMaterial({ color: color, opacity: 0.6, transparent: true });
+            const pts = [new THREE.Vector3(0, -2.9, 0), new THREE.Vector3(0, -2.9, 5)];
+            const gl = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gm);
+            envGroup.add(gl);
+            return gl;
+        }
+        const guideKey = createGuide(0xffffff);
+        const guideFill = createGuide(0xffccaa);
+        const guideRim = createGuide(0x4488ff);
+
+        // --- 5. LIGHTS ---
         const lights = {
-            key: { obj: createSpot(0xffffff, 2.5), marker: keyMarker, az: 45, pol: 30, on: true, intensity: 2.5, temp: 5600, modifier: 'softbox' },
-            fill: { obj: createSpot(0xffeedd, 0.8), marker: fillMarker, az: -45, pol: 10, on: true, intensity: 0.8, temp: 5600, modifier: 'softbox' },
-            rim: { obj: createSpot(0xEBF4FF, 3.0), marker: rimMarker, az: 135, pol: 30, on: true, intensity: 3.0, temp: 6600, modifier: 'bare' }
+            // Intensity Boost: 5.0 / 2.0 / 6.0
+            key: { obj: createSpot(0xffffff, 5.0), guide: guideKey, marker: keyMarker, az: 45, pol: 30, on: true, intensity: 5.0, temp: 5600, modifier: 'softbox' },
+            fill: { obj: createSpot(0xffeedd, 2.0), guide: guideFill, marker: fillMarker, az: -45, pol: 10, on: true, intensity: 2.0, temp: 5600, modifier: 'softbox' },
+            rim: { obj: createSpot(0xEBF4FF, 6.0), guide: guideRim, marker: rimMarker, az: 135, pol: 30, on: true, intensity: 6.0, temp: 6600, modifier: 'bare' }
         };
 
         function createSpot(color, intensity) {
@@ -341,7 +364,7 @@
             scene.add(l); return l;
         }
 
-        // --- 4. LOGIC ---
+        // --- 6. LOGIC & UI ---
         let currentLang = 'zh', currentTarget = 'key';
         const txt = {
             zh: {
@@ -353,8 +376,7 @@
                 gear1Title: "專業光學束光筒", gear1Desc: "精準控光 SHAPING LIGHT",
                 gear2Title: "雙色溫聚光燈", gear2Desc: "高顯色性攝影棚主燈",
                 langBtn: "EN",
-                // Analysis
-                lowKey: "暗調 / 剪影", lowKeyDesc: "主光已關閉。適合表現神秘感或剪影輪廓。",
+                lowKey: "暗調 (Low Key)", lowKeyDesc: "主光已關閉。適合表現神秘感或剪影輪廓。",
                 top: "頂光 (Top Light)", topDesc: "適合強調肌肉線條或創造戲劇性骷髏眼影。",
                 butterfly: "蝴蝶光 (Butterfly)", butterflyDesc: "經典好萊塢美顏光，在鼻下形成蝶形陰影。",
                 rembrandt: "倫勃朗光 (Rembrandt)", rembrandtDesc: "暗面臉頰形成倒三角光區，最具立體感的藝術佈光。",
@@ -371,13 +393,13 @@
                 gear1Title: "OPTICAL SNOOT", gear1Desc: "PRECISE LIGHT SHAPING",
                 gear2Title: "BI-COLOR SPOTLIGHT", gear2Desc: "STUDIO ESSENTIAL",
                 langBtn: "中",
-                lowKey: "LOW KEY", lowKeyDesc: "Main light off. Focus on silhouette.",
+                lowKey: "LOW KEY", lowKeyDesc: "Main light off. Silhouette focus.",
                 top: "TOP LIGHT", topDesc: "High drama, structure focus.",
                 butterfly: "BUTTERFLY", butterflyDesc: "Beauty lighting. Butterfly shadow.",
-                rembrandt: "REMBRANDT", rembrandtDesc: "Classic cinematic triangle on cheek.",
+                rembrandt: "REMBRANDT", rembrandtDesc: "Classic cinematic triangle.",
                 split: "SPLIT LIGHT", splitDesc: "High contrast side lighting.",
-                loop: "LOOP LIGHT", loopDesc: "Natural, general purpose portrait lighting.",
-                custom: "CUSTOM", customDesc: "Unique custom lighting setup."
+                loop: "LOOP LIGHT", loopDesc: "Natural, general purpose.",
+                custom: "CUSTOM", customDesc: "Unique custom setup."
             }
         };
 
@@ -418,12 +440,12 @@
         window.setModifier = (mod) => { lights[currentTarget].modifier = mod; updateUI(true); };
         
         window.applyPreset = (type) => {
-            if (type === 'rembrandt') { setLight('key', 45, 40, 2.5); setLight('fill', -45, 10, 0.5); setLight('rim', 180, 20, 1.0); } 
-            else if (type === 'butterfly') { setLight('key', 0, 50, 2.5); setLight('fill', 0, 0, 1.0); setLight('rim', 180, 40, 2.0); } 
-            else if (type === 'split') { setLight('key', 90, 10, 3.0); setLight('fill', -90, 10, 0.1); setLight('rim', 0, 0, 0); lights.rim.on = false; }
+            if (type === 'rembrandt') { setLight('key', 45, 40, 5.0, 5600, 'softbox', true); setLight('fill', -45, 10, 2.0, 5600, 'softbox', true); setLight('rim', 180, 20, 2.0, 5600, 'bare', true); } 
+            else if (type === 'butterfly') { setLight('key', 0, 50, 5.0, 5600, 'radar', true); setLight('fill', 0, 0, 2.5, 5600, 'softbox', true); setLight('rim', 180, 40, 3.0, 5600, 'bare', true); } 
+            else if (type === 'split') { setLight('key', 90, 10, 6.0, 5600, 'grid', true); setLight('fill', -90, 10, 0.5, 5600, 'softbox', true); setLight('rim', 0, 0, 0, 5600, 'bare', false); }
             updateUI(true);
         }
-        function setLight(id, a, p, i) { const d = lights[id]; d.az=a; d.pol=p; d.intensity=i; d.on=true; }
+        function setLight(id, a, p, i, t, m, o) { const d = lights[id]; d.az=a; d.pol=p; d.intensity=i; d.temp=t; d.modifier=m; d.on=o; }
 
         window.toggleLang = () => { currentLang = currentLang === 'zh' ? 'en' : 'zh'; applyLang(); analyze(); };
 
@@ -455,8 +477,8 @@
 
         function updateLightPos(id) {
             const d = lights[id];
-            const l = d.obj; const marker = d.marker;
-            l.visible = d.on; marker.visible = d.on;
+            const l = d.obj; const guide = d.guide; const marker = d.marker;
+            l.visible = d.on; guide.visible = d.on; marker.visible = d.on;
             l.intensity = d.intensity; l.color = kelvinToRGB(d.temp);
 
             if(!d.on) return;
@@ -466,7 +488,13 @@
             const ly = r * Math.cos(phi);
             const lz = r * Math.sin(phi) * Math.sin(theta);
             l.position.set(lx, ly, lz);
-            marker.position.set(lx, ly, lz); // 同步標記點位置
+            marker.position.set(lx, ly, lz);
+
+            const guideR = 4;
+            const gx = -(guideR * Math.cos(theta)); const gz = guideR * Math.sin(theta);
+            const pos = guide.geometry.attributes.position.array;
+            pos[0]=0; pos[1]=-2.9; pos[2]=0; pos[3]=gx; pos[4]=-2.9; pos[5]=gz;
+            guide.geometry.attributes.position.needsUpdate = true;
 
             if (d.modifier === 'softbox') { l.angle = 1.2; l.penumbra = 1.0; }
             else if (d.modifier === 'radar') { l.angle = 0.7; l.penumbra = 0.4; }
@@ -495,18 +523,17 @@
             requestAnimationFrame(animate);
             headGroup.rotation.y = Math.sin(Date.now() * 0.0005) * 0.05;
 
-            // --- Render Pass 1: Main View ---
-            renderer.setViewport(0, 0, w, h);
-            renderer.setScissor(0, 0, w, h);
-            overlayGroup.visible = false; // 主視圖隱藏標記點
+            // 1. Main View
+            renderer.setViewport(0, 0, w, h); renderer.setScissor(0, 0, w, h);
+            overlayGroup.visible = false;
             renderer.render(scene, mainCamera);
 
-            // --- Render Pass 2: Top-Down PIP View ---
+            // 2. PIP View
             const pipSize = 140; const pad = 20;
             renderer.setViewport(pad, h - pipSize - pad, pipSize, pipSize);
             renderer.setScissor(pad, h - pipSize - pad, pipSize, pipSize);
-            renderer.clearDepth(); // 清除深度緩衝，確保 PIP 在最上層
-            overlayGroup.visible = true; // 俯視圖顯示標記點
+            renderer.clearDepth();
+            overlayGroup.visible = true;
             renderer.render(scene, topCamera);
         }
 
