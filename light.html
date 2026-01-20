@@ -5,15 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Light Sculptor | EDEN LAB</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Shippori+Mincho:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { eden: { gold: '#D4AF37', black: '#050505', panel: '#0F0F0F' } },
+                    colors: { eden: { gold: '#D4AF37', black: '#050505' } },
                     fontFamily: { serif: ['Cinzel', 'serif'], mono: ['Space Mono', 'monospace'], zh: ['Shippori Mincho', 'serif'] }
                 }
             }
@@ -21,80 +30,53 @@
     </script>
 
     <style>
-        /* --- 核心佈局 --- */
-        body { 
-            background-color: #050505; color: #C0C0C0; 
-            height: 100vh; height: 100dvh; width: 100vw; overflow: hidden;
-            display: flex; flex-direction: column;
-        }
+        /* 佈局：全螢幕無捲動 */
+        body { background-color: #050505; color: #C0C0C0; height: 100dvh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* HEADER */
+        /* Header */
         header { 
-            height: 50px; flex-shrink: 0; z-index: 30;
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px; border-bottom: 1px solid #1a1a1a; background: #050505;
+            height: 50px; flex-shrink: 0; z-index: 30; display: flex; justify-content: space-between; align-items: center; 
+            padding: 0 20px; border-bottom: 1px solid #1a1a1a; background: #050505; 
         }
         .ig-link {
-            font-family: 'Space Mono'; font-size: 10px; color: #666; letter-spacing: 0.05em;
-            display: flex; align-items: center; gap: 6px; transition: 0.3s;
-            text-decoration: none; padding: 4px 8px; border: 1px solid #222; border-radius: 4px;
+            font-family: 'Space Mono'; font-size: 10px; color: #666; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; 
+            text-decoration: none; padding: 4px 8px; border: 1px solid #222; border-radius: 4px; transition: 0.3s;
         }
         .ig-link:hover { color: #D4AF37; border-color: #D4AF37; }
 
-        /* LAYOUT */
+        /* Main Layout */
         #main-layout { display: flex; flex: 1; min-height: 0; position: relative; flex-direction: column; }
         @media (min-width: 768px) { #main-layout { flex-direction: row; } }
 
-        /* CANVAS */
+        /* Canvas */
         #canvas-wrapper { 
-            flex-grow: 1; position: relative; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #1f1f1f 0%, #000000 90%);
-            order: 1; 
+            flex-grow: 1; position: relative; width: 100%; height: 100%; 
+            background: radial-gradient(circle at center, #1f1f1f 0%, #000000 90%); order: 1; 
         }
         canvas { display: block; width: 100%; height: 100%; outline: none; }
 
-        /* 實用性增強：佈光數據浮層 */
-        #lighting-data {
-            position: absolute; top: 20px; left: 20px; pointer-events: none;
-            font-family: 'Space Mono'; font-size: 10px; color: #D4AF37;
-            display: flex; flex-direction: column; gap: 4px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-        }
-        .data-row { display: flex; gap: 10px; }
-        .data-label { color: #666; width: 60px; }
-
-        /* DASHBOARD */
+        /* Dashboard */
         #dashboard { 
-            z-index: 20; background: #0a0a0a; 
-            display: flex; flex-direction: column; gap: 12px;
-            width: 100%; flex-shrink: 0; 
-            padding: 15px 20px; padding-bottom: max(15px, env(safe-area-inset-bottom));
-            border-top: 1px solid #222;
-            order: 2; 
+            z-index: 20; background: #0a0a0a; display: flex; flex-direction: column; gap: 12px; 
+            width: 100%; flex-shrink: 0; padding: 15px 20px; padding-bottom: max(15px, env(safe-area-inset-bottom)); 
+            border-top: 1px solid #222; order: 2; 
         }
         @media (min-width: 768px) {
-            #dashboard {
-                width: 380px; height: 100%;
-                border-top: none; border-left: 1px solid #222;
-                padding: 25px; order: 2; overflow-y: auto;
-            }
+            #dashboard { width: 380px; height: 100%; border-top: none; border-left: 1px solid #222; padding: 25px; overflow-y: auto; }
         }
 
-        /* UI ELEMENTS */
+        /* UI Elements */
         .preset-row { display: flex; gap: 8px; margin-bottom: 5px; }
         .preset-btn {
-            flex: 1; background: #111; border: 1px solid #333; color: #888;
-            font-family: 'Space Mono'; font-size: 9px; padding: 8px 0; text-align: center;
-            cursor: pointer; transition: 0.2s; border-radius: 2px;
+            flex: 1; background: #111; border: 1px solid #333; color: #888; font-family: 'Space Mono'; font-size: 9px; 
+            padding: 8px 0; text-align: center; cursor: pointer; transition: 0.2s; border-radius: 2px;
         }
         .preset-btn:hover { border-color: #666; color: #fff; background: #1a1a1a; }
-        .preset-btn:active { background: #D4AF37; color: #000; }
-
+        
         .tabs { display: flex; border: 1px solid #333; border-radius: 2px; overflow: hidden; height: 32px; flex-shrink: 0; }
         .tab-btn {
-            flex: 1; display: flex; align-items: center; justify-content: center;
-            font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.1em; color: #666;
-            background: #0e0e0e; cursor: pointer; transition: 0.2s;
+            flex: 1; display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-size: 10px; 
+            letter-spacing: 0.1em; color: #666; background: #0e0e0e; cursor: pointer; transition: 0.2s;
         }
         .tab-btn.active { background: #D4AF37; color: #000; font-weight: bold; }
 
@@ -104,11 +86,10 @@
         
         input[type=range] { -webkit-appearance: none; flex: 1; background: transparent; cursor: pointer; }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 12px; width: 12px; background: #D4AF37; 
-            border-radius: 50%; margin-top: -5px; border: 1px solid #000; box-shadow: 0 0 5px rgba(212,175,55,0.5);
+            -webkit-appearance: none; height: 12px; width: 12px; background: #D4AF37; border-radius: 50%; 
+            margin-top: -5px; border: 1px solid #000; box-shadow: 0 0 5px rgba(212,175,55,0.5);
         }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 2px; background: #333; border-radius: 1px; }
-        
         #tempSlider::-webkit-slider-runnable-track { background: linear-gradient(to right, #ffaa00, #ffffff, #88ccff); height: 2px; }
 
         .status-row { display: flex; justify-content: space-between; align-items: center; height: 24px; margin-bottom: 5px; }
@@ -121,12 +102,18 @@
         input:checked + .slider-tg { background-color: #111; border-color: #D4AF37; }
         input:checked + .slider-tg:before { transform: translateX(16px); background-color: #D4AF37; }
 
+        .mod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+        .mod-btn {
+            border: 1px solid #333; color: #666; font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px;
+            padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.2s; background: #0e0e0e; border-radius: 2px;
+        }
+        .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); color: #D4AF37; font-weight: bold; }
+
+        /* Gear */
         .gear-section { border-top: 1px solid #222; margin-top: auto; pt-4; display: flex; gap: 10px; flex-direction: column; }
         @media (min-width: 768px) { .gear-section { gap: 12px; } }
-        
         .gear-card {
-            background: #111; border: 1px solid #222; padding: 10px 12px;
-            display: flex; align-items: center; gap: 12px;
+            background: #111; border: 1px solid #222; padding: 10px 12px; display: flex; align-items: center; gap: 12px;
             text-decoration: none; transition: 0.3s; border-radius: 4px;
         }
         .gear-card:hover { border-color: #D4AF37; background: #151515; transform: translateY(-1px); }
@@ -136,29 +123,27 @@
         .gear-info p { font-family: 'Space Mono', monospace; font-size: 9px; color: #666; }
         .gear-arrow { color: #444; font-size: 10px; margin-left: auto; }
 
-        .mod-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-        .mod-btn {
-            border: 1px solid #333; color: #666; font-family: 'Space Mono', 'Shippori Mincho'; font-size: 9px;
-            padding: 8px 0; text-align: center; cursor: pointer; transition: all 0.2s; background: #0e0e0e; border-radius: 2px;
+        /* Lighting Data Overlay */
+        #lighting-data {
+            position: absolute; top: 20px; left: 20px; pointer-events: none;
+            font-family: 'Space Mono'; font-size: 10px; color: #D4AF37;
+            display: flex; flex-direction: column; gap: 4px; opacity: 0.7;
         }
-        .mod-btn:hover { border-color: #555; color: #ccc; }
-        .mod-btn.active { border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); color: #D4AF37; font-weight: bold; }
-
+        .data-row { display: flex; gap: 10px; }
+        .data-label { color: #666; width: 60px; }
     </style>
 </head>
-<body>
+<body class="lang-zh">
 
     <header>
         <div class="flex items-center gap-3">
             <span class="text-[12px] tracking-[0.2em] text-[#D4AF37] font-serif font-bold">EDEN</span>
             <span class="text-[9px] text-[#444] tracking-widest border-l border-[#333] pl-3 hidden md:inline">LIGHT SCULPTOR</span>
         </div>
-        
         <div class="flex items-center gap-6">
             <a href="https://www.instagram.com/eden_d_photo/" target="_blank" class="ig-link">
                 design by EDEN_D_PHOTO
             </a>
-            
             <button id="langBtn" onclick="window.toggleLang()" class="border border-[#444] px-2 py-1 text-[9px] font-mono hover:border-[#D4AF37] hover:text-[#D4AF37] transition-colors text-[#888] bg-black/50 backdrop-blur cursor-pointer w-16 text-center">
                 EN
             </button>
@@ -168,9 +153,9 @@
     <div id="main-layout">
         <div id="canvas-wrapper">
             <div id="lighting-data">
-                <div class="data-row"><span class="data-label">ANGLE:</span><span id="dataAngle">--</span></div>
-                <div class="data-row"><span class="data-label">HEIGHT:</span><span id="dataHeight">--</span></div>
-                <div class="data-row"><span class="data-label">TEMP:</span><span id="dataTemp">--</span></div>
+                <div class="data-row"><span class="data-label">ANGLE</span><span id="dataAngle">45°</span></div>
+                <div class="data-row"><span class="data-label">HEIGHT</span><span id="dataHeight">30°</span></div>
+                <div class="data-row"><span class="data-label">TEMP</span><span id="dataTemp">5600K</span></div>
             </div>
             <canvas id="webgl"></canvas>
         </div>
@@ -178,9 +163,9 @@
         <footer id="dashboard">
             
             <div class="preset-row">
-                <div class="preset-btn" onclick="window.applyPreset('rembrandt')">REMBRANDT (倫勃朗)</div>
-                <div class="preset-btn" onclick="window.applyPreset('butterfly')">BUTTERFLY (蝴蝶)</div>
-                <div class="preset-btn" onclick="window.applyPreset('split')">SPLIT (分割)</div>
+                <div class="preset-btn" onclick="window.applyPreset('rembrandt')">REMBRANDT</div>
+                <div class="preset-btn" onclick="window.applyPreset('butterfly')">BUTTERFLY</div>
+                <div class="preset-btn" onclick="window.applyPreset('split')">SPLIT</div>
             </div>
 
             <div class="tabs">
@@ -234,8 +219,8 @@
             </div>
 
             <div class="border-t border-[#222] pt-3">
-                <span id="algoTitle" class="text-[#D4AF37] font-serif text-xs font-bold tracking-wider block mb-1">ANALYSIS</span>
-                <span id="algoDesc" class="text-[#666] font-zh text-xs block leading-relaxed">當前佈光狀態分析...</span>
+                <span id="algoTitle" class="text-[#D4AF37] font-serif text-xs font-bold tracking-wider block mb-1">REMBRANDT</span>
+                <span id="algoDesc" class="text-[#666] font-zh text-xs block leading-relaxed">經典倫勃朗光，立體感強。</span>
             </div>
 
             <div class="gear-section">
@@ -244,7 +229,7 @@
                     <div class="gear-icon"><i class="fas fa-bullseye"></i></div>
                     <div class="gear-info">
                         <h4 id="gear1Title">專業光學束光筒</h4>
-                        <p id="gear1Desc">創造精準的切割光效</p>
+                        <p id="gear1Desc">精準控光 SHAPING LIGHT</p>
                     </div>
                     <i class="fas fa-chevron-right gear-arrow"></i>
                 </a>
@@ -257,12 +242,112 @@
                     <i class="fas fa-chevron-right gear-arrow"></i>
                 </a>
             </div>
-
         </footer>
     </div>
 
-    <script>
-        // --- RESOURCES ---
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- 1. SETUP ---
+        const canvas = document.getElementById('webgl');
+        const wrapper = document.getElementById('canvas-wrapper');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(40, wrapper.clientWidth / wrapper.clientHeight, 0.1, 100);
+        camera.position.set(0, 0.2, 8); 
+        camera.lookAt(0, -0.2, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+        renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.3;
+
+        // --- 2. THE PLANAR HEAD (Structure Block) ---
+        // 核心：使用基礎幾何體拼湊出 "Asaro Head" 風格的結構人頭
+        const headGroup = new THREE.Group();
+        scene.add(headGroup);
+
+        const mat = new THREE.MeshStandardMaterial({ 
+            color: 0xffffff, roughness: 0.5, metalness: 0.1, flatShading: false 
+        });
+
+        // 頭顱 (Icosahedron - Low Poly Sphere)
+        const skull = new THREE.Mesh(new THREE.IcosahedronGeometry(1.6, 2), mat);
+        skull.scale.set(0.85, 1.15, 0.95);
+        skull.castShadow = true; skull.receiveShadow = true;
+        headGroup.add(skull);
+
+        // 鼻子 (Pyramid) - 產生蝴蝶光陰影
+        const nose = new THREE.Mesh(new THREE.ConeGeometry(0.3, 1.2, 4), mat);
+        nose.position.set(0, -0.2, 1.4);
+        nose.rotation.y = Math.PI / 4; // 轉45度，讓稜線朝前
+        nose.rotation.x = -0.15;
+        nose.scale.z = 0.6;
+        nose.castShadow = true; nose.receiveShadow = true;
+        headGroup.add(nose);
+
+        // 眉骨 (Box) - 產生眼窩陰影
+        const brow = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.2, 0.5), mat);
+        brow.position.set(0, 0.5, 1.1);
+        brow.rotation.x = 0.2;
+        brow.castShadow = true; brow.receiveShadow = true;
+        headGroup.add(brow);
+
+        // 耳朵 (Box)
+        const earL = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 0.4), mat);
+        earL.position.set(-1.4, -0.2, 0); earL.rotation.y = -0.3; earL.castShadow = true; earL.receiveShadow = true;
+        headGroup.add(earL);
+        const earR = earL.clone();
+        earR.position.set(1.4, -0.2, 0); earR.rotation.y = 0.3;
+        headGroup.add(earR);
+
+        // 脖子 (Cylinder)
+        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 2.5, 16), mat);
+        neck.position.y = -2.2; neck.castShadow = true; neck.receiveShadow = true;
+        headGroup.add(neck);
+
+        // --- 3. FLOOR PLAN & GUIDES ---
+        const floorGroup = new THREE.Group();
+        scene.add(floorGroup);
+
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ 
+            color: 0x111111, roughness: 0.8, metalness: 0.2 
+        }));
+        plane.rotation.x = -Math.PI / 2; plane.position.y = -3.0; plane.receiveShadow = true;
+        floorGroup.add(plane);
+
+        // Guide Lines Function
+        function createGuide(color) {
+            const gm = new THREE.LineBasicMaterial({ color: color, opacity: 0.4, transparent: true });
+            const pts = [new THREE.Vector3(0, -2.9, 0), new THREE.Vector3(0, -2.9, 5)];
+            const gl = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), gm);
+            floorGroup.add(gl);
+            return gl;
+        }
+        const guideKey = createGuide(0xffffff);
+        const guideFill = createGuide(0xffeedd);
+        const guideRim = createGuide(0x4488ff);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // Low ambient for contrast
+        scene.add(ambientLight);
+
+        // --- 4. LIGHTS ---
+        const lights = {
+            key: { obj: createSpot(0xffffff, 2.5), guide: guideKey, az: 45, pol: 30, on: true, intensity: 2.5, temp: 5600, modifier: 'softbox' },
+            fill: { obj: createSpot(0xffeedd, 0.8), guide: guideFill, az: -45, pol: 10, on: true, intensity: 0.8, temp: 5600, modifier: 'softbox' },
+            rim: { obj: createSpot(0xEBF4FF, 3.0), guide: guideRim, az: 135, pol: 30, on: true, intensity: 3.0, temp: 6600, modifier: 'bare' }
+        };
+
+        function createSpot(color, intensity) {
+            const l = new THREE.SpotLight(color, intensity);
+            l.castShadow = true; l.shadow.mapSize.set(1024, 1024); l.shadow.bias = -0.0001;
+            scene.add(l); return l;
+        }
+
+        // --- 5. LOGIC ---
+        let currentLang = 'zh', currentTarget = 'key';
         const txt = {
             zh: {
                 tabKey: "主光", tabFill: "補光", tabRim: "輪廓",
@@ -270,13 +355,13 @@
                 modSoft: "柔光罩", modRadar: "雷達罩", modGrid: "蜂巢", modBare: "裸燈",
                 labelAz: "方位角", labelAlt: "高度角", labelInt: "輸出強度", labelTemp: "色溫 K",
                 labelGear: "專業攝影裝備 (AFFILIATE)",
-                gear1Title: "專業光學束光筒", gear1Desc: "創造精準的切割光效",
+                gear1Title: "專業光學束光筒", gear1Desc: "精準控光 SHAPING LIGHT",
                 gear2Title: "雙色溫聚光燈", gear2Desc: "高顯色性攝影棚主燈",
                 langBtn: "EN",
                 // Analysis
                 lowKey: "暗調 / 剪影", lowKeyDesc: "主光已關閉。適合表現神秘感或剪影輪廓。",
                 top: "頂光 (Top Light)", topDesc: "適合強調肌肉線條或創造戲劇性骷髏眼影。",
-                butterfly: "蝴蝶光 (Butterfly)", butterflyDesc: "經典好萊塢美顏光，在鼻下形成蝶形陰影，修飾臉型。",
+                butterfly: "蝴蝶光 (Butterfly)", butterflyDesc: "經典好萊塢美顏光，在鼻下形成蝶形陰影。",
                 rembrandt: "倫勃朗光 (Rembrandt)", rembrandtDesc: "暗面臉頰形成倒三角光區，最具立體感的藝術佈光。",
                 split: "分割光 (Split)", splitDesc: "臉部明暗各半，創造強烈性格與戲劇張力。",
                 loop: "環形光 (Loop)", loopDesc: "鼻影向側邊微偏，最安全通用的訪談/肖像佈光。",
@@ -291,137 +376,16 @@
                 gear1Title: "OPTICAL SNOOT", gear1Desc: "PRECISE LIGHT SHAPING",
                 gear2Title: "BI-COLOR SPOTLIGHT", gear2Desc: "STUDIO ESSENTIAL",
                 langBtn: "中",
-                // Analysis
-                lowKey: "LOW KEY", lowKeyDesc: "Main light off. Focus on silhouette and outline.",
-                top: "TOP LIGHT", topDesc: "Dramatic shadows, skull-like structure.",
-                butterfly: "BUTTERFLY", butterflyDesc: "Beauty lighting. Butterfly shadow under nose.",
-                rembrandt: "REMBRANDT", rembrandtDesc: "Classic cinematic triangle on the cheek.",
+                lowKey: "LOW KEY", lowKeyDesc: "Main light off. Focus on silhouette.",
+                top: "TOP LIGHT", topDesc: "High drama, structure focus.",
+                butterfly: "BUTTERFLY", butterflyDesc: "Beauty lighting. Butterfly shadow.",
+                rembrandt: "REMBRANDT", rembrandtDesc: "Classic cinematic triangle on cheek.",
                 split: "SPLIT LIGHT", splitDesc: "High contrast side lighting.",
                 loop: "LOOP LIGHT", loopDesc: "Natural, general purpose portrait lighting.",
                 custom: "CUSTOM", customDesc: "Unique custom lighting setup."
             }
         };
 
-        // --- GLOBAL STATE ---
-        let currentLang = 'zh'; 
-        let currentTarget = 'key';
-
-        // --- 1. Three.js Init ---
-        const canvas = document.querySelector('#webgl');
-        const wrapper = document.querySelector('#canvas-wrapper');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(35, wrapper.clientWidth / wrapper.clientHeight, 0.1, 100);
-        camera.position.set(0, 0.5, 9); // 視角微調
-        camera.lookAt(0, 0, 0);
-
-        const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
-        renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.3;
-
-        // --- 2. MANNEQUIN HEAD (積木人頭 - The Planar Head) ---
-        // 這是替代圓球的關鍵：用幾何體拼出一個"結構人頭"，能顯示鼻影
-        const headGroup = new THREE.Group();
-        scene.add(headGroup);
-
-        const plasterMat = new THREE.MeshStandardMaterial({ 
-            color: 0xffffff, roughness: 0.5, metalness: 0.1, flatShading: false 
-        });
-
-        // 2.1 Skull (Base)
-        const skull = new THREE.Mesh(new THREE.SphereGeometry(1.6, 64, 64), plasterMat);
-        skull.scale.set(0.85, 1.15, 0.9); // 拉長成鵝蛋臉
-        skull.castShadow = true; skull.receiveShadow = true;
-        headGroup.add(skull);
-
-        // 2.2 Nose (關鍵：用來產生 Butterfly/Rembrandt 陰影)
-        // 幾何形狀：楔形 (Wedge)
-        const noseGeo = new THREE.BoxGeometry(0.35, 1.2, 0.6);
-        // 修改頂點變成梯形鼻
-        const nosePositions = noseGeo.attributes.position;
-        for(let i=0; i<nosePositions.count; i++){
-            if(nosePositions.getZ(i) > 0) { // 鼻尖
-                nosePositions.setX(i, nosePositions.getX(i) * 0.4); // 鼻尖變窄
-                nosePositions.setY(i, nosePositions.getY(i) * 0.8); // 鼻尖微縮
-            }
-        }
-        noseGeo.computeVertexNormals();
-        const nose = new THREE.Mesh(noseGeo, plasterMat);
-        nose.position.set(0, -0.2, 1.4); // 突出臉部
-        nose.rotation.x = -0.15;
-        nose.castShadow = true; nose.receiveShadow = true;
-        headGroup.add(nose);
-
-        // 2.3 Brow Ridge (眉骨 - 用來產生頂光骷髏眼)
-        const brow = new THREE.Mesh(new THREE.CapsuleGeometry(0.15, 1.4, 4, 16), plasterMat);
-        brow.rotation.z = Math.PI / 2;
-        brow.rotation.x = 0.2; // 貼合額頭
-        brow.position.set(0, 0.5, 1.2);
-        brow.castShadow = true; brow.receiveShadow = true;
-        headGroup.add(brow);
-
-        // 2.4 Ears (簡單示意)
-        const earL = new THREE.Mesh(new THREE.CapsuleGeometry(0.2, 0.6, 4, 8), plasterMat);
-        earL.position.set(-1.45, -0.2, 0.2);
-        earL.rotation.z = -0.1;
-        earL.castShadow = true; earL.receiveShadow = true;
-        headGroup.add(earL);
-        
-        const earR = earL.clone();
-        earR.position.set(1.45, -0.2, 0.2);
-        earR.rotation.z = 0.1;
-        headGroup.add(earR);
-
-        // 2.5 Neck
-        const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.9, 2.5, 32), plasterMat);
-        neck.position.y = -2.2;
-        neck.castShadow = true; neck.receiveShadow = true;
-        headGroup.add(neck);
-
-        // --- 3. FLOOR PLAN (佈光圖視覺化) ---
-        // 在地板上畫線，顯示燈光角度
-        const floorGroup = new THREE.Group();
-        scene.add(floorGroup);
-
-        const plane = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ 
-            color: 0x111111, roughness: 0.8, metalness: 0.2 
-        }));
-        plane.rotation.x = -Math.PI / 2; plane.position.y = -3.0; plane.receiveShadow = true;
-        floorGroup.add(plane);
-
-        // 用來顯示燈光方向的線條
-        function createGuideLine(color) {
-            const mat = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.5 });
-            const pts = [new THREE.Vector3(0, -2.9, 0), new THREE.Vector3(0, -2.9, 5)];
-            const geo = new THREE.BufferGeometry().setFromPoints(pts);
-            const line = new THREE.Line(geo, mat);
-            floorGroup.add(line);
-            return line;
-        }
-        const guideKey = createGuideLine(0xffffff);
-        const guideFill = createGuideLine(0xffeedd);
-        const guideRim = createGuideLine(0x4488ff);
-
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
-        scene.add(ambientLight);
-
-        // --- 4. Lights System ---
-        const lights = {
-            key: { obj: createSpot(0xffffff, 2.5), guide: guideKey, az: 45, pol: 30, on: true, intensity: 2.5, temp: 5600, modifier: 'softbox' },
-            fill: { obj: createSpot(0xffeedd, 0.8), guide: guideFill, az: -45, pol: 10, on: true, intensity: 0.8, temp: 5600, modifier: 'softbox' },
-            rim: { obj: createSpot(0xEBF4FF, 3.0), guide: guideRim, az: 135, pol: 30, on: true, intensity: 3.0, temp: 6600, modifier: 'bare' }
-        };
-
-        function createSpot(color, intensity) {
-            const l = new THREE.SpotLight(color, intensity);
-            l.castShadow = true; l.shadow.mapSize.set(1024, 1024); l.angle = 0.8; l.penumbra = 0.5;
-            scene.add(l); return l;
-        }
-
-        // --- 5. LOGIC & UI ---
         const els = {
             azSlider: document.getElementById('azSlider'), polSlider: document.getElementById('polSlider'), 
             intSlider: document.getElementById('intSlider'), tempSlider: document.getElementById('tempSlider'),
@@ -433,14 +397,12 @@
         };
 
         function kelvinToRGB(k) {
-            let r, g, b; k = k / 100;
+            let r, g, b; k /= 100;
             if (k <= 66) { r = 255; g = k < 6 ? 0 : 99.47 * Math.log(k) - 161.1; b = k <= 19 ? 0 : 138.5 * Math.log(k - 10) - 305; } 
             else { r = 329.7 * Math.pow(k - 60, -0.133); g = 288.1 * Math.pow(k - 60, -0.0755); b = 255; }
-            return new THREE.Color(`rgb(${clamp(r)},${clamp(g)},${clamp(b)})`);
+            return new THREE.Color(`rgb(${Math.max(0,Math.min(255,Math.round(r)))},${Math.max(0,Math.min(255,Math.round(g)))},${Math.max(0,Math.min(255,Math.round(b)))})`);
         }
-        function clamp(v) { return Math.max(0, Math.min(255, Math.round(v))); }
 
-        // Interaction
         window.selectLight = (id) => {
             currentTarget = id;
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -460,103 +422,68 @@
         window.toggleLight = () => { lights[currentTarget].on = els.powerSwitch.checked; updateUI(true); };
         window.setModifier = (mod) => { lights[currentTarget].modifier = mod; updateUI(true); };
         
-        // Presets
         window.applyPreset = (type) => {
-            if (type === 'rembrandt') {
-                setLight('key', 45, 40, 2.5, 5600, 'softbox', true);
-                setLight('fill', -45, 10, 0.5, 5600, 'softbox', true);
-                setLight('rim', 180, 20, 1.0, 5600, 'bare', true);
-            } else if (type === 'butterfly') {
-                setLight('key', 0, 50, 2.5, 5600, 'radar', true);
-                setLight('fill', 0, 0, 1.0, 5600, 'softbox', true); // 下方補光
-                setLight('rim', 180, 40, 2.0, 5600, 'bare', true);
-            } else if (type === 'split') {
-                setLight('key', 90, 10, 3.0, 5600, 'grid', true);
-                setLight('fill', -90, 10, 0.1, 5600, 'softbox', true);
-                setLight('rim', 0, 0, 0, 5600, 'bare', false);
-            }
+            if (type === 'rembrandt') { setLight('key', 45, 40, 2.5); setLight('fill', -45, 10, 0.5); setLight('rim', 180, 20, 1.0); } 
+            else if (type === 'butterfly') { setLight('key', 0, 50, 2.5); setLight('fill', 0, 0, 1.0); setLight('rim', 180, 40, 2.0); } 
+            else if (type === 'split') { setLight('key', 90, 10, 3.0); setLight('fill', -90, 10, 0.1); setLight('rim', 0, 0, 0); lights.rim.on = false; }
             updateUI(true);
         }
-        function setLight(id, a, p, i, t, m, o) {
-            const d = lights[id]; d.az=a; d.pol=p; d.intensity=i; d.temp=t; d.modifier=m; d.on=o;
-        }
+        function setLight(id, a, p, i) { const d = lights[id]; d.az=a; d.pol=p; d.intensity=i; d.on=true; }
 
-        window.toggleLang = () => {
-            currentLang = currentLang === 'zh' ? 'en' : 'zh';
-            applyLang(); analyze();
-        };
+        window.toggleLang = () => { currentLang = currentLang === 'zh' ? 'en' : 'zh'; applyLang(); analyze(); };
 
         function applyLang() {
             const t = txt[currentLang];
-            // Apply all text... (Simplified for brevity, same as before)
+            document.getElementById('tabKey').innerText = t.tabKey; document.getElementById('tabFill').innerText = t.tabFill; document.getElementById('tabRim').innerText = t.tabRim;
+            document.getElementById('labelStatus').innerText = t.labelStatus; document.getElementById('labelMod').innerText = t.labelMod;
+            document.getElementById('mod-softbox').innerText = t.modSoft; document.getElementById('mod-radar').innerText = t.modRadar; document.getElementById('mod-grid').innerText = t.modGrid; document.getElementById('mod-bare').innerText = t.modBare;
+            document.getElementById('labelAz').innerText = t.labelAz; document.getElementById('labelAlt').innerText = t.labelAlt; document.getElementById('labelInt').innerText = t.labelInt; document.getElementById('labelTemp').innerText = t.labelTemp;
+            document.getElementById('labelGear').innerText = t.labelGear; document.getElementById('gear1Title').innerText = t.gear1Title; document.getElementById('gear1Desc').innerText = t.gear1Desc; document.getElementById('gear2Title').innerText = t.gear2Title; document.getElementById('gear2Desc').innerText = t.gear2Desc;
             document.getElementById('langBtn').innerText = t.langBtn;
-            document.getElementById('labelGear').innerText = t.labelGear;
-            document.getElementById('algoTitle').innerText = (lights.key.on ? "ANALYSIS" : "LOW KEY");
         }
 
-        function updateUI(updatePhysics = false) {
+        function updateUI(phys = false) {
             const d = lights[currentTarget];
-            if (!updatePhysics) {
-                els.azSlider.value = d.az; els.polSlider.value = d.pol; 
-                els.intSlider.value = d.intensity; els.tempSlider.value = d.temp;
+            if (!phys) {
+                els.azSlider.value = d.az; els.polSlider.value = d.pol; els.intSlider.value = d.intensity; els.tempSlider.value = d.temp;
             }
-            els.azDisplay.innerText = d.az + "°"; els.polDisplay.innerText = d.pol + "°"; 
-            els.intDisplay.innerText = d.intensity; els.tempDisplay.innerText = d.temp;
+            els.azDisplay.innerText = d.az + "°"; els.polDisplay.innerText = d.pol + "°"; els.intDisplay.innerText = d.intensity; els.tempDisplay.innerText = d.temp;
             els.powerSwitch.checked = d.on;
-
-            document.querySelectorAll('.mod-btn').forEach(b => {
-                if (b.id === 'mod-' + d.modifier) b.classList.add('active'); else b.classList.remove('active');
-            });
-
-            if (updatePhysics) updateLightPos(currentTarget);
+            document.querySelectorAll('.mod-btn').forEach(b => { if (b.id === 'mod-' + d.modifier) b.classList.add('active'); else b.classList.remove('active'); });
             
-            // UI Feedback
             const op = d.on ? '1' : '0.4';
-            els.azSlider.parentElement.style.opacity = op;
-            els.polSlider.parentElement.style.opacity = op;
+            els.azSlider.parentElement.style.opacity = op; els.polSlider.parentElement.style.opacity = op; els.intSlider.parentElement.style.opacity = op; els.tempSlider.parentElement.style.opacity = op;
+            
+            if (phys) updateLightPos(currentTarget);
             analyze();
         }
 
         function updateLightPos(id) {
             const d = lights[id];
-            const l = d.obj;
-            const guide = d.guide;
-            
-            l.visible = d.on;
-            guide.visible = d.on;
-            l.intensity = d.intensity;
-            l.color = kelvinToRGB(d.temp);
+            const l = d.obj; const guide = d.guide;
+            l.visible = d.on; guide.visible = d.on;
+            l.intensity = d.intensity; l.color = kelvinToRGB(d.temp);
 
             if(!d.on) return;
 
-            const r = 7;
-            const phi = (90 - d.pol) * (Math.PI / 180);
-            const theta = (d.az + 90) * (Math.PI / 180);
+            const r = 7; const phi = (90 - d.pol) * (Math.PI / 180); const theta = (d.az + 90) * (Math.PI / 180);
             l.position.set(-(r * Math.sin(phi) * Math.cos(theta)), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta));
 
-            // 更新地板參考線 (指向中心)
-            // 線條起點是 (0,-3,0)，終點是光源在地板的投影方向
-            const guideR = 4;
-            const gx = -(guideR * Math.cos(theta));
-            const gz = guideR * Math.sin(theta);
-            
-            const positions = guide.geometry.attributes.position.array;
-            positions[0] = 0; positions[1] = -2.9; positions[2] = 0; // Center
-            positions[3] = gx; positions[4] = -2.9; positions[5] = gz; // Direction
+            // Guide Update
+            const gr = 4; const gx = -(gr * Math.cos(theta)); const gz = gr * Math.sin(theta);
+            const pos = guide.geometry.attributes.position.array;
+            pos[0]=0; pos[1]=-2.9; pos[2]=0; pos[3]=gx; pos[4]=-2.9; pos[5]=gz;
             guide.geometry.attributes.position.needsUpdate = true;
 
-            // Physics
-            if (d.modifier === 'softbox') { l.angle = 1.0; l.penumbra = 1.0; }
+            if (d.modifier === 'softbox') { l.angle = 1.2; l.penumbra = 1.0; }
             else if (d.modifier === 'radar') { l.angle = 0.7; l.penumbra = 0.4; }
             else if (d.modifier === 'grid') { l.angle = 0.35; l.penumbra = 0.2; }
             else if (d.modifier === 'bare') { l.angle = 1.2; l.penumbra = 0.05; }
         }
 
         function analyze() {
-            const k = lights.key;
-            const t = txt[currentLang];
+            const k = lights.key; const t = txt[currentLang];
             let title = t.custom, desc = t.customDesc;
-
             if(!k.on) { title = t.lowKey; desc = t.lowKeyDesc; }
             else {
                 const az = Math.abs(k.az);
@@ -566,19 +493,14 @@
                 else if(az > 70) { title = t.split; desc = t.splitDesc; }
                 else { title = t.loop; desc = t.loopDesc; }
             }
-            els.algoTitle.innerText = title;
-            els.algoDesc.innerText = desc;
-
-            // Update overlay data
-            els.dataAngle.innerText = k.az + "°";
-            els.dataHeight.innerText = k.pol + "°";
-            els.dataTemp.innerText = k.temp + "K";
+            els.algoTitle.innerText = title; els.algoDesc.innerText = desc;
+            els.dataAngle.innerText = k.az + "°"; els.dataHeight.innerText = k.pol + "°"; els.dataTemp.innerText = k.temp + "K";
         }
 
         function animate() {
             requestAnimationFrame(animate);
-            // 微動態
-            headGroup.rotation.y = Math.sin(Date.now() * 0.0005) * 0.1;
+            // Ultra-Slow Breathing
+            headGroup.rotation.y = Math.sin(Date.now() * 0.0005) * 0.05; 
             renderer.render(scene, camera);
         }
 
@@ -587,11 +509,9 @@
             camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h);
         });
 
-        // Start
         applyLang();
         updateLightPos('key'); updateLightPos('fill'); updateLightPos('rim');
-        updateUI();
-        animate();
+        updateUI(); animate();
 
     </script>
 </body>
