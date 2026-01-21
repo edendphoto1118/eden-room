@@ -262,14 +262,14 @@
         renderer.setSize(wrapper.clientWidth, wrapper.clientHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap; // 柔和陰影
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         
-        // 🔥 高調曝光設定
+        // 🔥 高對比設定 (High Contrast)
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 2.0;
+        renderer.toneMappingExposure = 1.8; // 稍微降低曝光，讓暗部更沉
 
         // --- 2. OBJECT: Diamond Sphere ---
-        const geometry = new THREE.IcosahedronGeometry(1.6, 2); // Level 2 鑽石切割
+        const geometry = new THREE.IcosahedronGeometry(1.6, 2); 
         const material = new THREE.MeshStandardMaterial({ 
             color: 0xffffff, roughness: 0.2, metalness: 0.1, flatShading: true 
         });
@@ -281,8 +281,9 @@
         const envGroup = new THREE.Group();
         scene.add(envGroup);
         
-        const floorMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.8, metalness: 0.2 });
-        const wallMat = new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.8, metalness: 0.1 });
+        // 地板材質稍微調暗一點點
+        const floorMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.8, metalness: 0.2 });
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.8, metalness: 0.1 });
         
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), floorMat);
         plane.rotation.x = -Math.PI / 2; plane.position.y = -2.5; plane.receiveShadow = true;
@@ -292,8 +293,8 @@
         backWall.position.set(0, 10, -5.0); backWall.receiveShadow = true;
         envGroup.add(backWall);
 
-        // Ambient (Base Light)
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        // 🔥 關鍵：大幅降低環境光，製造深色陰影
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.15);
         scene.add(ambientLight);
 
         // --- 4. LIGHTS ---
@@ -438,20 +439,20 @@
             const l = d.obj;
             l.visible = d.on; 
             
-            // 🔥 暴力差異化 (Maximized Contrast)
+            // 🔥 差異化與亮度補償 (Contrast & Boost)
             let baseIntensity = d.intensity;
             if (d.modifier === 'softbox') { 
-                l.angle = 1.0; l.penumbra = 1.0; // 極度柔和
+                l.angle = 1.0; l.penumbra = 1.0; 
                 baseIntensity *= 0.9; 
             } else if (d.modifier === 'radar') { 
-                l.angle = 0.6; l.penumbra = 0.2; // 邊緣清晰
-                baseIntensity *= 1.1; 
+                l.angle = 0.6; l.penumbra = 0.2; 
+                baseIntensity *= 1.3; // Boost Radar
             } else if (d.modifier === 'grid') { 
-                l.angle = 0.3; l.penumbra = 0.1; // 極度聚光
-                baseIntensity *= 1.2; 
+                l.angle = 0.3; l.penumbra = 0.1; 
+                baseIntensity *= 1.5; // Boost Grid
             } else if (d.modifier === 'bare') { 
-                l.angle = 1.5; l.penumbra = 0.0; // 刀切陰影
-                baseIntensity *= 1.0; 
+                l.angle = 1.5; l.penumbra = 0.0; 
+                baseIntensity *= 1.2; // Boost Bare
             }
             
             l.intensity = baseIntensity;
@@ -484,7 +485,7 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            mesh.rotation.y += 0.0005; // 微動態
+            mesh.rotation.y += 0.0005; 
             renderer.render(scene, camera);
         }
 
