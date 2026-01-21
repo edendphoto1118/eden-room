@@ -65,13 +65,14 @@
             #dashboard { width: 380px; height: 100%; border-top: none; border-left: 1px solid #222; padding: 25px; overflow-y: auto; }
         }
 
-        /* --- UI COMPONENTS --- */
+        /* UI Elements */
         .preset-row { display: flex; gap: 8px; margin-bottom: 5px; }
         .preset-btn {
             flex: 1; background: #151515; border: 1px solid #333; color: #999; font-family: 'Space Mono'; font-size: 9px; 
             padding: 8px 0; text-align: center; cursor: pointer; transition: 0.2s; border-radius: 2px;
         }
         .preset-btn:hover { border-color: #777; color: #fff; background: #222; }
+        .preset-btn:active { background: #D4AF37; color: #000; }
         
         .tabs { display: flex; border: 1px solid #333; border-radius: 2px; overflow: hidden; height: 32px; flex-shrink: 0; }
         .tab-btn {
@@ -210,7 +211,7 @@
                 <div class="slider-row">
                     <span id="labelInt" class="slider-label text-[#D4AF37]">輸出強度</span>
                     <input type="range" id="intSlider" min="0" max="30" step="0.1" oninput="updateVal()">
-                    <span id="intDisplay" class="slider-val text-[#D4AF37]">8.0</span>
+                    <span id="intDisplay" class="slider-val text-[#D4AF37]">5.0</span>
                 </div>
                 <div class="slider-row">
                     <span id="labelTemp" class="slider-label">色溫 K</span>
@@ -264,11 +265,10 @@
         renderer.shadowMap.enabled = true;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         
-        // 🔥 高亮度曝光設定 (High Exposure)
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 2.3; // 從 1.8 提升到 2.3
+        renderer.toneMappingExposure = 2.0;
 
-        // --- 2. OBJECT: Diamond Sphere ---
+        // --- 2. OBJECT: Diamond Sphere + ATMOSPHERE SHELL ---
         const geometry = new THREE.IcosahedronGeometry(1.6, 2); 
         const material = new THREE.MeshStandardMaterial({ 
             color: 0xffffff, roughness: 0.2, metalness: 0.1, flatShading: true 
@@ -276,6 +276,22 @@
         const mesh = new THREE.Mesh(geometry, material);
         mesh.castShadow = true; mesh.receiveShadow = true;
         scene.add(mesh);
+
+        // 🔥 The Atmosphere Shell (關鍵：大氣光暈層)
+        const shellGeo = new THREE.IcosahedronGeometry(1.6, 2); // Same geometry to match vertices
+        const shellMat = new THREE.MeshStandardMaterial({
+            color: 0xffffff,
+            roughness: 0.5, // 霧面質感
+            metalness: 0.0,
+            transparent: true,
+            opacity: 0.15, // 低透明度，模擬霧氣
+            side: THREE.DoubleSide, // 雙面受光：讓背後的光能照亮殼的內側，從前面看就像光暈
+            depthWrite: false, // 不遮擋內部物體
+            flatShading: true
+        });
+        const shell = new THREE.Mesh(shellGeo, shellMat);
+        shell.scale.set(1.08, 1.08, 1.08); // 稍微放大包裹
+        scene.add(shell);
 
         // --- 3. ENVIRONMENT ---
         const envGroup = new THREE.Group();
@@ -286,19 +302,19 @@
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), floorMat);
         plane.rotation.x = -Math.PI / 2; plane.position.y = -2.5; plane.receiveShadow = true;
         envGroup.add(plane);
+        
         const backWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 30), wallMat);
         backWall.position.set(0, 10, -5.0); backWall.receiveShadow = true;
         envGroup.add(backWall);
 
-        // Ambient: 0.25 (適度提亮暗部)
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.2); // Low ambient for contrast
         scene.add(ambientLight);
 
         // --- 4. LIGHTS ---
-        // 💡 預設強度大幅提升
         const lights = {
             key: { obj: createSpot(0xffffff, 8.0), az: 45, pol: 30, on: true, intensity: 8.0, temp: 5600, modifier: 'softbox' },
             fill: { obj: createSpot(0xffeedd, 3.0), az: -45, pol: 10, on: true, intensity: 3.0, temp: 5600, modifier: 'softbox' },
+            // Rim light slightly boosted for the shell
             rim: { obj: createSpot(0xEBF4FF, 12.0), az: 135, pol: 30, on: true, intensity: 12.0, temp: 6600, modifier: 'bare' }
         };
 
@@ -308,7 +324,7 @@
             scene.add(l); return l;
         }
 
-        // --- 5. LOGIC ---
+        // --- 5. LOGIC & UI ---
         let currentLang = 'zh', currentTarget = 'key';
         const txt = {
             zh: {
@@ -387,17 +403,17 @@
             if (type === 'studio') { 
                 setLight('key', 45, 30, 8.0, 5600, 'softbox', true); 
                 setLight('fill', -45, 10, 3.0, 5600, 'softbox', true); 
-                setLight('rim', 180, 20, 6.0, 5600, 'bare', true); 
+                setLight('rim', 180, 20, 12.0, 5600, 'bare', true); 
             } 
             else if (type === 'dramatic') { 
                 setLight('key', 90, 10, 10.0, 5600, 'grid', true); 
                 setLight('fill', -90, 10, 1.0, 5600, 'softbox', true); 
-                setLight('rim', 0, 80, 8.0, 7000, 'bare', true); 
+                setLight('rim', 0, 80, 10.0, 7000, 'bare', true); 
             } 
             else if (type === 'color') { 
                 setLight('key', -45, 20, 8.0, 2500, 'radar', true); 
                 setLight('fill', 45, 10, 5.0, 8000, 'softbox', true); 
-                setLight('rim', 180, 10, 10.0, 2000, 'grid', true); 
+                setLight('rim', 180, 10, 15.0, 2000, 'grid', true); 
             }
             updateUI(true);
         }
@@ -436,21 +452,11 @@
             const l = d.obj;
             l.visible = d.on; 
             
-            // 🔥 暴力差異化 (Maximized Contrast)
             let baseIntensity = d.intensity;
-            if (d.modifier === 'softbox') { 
-                l.angle = 1.0; l.penumbra = 1.0; 
-                baseIntensity *= 0.9; 
-            } else if (d.modifier === 'radar') { 
-                l.angle = 0.6; l.penumbra = 0.2; 
-                baseIntensity *= 1.3; 
-            } else if (d.modifier === 'grid') { 
-                l.angle = 0.3; l.penumbra = 0.1; 
-                baseIntensity *= 1.5; 
-            } else if (d.modifier === 'bare') { 
-                l.angle = 1.5; l.penumbra = 0.0; 
-                baseIntensity *= 1.2; 
-            }
+            if (d.modifier === 'softbox') { l.angle = 1.0; l.penumbra = 1.0; baseIntensity *= 0.9; } 
+            else if (d.modifier === 'radar') { l.angle = 0.6; l.penumbra = 0.2; baseIntensity *= 1.3; } 
+            else if (d.modifier === 'grid') { l.angle = 0.3; l.penumbra = 0.1; baseIntensity *= 1.5; } 
+            else if (d.modifier === 'bare') { l.angle = 1.5; l.penumbra = 0.0; baseIntensity *= 1.2; }
             
             l.intensity = baseIntensity;
             l.color = kelvinToRGB(d.temp);
@@ -482,7 +488,9 @@
 
         function animate() {
             requestAnimationFrame(animate);
-            mesh.rotation.y += 0.0005; // 微動態
+            mesh.rotation.y += 0.0005; 
+            // Sync shell rotation
+            shell.rotation.y = mesh.rotation.y;
             renderer.render(scene, camera);
         }
 
